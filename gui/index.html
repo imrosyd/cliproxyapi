@@ -1763,14 +1763,23 @@
                 if (res.ok) {
                     const data = await res.json();
                     // Show stats section when server is running (stats always returned)
-                    section.style.display = 'block';
-                    document.getElementById('statTotal').textContent = data.total || 0;
-                    document.getElementById('statSuccess').textContent = (data.successRate || 0) + '%';
-                    document.getElementById('statLatency').textContent = Math.round(data.avgLatency || 0) + 'ms';
-                    document.getElementById('statErrors').textContent = data.errors || 0;
+                    
+                    // Only show stats if available
+                    if (data.available === false) {
+                        section.style.display = 'none';
+                    } else {
+                        section.style.display = 'block';
+                        document.getElementById('statTotal').textContent = data.total || 0;
+                        document.getElementById('statSuccess').textContent = (data.successRate || 0) + '%';
+                        document.getElementById('statLatency').textContent = Math.round(data.avgLatency || 0) + 'ms';
+                        document.getElementById('statErrors').textContent = data.errors || 0;
+                    }
+                } else {
+                    section.style.display = 'none';
                 }
             } catch (e) {
                 console.error('Failed to load stats:', e);
+                section.style.display = 'none';
             }
         }
 

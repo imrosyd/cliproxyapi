@@ -270,106 +270,49 @@ function Get-AvailableModels {
 # Request Stats Functions
 # ============================================
 
-$script:RequestStats = @{
-    total = 0
-    success = 0
-    errors = 0
-    totalLatency = 0
-    lastReset = (Get-Date).ToString("o")
-    recentRequests = [System.Collections.ArrayList]@()
-}
-$script:LastLogPosition = 0
-
 function Get-RequestStats {
-    # Parse server logs for new entries (merge stdout and stderr)
-    $stdoutLog = Join-Path $LOG_DIR "server-stdout.log"
-    $stderrLog = Join-Path $LOG_DIR "server-stderr.log"
+    # CLIProxyAPI doesn't output access logs to stdout/stderr by default
+    # Stats tracking would require intercepting requests or reading from a stats endpoint
+    # For now, return placeholder data indicating stats are not available
     
-    # Combine both log files
-    $content = ""
-    if (Test-Path $stdoutLog) {
-        $content += [System.IO.File]::ReadAllText($stdoutLog)
-    }
-    if (Test-Path $stderrLog) {
-        $content += [System.IO.File]::ReadAllText($stderrLog)
-    }
-    
-    if ($content) {
+    # Check if server has a /stats endpoint
+    $proc = Get-ServerProcess
+    if ($proc) {
         try {
-            if ($content.Length -gt $script:LastLogPosition) {
-                $newContent = $content.Substring($script:LastLogPosition)
-                $script:LastLogPosition = $content.Length
-                
-                # Parse log lines for request patterns
-                # CLIProxyAPI logs format: timestamp | method path | status | latency
-                $lines = $newContent -split "`n"
-                foreach ($line in $lines) {
-                    if ($line -match "POST /v1/(chat/completions|completions|embeddings)") {
-                        $script:RequestStats.total++
-                        
-                        # Try to extract status code
-                        if ($line -match "\b(2\d{2})\b") {
-                            $script:RequestStats.success++
-                        } elseif ($line -match "\b([45]\d{2})\b") {
-                            $script:RequestStats.errors++
-                        } else {
-                            $script:RequestStats.success++  # Assume success if no error code
-                        }
-                        
-                        # Try to extract latency (e.g., "1.234s" or "234ms")
-                        if ($line -match "(\d+\.?\d*)(ms|s)") {
-                            $latency = [double]$matches[1]
-                            if ($matches[2] -eq "s") { $latency = $latency * 1000 }
-                            $script:RequestStats.totalLatency += $latency
-                        }
-                        
-                        # Add to recent requests (keep last 50)
-                        $requestInfo = @{
-                            time = (Get-Date).ToString("HH:mm:ss")
-                            endpoint = if ($line -match "/v1/(\S+)") { $matches[1] } else { "unknown" }
-                        }
-                        $script:RequestStats.recentRequests.Insert(0, $requestInfo) | Out-Null
-                        if ($script:RequestStats.recentRequests.Count -gt 50) {
-                            $script:RequestStats.recentRequests.RemoveAt(50)
-                        }
-                    }
+            # Try to fetch stats from server's internal stats endpoint if available
+            $response = Invoke-RestMethod -Uri "http://localhost:$API_PORT/stats" -TimeoutSec 2 -ErrorAction SilentlyContinue
+            if ($response) {
+                return @{
+                    total = $response.total_requests ?? 0
+                    success = $response.successful_requests ?? 0
+                    errors = $response.failed_requests ?? 0
+                    successRate = if ($response.total_requests -gt 0) { [math]::Round(($response.successful_requests / $response.total_requests) * 100, 1) } else { 0 }
+                    avgLatency = $response.avg_latency_ms ?? 0
+                    lastReset = $response.start_time ?? (Get-Date).ToString("o")
+                    available = $true
                 }
             }
         } catch {
-            # Ignore log parsing errors
+            # Stats endpoint not available
         }
     }
     
-    $avgLatency = if ($script:RequestStats.total -gt 0) {
-        [math]::Round($script:RequestStats.totalLatency / $script:RequestStats.total, 0)
-    } else { 0 }
-    
-    $successRate = if ($script:RequestStats.total -gt 0) {
-        [math]::Round(($script:RequestStats.success / $script:RequestStats.total) * 100, 1)
-    } else { 0 }
-    
+    # Return unavailable stats
     return @{
-        total = $script:RequestStats.total
-        success = $script:RequestStats.success
-        errors = $script:RequestStats.errors
-        successRate = $successRate
-        avgLatency = $avgLatency
-        lastReset = $script:RequestStats.lastReset
-        recentRequests = $script:RequestStats.recentRequests
+        total = 0
+        success = 0
+        errors = 0
+        successRate = 0
+        avgLatency = 0
+        lastReset = (Get-Date).ToString("o")
+        available = $false
+        message = "Stats not available - CLIProxyAPI doesn't expose request metrics"
     }
 }
 
 function Reset-RequestStats {
-    $script:RequestStats = @{
-        total = 0
-        success = 0
-        errors = 0
-        totalLatency = 0
-        lastReset = (Get-Date).ToString("o")
-        recentRequests = [System.Collections.ArrayList]@()
-    }
-    $script:LastLogPosition = 0
-    return @{ success = $true; message = "Stats reset" }
+    # Stats are fetched from server, cannot be reset from GUI
+    return @{ success = $false; message = "Stats reset not supported - stats are read-only from server" }
 }
 
 # ============================================

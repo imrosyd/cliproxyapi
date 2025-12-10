@@ -91,16 +91,28 @@ cd CLIProxyAPIPlus-Easy-Installation
 
 ### Setelah Instalasi
 
+Script diinstall ke `~/bin/` dan otomatis ditambahkan ke PATH.
+
 ```powershell
-# Login ke provider (menu interaktif)
-cliproxyapi-oauth.ps1
+# Restart terminal (atau refresh PATH)
+$env:Path = [Environment]::GetEnvironmentVariable('Path', 'User')
 
-# Atau login ke provider tertentu
-cliproxyapi-oauth.ps1 -Gemini -Copilot -Antigravity
+# Start server di background
+start-cliproxyapi -Background
 
-# Jalankan proxy server
-cliproxyapi-plus --config ~/.cli-proxy-api/config.yaml
+# Login ke provider
+cliproxyapi-oauth -All
+
+# Buka GUI Control Center (kontrol penuh via browser)
+gui-cliproxyapi
 ```
+
+**Script yang Tersedia:**
+- `start-cliproxyapi` - Start/stop/restart server
+- `cliproxyapi-oauth` - Login ke OAuth provider
+- `gui-cliproxyapi` - Buka GUI Control Center
+- `update-cliproxyapi` - Update ke versi terbaru
+- `uninstall-cliproxyapi` - Hapus semuanya
 
 ---
 
@@ -113,11 +125,18 @@ Script install **otomatis mengkonfigurasi** Droid dengan update `~/.factory/conf
 Tinggal jalankan proxy dan pilih model di Droid:
 
 ```powershell
-# Jalankan proxy (biarkan jalan di background)
-cliproxyapi-plus --config ~/.cli-proxy-api/config.yaml
+# Start proxy di background
+start-cliproxyapi -Background
 
 # Pake Droid seperti biasa - custom models akan muncul di model selector
 droid
+```
+
+Atau pake GUI:
+
+```powershell
+# Buka Control Center, klik "Start", terus pake Droid
+gui-cliproxyapi
 ```
 
 ### Claude Code
@@ -360,6 +379,30 @@ Uninstall bersih.
 # Force tanpa konfirmasi
 .\uninstall-cliproxyapi.ps1 -All -Force
 ```
+
+### `gui-cliproxyapi.ps1`
+
+GUI Control Center dengan fitur manajemen server lengkap.
+
+```powershell
+# Buka GUI (start management server di port 8318)
+gui-cliproxyapi.ps1
+
+# Pake port custom
+gui-cliproxyapi.ps1 -Port 9000
+
+# Jangan auto-buka browser
+gui-cliproxyapi.ps1 -NoBrowser
+```
+
+**Fitur:**
+- Monitoring status server real-time
+- Tombol Start/Stop/Restart (beneran jalan!)
+- Tombol OAuth login untuk semua provider
+- Activity log viewer
+- Keyboard shortcut: Tekan `R` untuk refresh
+
+GUI menjalankan management server lokal di `localhost:8318` yang handle semua perintah kontrol. Ini menggantikan GUI berbasis file yang cuma bisa nampilin status.
 
 ---
 

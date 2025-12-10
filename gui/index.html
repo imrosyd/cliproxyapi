@@ -628,7 +628,6 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8317';
         let serverStartTime = null;
 
         function log(message, type = 'info') {
@@ -649,14 +648,14 @@
             log('Logs cleared', 'info');
         }
 
-        function showToast(message) {
+        function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.querySelector('.toast-msg').textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        function updateUI(running, pid = null) {
+        function updateUI(status) {
             const dot = document.getElementById('statusDot');
             const label = document.getElementById('statusLabel');
             const desc = document.getElementById('statusDesc');
@@ -665,21 +664,24 @@
             const btnStart = document.getElementById('btnStart');
             const btnStop = document.getElementById('btnStop');
 
-            if (running) {
+            if (status.running) {
                 dot.className = 'status-dot running';
                 label.className = 'status-label running';
                 label.textContent = 'Running';
-                desc.textContent = 'Server is active on port 8317';
-                pidEl.textContent = pid || 'Active';
+                desc.textContent = `Server active on port ${status.port}`;
+                pidEl.textContent = status.pid || 'Active';
                 btnStart.disabled = true;
                 btnStop.disabled = false;
 
-                if (serverStartTime) {
-                    const secs = Math.floor((Date.now() - serverStartTime) / 1000);
+                if (status.startTime) {
+                    const start = new Date(status.startTime);
+                    const secs = Math.floor((Date.now() - start.getTime()) / 1000);
                     const h = Math.floor(secs / 3600);
                     const m = Math.floor((secs % 3600) / 60);
                     const s = secs % 60;
-                    uptimeEl.textContent = h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`;
+                    uptimeEl.textContent = h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+                } else {
+                    uptimeEl.textContent = '—';
                 }
             } else {
                 dot.className = 'status-dot stopped';
@@ -690,7 +692,6 @@
                 uptimeEl.textContent = '—';
                 btnStart.disabled = false;
                 btnStop.disabled = true;
-                serverStartTime = null;
             }
         }
 
@@ -698,62 +699,140 @@
             const dot = document.getElementById('statusDot');
             const label = document.getElementById('statusLabel');
             const desc = document.getElementById('statusDesc');
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
             
             dot.className = 'status-dot starting';
             label.className = 'status-label starting';
             label.textContent = 'Starting';
             desc.textContent = 'Server is starting up...';
+            btnStart.disabled = true;
+            btnStop.disabled = true;
+        }
+
+        function setStopping() {
+            const dot = document.getElementById('statusDot');
+            const label = document.getElementById('statusLabel');
+            const desc = document.getElementById('statusDesc');
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
+            
+            dot.className = 'status-dot starting';
+            label.className = 'status-label starting';
+            label.textContent = 'Stopping';
+            desc.textContent = 'Server is shutting down...';
+            btnStart.disabled = true;
+            btnStop.disabled = true;
         }
 
         async function checkStatus() {
             try {
-                const res = await fetch(`${API_BASE}/v1/models`, {
-                    headers: { 'Authorization': 'Bearer sk-dummy' },
+                const res = await fetch('/api/status', {
                     signal: AbortSignal.timeout(2000)
                 });
                 if (res.ok) {
-                    updateUI(true);
-                    return true;
+                    const status = await res.json();
+                    updateUI(status);
+                    return status.running;
                 }
             } catch (e) {
-                updateUI(false);
+                updateUI({ running: false });
             }
             return false;
         }
 
         async function refreshStatus() {
             log('Checking status...', 'info');
-            const ok = await checkStatus();
-            log(ok ? 'Server is running' : 'Server is offline', ok ? 'success' : 'warning');
+            const running = await checkStatus();
+            log(running ? 'Server is running' : 'Server is offline', running ? 'success' : 'warning');
         }
 
-        function startServer() {
+        async function startServer() {
             log('Starting server...', 'info');
             setStarting();
-            showToast('Run: start-cliproxyapi.ps1 -Background');
-            serverStartTime = Date.now();
-            setTimeout(checkStatus, 2000);
+            
+            try {
+                const res = await fetch('/api/start', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    log(`Server started (PID: ${data.pid})`, 'success');
+                    showToast('Server started successfully');
+                    setTimeout(checkStatus, 500);
+                } else {
+                    log(`Failed: ${data.error}`, 'error');
+                    showToast(data.error);
+                    checkStatus();
+                }
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+                checkStatus();
+            }
         }
 
-        function stopServer() {
+        async function stopServer() {
             log('Stopping server...', 'warning');
-            showToast('Run: start-cliproxyapi.ps1 -Stop');
-            setTimeout(checkStatus, 1000);
+            setStopping();
+            
+            try {
+                const res = await fetch('/api/stop', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    log('Server stopped', 'success');
+                    showToast('Server stopped');
+                    setTimeout(checkStatus, 300);
+                } else {
+                    log(`Failed: ${data.error}`, 'error');
+                    showToast(data.error);
+                    checkStatus();
+                }
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+                checkStatus();
+            }
         }
 
-        function restartServer() {
+        async function restartServer() {
             log('Restarting server...', 'info');
-            showToast('Run: start-cliproxyapi.ps1 -Restart');
+            setStarting();
+            
+            try {
+                const res = await fetch('/api/restart', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    log(`Server restarted (PID: ${data.pid})`, 'success');
+                    showToast('Server restarted');
+                    setTimeout(checkStatus, 500);
+                } else {
+                    log(`Failed: ${data.error}`, 'error');
+                    showToast(data.error);
+                    checkStatus();
+                }
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+                checkStatus();
+            }
         }
 
-        function loginProvider(name) {
-            const flags = {
-                gemini: '-Gemini', copilot: '-Copilot', antigravity: '-Antigravity',
-                codex: '-Codex', claude: '-Claude', qwen: '-Qwen',
-                iflow: '-iFlow', kiro: '-Kiro'
-            };
-            log(`Login ${name}: cliproxyapi-oauth.ps1 ${flags[name]}`, 'info');
-            showToast(`Run: cliproxyapi-oauth.ps1 ${flags[name]}`);
+        async function loginProvider(name) {
+            log(`Logging in to ${name}...`, 'info');
+            
+            try {
+                const res = await fetch(`/api/oauth/${name}`, { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    log(`OAuth login started for ${name}`, 'success');
+                    showToast(`Opening ${name} login...`);
+                } else {
+                    log(`Failed: ${data.error}`, 'error');
+                    showToast(data.error);
+                }
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+            }
         }
 
         // Keyboard shortcuts

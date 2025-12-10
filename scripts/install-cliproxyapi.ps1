@@ -249,6 +249,18 @@ if (Test-Path $binaryPath) {
     exit 1
 }
 
+# Add ~/bin to PATH if not already
+Write-Step "Configuring PATH..."
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($userPath -notlike "*$BIN_DIR*") {
+    [Environment]::SetEnvironmentVariable("Path", "$userPath;$BIN_DIR", "User")
+    Write-Success "Added $BIN_DIR to PATH"
+    $pathAdded = $true
+} else {
+    Write-Success "$BIN_DIR already in PATH"
+    $pathAdded = $false
+}
+
 # OAuth login prompts
 if (-not $SkipOAuth) {
     Write-Host @"
@@ -291,14 +303,36 @@ Write-Host @"
 ==============================================
   Installation Complete!
 ==============================================
-Binary:     $BIN_DIR\$BINARY_NAME
-Config:     $CONFIG_DIR\config.yaml
-Droid:      $FACTORY_DIR\config.json
+"@ -ForegroundColor Green
 
-To start the server:
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml
+Write-Host @"
+Installed Files:
+  Binary:   $BIN_DIR\$BINARY_NAME
+  Config:   $CONFIG_DIR\config.yaml
+  Droid:    $FACTORY_DIR\config.json
 
-To update later:
-  update-cliproxyapi.ps1
+Available Scripts (in $BIN_DIR):
+  start-cliproxyapi     Start/stop/restart server
+  cliproxyapi-oauth     Login to OAuth providers
+  gui-cliproxyapi       Open Control Center GUI
+  update-cliproxyapi    Update to latest version
+  uninstall-cliproxyapi Remove everything
+
+Quick Start:
+  1. Start server:    start-cliproxyapi -Background
+  2. Login OAuth:     cliproxyapi-oauth -All
+  3. Open GUI:        gui-cliproxyapi
+  4. Use with Droid:  droid (select cliproxyapi-plus/* model)
+"@ -ForegroundColor Cyan
+
+if ($pathAdded) {
+    Write-Host @"
+
+NOTE: Restart your terminal for PATH changes to take effect.
+      Or run: `$env:Path = [Environment]::GetEnvironmentVariable('Path', 'User')
+"@ -ForegroundColor Yellow
+}
+
+Write-Host @"
 ==============================================
 "@ -ForegroundColor Green

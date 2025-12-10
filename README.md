@@ -91,16 +91,28 @@ cd CLIProxyAPIPlus-Easy-Installation
 
 ### After Installation
 
+Scripts are installed to `~/bin/` and added to PATH automatically.
+
 ```powershell
-# Login to providers (interactive menu)
-cliproxyapi-oauth.ps1
+# Restart terminal (or refresh PATH)
+$env:Path = [Environment]::GetEnvironmentVariable('Path', 'User')
 
-# Or login to specific providers
-cliproxyapi-oauth.ps1 -Gemini -Copilot -Antigravity
+# Start server in background
+start-cliproxyapi -Background
 
-# Start the proxy server
-cliproxyapi-plus --config ~/.cli-proxy-api/config.yaml
+# Login to providers
+cliproxyapi-oauth -All
+
+# Open GUI Control Center (full control via browser)
+gui-cliproxyapi
 ```
+
+**Available Scripts:**
+- `start-cliproxyapi` - Start/stop/restart server
+- `cliproxyapi-oauth` - Login to OAuth providers
+- `gui-cliproxyapi` - Open GUI Control Center
+- `update-cliproxyapi` - Update to latest version
+- `uninstall-cliproxyapi` - Remove everything
 
 ---
 
@@ -113,11 +125,18 @@ The install script **automatically configures** Droid by updating `~/.factory/co
 Just start the proxy and select a model in Droid:
 
 ```powershell
-# Start proxy (keep running in background)
-cliproxyapi-plus --config ~/.cli-proxy-api/config.yaml
+# Start proxy in background
+start-cliproxyapi -Background
 
 # Use Droid normally - custom models will appear in model selector
 droid
+```
+
+Or use the GUI:
+
+```powershell
+# Open Control Center, click "Start", then use Droid
+gui-cliproxyapi
 ```
 
 ### Claude Code
@@ -360,6 +379,30 @@ Clean uninstallation.
 # Force without confirmation
 .\uninstall-cliproxyapi.ps1 -All -Force
 ```
+
+### `gui-cliproxyapi.ps1`
+
+GUI Control Center with full server management.
+
+```powershell
+# Open GUI (starts management server on port 8318)
+gui-cliproxyapi.ps1
+
+# Use custom port
+gui-cliproxyapi.ps1 -Port 9000
+
+# Don't auto-open browser
+gui-cliproxyapi.ps1 -NoBrowser
+```
+
+**Features:**
+- Real-time server status monitoring
+- Start/Stop/Restart buttons (actually work!)
+- OAuth login buttons for all providers
+- Activity log viewer
+- Keyboard shortcut: Press `R` to refresh
+
+The GUI runs a local management server on `localhost:8318` that handles all control commands. This replaces the old file-based GUI that could only show status.
 
 ---
 

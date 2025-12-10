@@ -86,31 +86,55 @@ function Start-ApiServer {
     }
     
     try {
-        $logFile = Join-Path $LOG_DIR "server.log"
+        $stdoutLog = Join-Path $LOG_DIR "server-stdout.log"
+        $stderrLog = Join-Path $LOG_DIR "server-stderr.log"
         
-        # Clear old log on start
-        if (Test-Path $logFile) {
-            Clear-Content $logFile -Force
-        }
+        # Clear old logs on start
+        if (Test-Path $stdoutLog) { Clear-Content $stdoutLog -Force }
+        if (Test-Path $stderrLog) { Clear-Content $stderrLog -Force }
         $script:LastLogPosition = 0
         
-        # Start process with output redirected to log file
-        $processArgs = "--config `"$CONFIG`""
-        $process = Start-Process -FilePath $BINARY -ArgumentList $processArgs `
-            -RedirectStandardOutput $logFile -RedirectStandardError $logFile `
-            -PassThru -NoNewWindow -WindowStyle Hidden
+        # Use ProcessStartInfo to properly redirect both streams
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $BINARY
+        $psi.Arguments = "--config `"$CONFIG`""
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.WorkingDirectory = $CONFIG_DIR
+        
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $psi
+        [void]$process.Start()
+        
+        # Asynchronously redirect output to files
+        Start-Job -ScriptBlock {
+            param($p, $stdout, $stderr)
+            while (-not $p.HasExited) {
+                $line = $p.StandardOutput.ReadLine()
+                if ($line) { $line | Out-File -Append -FilePath $stdout -Encoding UTF8 }
+                $errLine = $p.StandardError.ReadLine()
+                if ($errLine) { $errLine | Out-File -Append -FilePath $stderr -Encoding UTF8 }
+            }
+            # Capture remaining output
+            $remaining = $p.StandardOutput.ReadToEnd()
+            if ($remaining) { $remaining | Out-File -Append -FilePath $stdout -Encoding UTF8 }
+            $errRemaining = $p.StandardError.ReadToEnd()
+            if ($errRemaining) { $errRemaining | Out-File -Append -FilePath $stderr -Encoding UTF8 }
+        } -ArgumentList $process, $stdoutLog, $stderrLog | Out-Null
         
         Start-Sleep -Milliseconds 500
         
         if (-not $process.HasExited) {
             return @{ success = $true; pid = $process.Id; message = "Server started" }
         } else {
-            # Read error from log
+            # Read error from logs
             $errorMsg = "Server exited immediately"
-            if (Test-Path $logFile) {
-                $logContent = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
-                if ($logContent) { $errorMsg += ": $logContent" }
-            }
+            $stdout = if (Test-Path $stdoutLog) { Get-Content $stdoutLog -Raw -ErrorAction SilentlyContinue } else { "" }
+            $stderr = if (Test-Path $stderrLog) { Get-Content $stderrLog -Raw -ErrorAction SilentlyContinue } else { "" }
+            $combinedLog = "$stdout$stderr".Trim()
+            if ($combinedLog) { $errorMsg += ": $combinedLog" }
             return @{ success = $false; error = $errorMsg }
         }
     } catch {
@@ -257,12 +281,21 @@ $script:RequestStats = @{
 $script:LastLogPosition = 0
 
 function Get-RequestStats {
-    # Parse server log for new entries
-    $logFile = Join-Path $LOG_DIR "server.log"
+    # Parse server logs for new entries (merge stdout and stderr)
+    $stdoutLog = Join-Path $LOG_DIR "server-stdout.log"
+    $stderrLog = Join-Path $LOG_DIR "server-stderr.log"
     
-    if (Test-Path $logFile) {
+    # Combine both log files
+    $content = ""
+    if (Test-Path $stdoutLog) {
+        $content += [System.IO.File]::ReadAllText($stdoutLog)
+    }
+    if (Test-Path $stderrLog) {
+        $content += [System.IO.File]::ReadAllText($stderrLog)
+    }
+    
+    if ($content) {
         try {
-            $content = [System.IO.File]::ReadAllText($logFile)
             if ($content.Length -gt $script:LastLogPosition) {
                 $newContent = $content.Substring($script:LastLogPosition)
                 $script:LastLogPosition = $content.Length

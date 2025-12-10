@@ -109,7 +109,10 @@ if ($UsePrebuilt) {
     if (Test-Path $CLONE_DIR) {
         if ($Force) {
             Write-Host "    Removing existing clone..."
-            Remove-Item -Recurse -Force $CLONE_DIR
+            Remove-Item -Recurse -Force $CLONE_DIR -ErrorAction SilentlyContinue
+        } elseif (-not (Test-Path "$CLONE_DIR\go.mod")) {
+            Write-Host "    Existing clone is invalid, removing..."
+            Remove-Item -Recurse -Force $CLONE_DIR -ErrorAction SilentlyContinue
         }
     }
     

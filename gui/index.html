@@ -306,9 +306,9 @@
         }
 
         .provider-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 6px;
+            width: 28px;
+            height: 28px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -327,6 +327,14 @@
 
         .provider.connected .provider-icon svg {
             fill: var(--success);
+        }
+
+        /* Center content in provider cards */
+        .provider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .provider-name {
@@ -624,7 +632,7 @@
                 </div>
                 <div class="provider" id="provider-antigravity" onclick="loginProvider('antigravity')">
                     <div class="provider-icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 19h20L12 2zm0 4l6.5 11h-13L12 6z"/></svg>
+                        <svg viewBox="0 0 434 400" xmlns="http://www.w3.org/2000/svg"><path d="M392.7 390.1c24.2 18.1 60.4 6 27.2-27.2C320.2 266.2 341.4.3 217.5.3S114.8 266.2 15.1 362.9c-36.3 36.3 3 45.3 27.2 27.2 93.6-70.2 140.5-105.3 175.2-105.3s81.6 35.1 175.2 105.3z"/></svg>
                     </div>
                     <div class="provider-name">Antigravity</div>
                 </div>
@@ -636,7 +644,7 @@
                 </div>
                 <div class="provider" id="provider-claude" onclick="loginProvider('claude')">
                     <div class="provider-icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        <svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg"><path d="M234 800l235-132 4-11-4-7h-11l-40-2-134-4-116-5-113-6-28-6-27-35 3-18 27-16 34 3 75 5 113 8 82 5 122 13h20l3-8-6-5-6-5-132-90-137-84-66-48-35-24-18-22-8-50 33-36 44 3 11 3 44 34 95 73 124 91 18 15 7-5 1-4-9-14-67-122-72-124-32-50-8-30c-3-13-5-24-5-37l37-50 21-7 49 7 21 19 31 70 50 111 77 151 23 45 12 41 5 12h8v-7l6-85 12-104 11-134 4-38 19-45 37-24 29 14 24 38-3 22-14 92-28 144-18 97h11l12-12 49-65 82-103 36-43 42-45 27-21h51l38 56-17 58-53 67-44 56-63 85-39 67 4 6 9-1 142-30 77-14 92-15 41 19 5 20-17 40-98 24-115 23-171 40-2 2 3 4 77 7 33 2h80l150 11 40 26 24 32-5 24-60 31-82-20-191-45-65-16h-9v7l54 53 99 90 125 116 7 29-17 22-17-3-110-82-43-38-97-78h-8v9l22 32 116 175 6 54-8 17-30 11-33-6-68-94-71-107-52-94-6 4-57 361-16 18-33 14-30-23-16-37 16-67 19-97 15-75 14-95 8-31v-3l-7 1-71 98-108 147-86 92-20 8-36-18 3-33 20-27 119-149 72-93 46-54v-8h-3l-315 205-56 7-24-22 3-33 12-13 95-65z"/></svg>
                     </div>
                     <div class="provider-name">Claude</div>
                 </div>

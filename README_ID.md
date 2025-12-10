@@ -399,10 +399,17 @@ gui-cliproxyapi.ps1 -NoBrowser
 - Monitoring status server real-time
 - Tombol Start/Stop/Restart (beneran jalan!)
 - Tombol OAuth login untuk semua provider
+- **Request Statistics** - Total request, success rate, avg latency, errors
+- **Auto-Updater** - Klik version badge untuk cek update
+- Indikator status auth provider (hijau = terhubung)
+- Daftar model tersedia (saat server running)
+- Editor konfigurasi (edit config.yaml langsung)
+- Tombol copy endpoint untuk setup cepat
+- Opsi auto-start (ingat preferensi kamu)
 - Activity log viewer
-- Keyboard shortcut: Tekan `R` untuk refresh
+- Keyboard shortcut: `R` untuk refresh, `Esc` untuk tutup modal
 
-GUI menjalankan management server lokal di `localhost:8318` yang handle semua perintah kontrol. Ini menggantikan GUI berbasis file yang cuma bisa nampilin status.
+GUI menjalankan management server lokal di `localhost:8318` yang handle semua perintah kontrol.
 
 ---
 

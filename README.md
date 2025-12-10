@@ -399,10 +399,17 @@ gui-cliproxyapi.ps1 -NoBrowser
 - Real-time server status monitoring
 - Start/Stop/Restart buttons (actually work!)
 - OAuth login buttons for all providers
+- **Request Statistics** - Total requests, success rate, avg latency, errors
+- **Auto-Updater** - Click version badge to check for updates
+- Provider auth status indicators (green = connected)
+- Available models list (when server is running)
+- Configuration editor (edit config.yaml directly)
+- Copy endpoint button for quick setup
+- Auto-start option (remembers your preference)
 - Activity log viewer
-- Keyboard shortcut: Press `R` to refresh
+- Keyboard shortcuts: `R` to refresh, `Esc` to close modals
 
-The GUI runs a local management server on `localhost:8318` that handles all control commands. This replaces the old file-based GUI that could only show status.
+The GUI runs a local management server on `localhost:8318` that handles all control commands.
 
 ---
 

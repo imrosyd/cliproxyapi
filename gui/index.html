@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIProxyAPI+ Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-card-hover: #1c2128;
+            --border: #30363d;
+            --border-glow: #39c5cf30;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #484f58;
+            --accent-cyan: #39c5cf;
+            --accent-green: #3fb950;
+            --accent-amber: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --accent-blue: #58a6ff;
+            --glow-cyan: 0 0 20px #39c5cf40, 0 0 40px #39c5cf20;
+            --glow-green: 0 0 20px #3fb95040, 0 0 40px #3fb95020;
+            --glow-amber: 0 0 20px #d2992240, 0 0 40px #d2992220;
+            --glow-red: 0 0 20px #f8514940, 0 0 40px #f8514920;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, #39c5cf08 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, #a371f708 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgPulse 10s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: var(--glow-cyan);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-cyan));
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-orb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-orb.running {
+            background: var(--accent-green);
+            box-shadow: var(--glow-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-orb.stopped {
+            background: var(--text-muted);
+        }
+
+        .status-orb.starting {
+            background: var(--accent-amber);
+            box-shadow: var(--glow-amber);
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .status-text {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .status-text.running { color: var(--accent-green); }
+        .status-text.stopped { color: var(--text-muted); }
+        .status-text.starting { color: var(--accent-amber); }
+
+        .status-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .status-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .detail-item {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .detail-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .detail-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            word-break: break-all;
+        }
+
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            box-shadow: 0 4px 12px #23863640;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px #23863660;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #da3633, #f85149);
+            color: white;
+            box-shadow: 0 4px 12px #da363340;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px #da363360;
+        }
+
+        .btn-restart {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-restart:hover:not(:disabled) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-cyan);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* OAuth Section */
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .oauth-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .oauth-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .oauth-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .oauth-btn.connected {
+            border-color: var(--accent-green);
+        }
+
+        .oauth-btn.connected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 10px;
+            color: var(--accent-green);
+        }
+
+        .oauth-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .oauth-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Logs Section */
+        .logs-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .logs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logs-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .logs-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .logs-actions button {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logs-actions button:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .logs-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 16px 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+        }
+
+        .log-line {
+            display: flex;
+            gap: 12px;
+            padding: 2px 0;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .log-msg { color: var(--text-secondary); }
+        .log-msg.info { color: var(--accent-cyan); }
+        .log-msg.success { color: var(--accent-green); }
+        .log-msg.warning { color: var(--accent-amber); }
+        .log-msg.error { color: var(--accent-red); }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-version {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .status-details {
+                grid-template-columns: 1fr;
+            }
+            .oauth-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .controls {
+                flex-direction: column;
+            }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-color: var(--accent-green); }
+        .toast.error { border-color: var(--accent-red); }
+        .toast.info { border-color: var(--accent-cyan); }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <h1>CLIProxyAPI+</h1>
+                    <p class="subtitle">Control Center</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="status-card">
+            <div class="status-header">
+                <div class="status-indicator">
+                    <div class="status-orb" id="statusOrb"></div>
+                    <span class="status-text" id="statusText">Checking...</span>
+                </div>
+                <span class="status-badge" id="statusBadge">--</span>
+            </div>
+            <div class="status-details">
+                <div class="detail-item">
+                    <div class="detail-label">Endpoint</div>
+                    <div class="detail-value" id="endpoint">http://localhost:8317</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">PID</div>
+                    <div class="detail-value" id="pid">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Uptime</div>
+                    <div class="detail-value" id="uptime">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="btnStart" onclick="startServer()">
+                <span>▶</span> Start
+            </button>
+            <button class="btn btn-stop" id="btnStop" onclick="stopServer()">
+                <span>■</span> Stop
+            </button>
+            <button class="btn btn-restart" id="btnRestart" onclick="restartServer()">
+                <span>↻</span> Restart
+            </button>
+        </div>
+
+        <div class="section-title">OAuth Providers</div>
+        <div class="oauth-grid">
+            <button class="oauth-btn" onclick="loginProvider('gemini')">
+                <div class="oauth-icon">🔷</div>
+                <div class="oauth-name">Gemini</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('copilot')">
+                <div class="oauth-icon">🐙</div>
+                <div class="oauth-name">Copilot</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('antigravity')">
+                <div class="oauth-icon">🚀</div>
+                <div class="oauth-name">Antigravity</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('codex')">
+                <div class="oauth-icon">🤖</div>
+                <div class="oauth-name">Codex</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('claude')">
+                <div class="oauth-icon">🧠</div>
+                <div class="oauth-name">Claude</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('qwen')">
+                <div class="oauth-icon">☁️</div>
+                <div class="oauth-name">Qwen</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('iflow')">
+                <div class="oauth-icon">🌊</div>
+                <div class="oauth-name">iFlow</div>
+            </button>
+            <button class="oauth-btn" onclick="loginProvider('kiro')">
+                <div class="oauth-icon">☁️</div>
+                <div class="oauth-name">Kiro</div>
+            </button>
+        </div>
+
+        <div class="logs-card">
+            <div class="logs-header">
+                <span class="logs-title">📋 Activity Log</span>
+                <div class="logs-actions">
+                    <button onclick="clearLogs()">Clear</button>
+                    <button onclick="refreshStatus()">Refresh</button>
+                </div>
+            </div>
+            <div class="logs-content" id="logsContent">
+                <div class="log-line">
+                    <span class="log-time">--:--:--</span>
+                    <span class="log-msg info">Initializing Control Center...</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/julianromli/CLIProxyAPIPlus-Easy-Installation" target="_blank">GitHub</a>
+                <a href="https://github.com/router-for-me/CLIProxyAPIPlus" target="_blank">Upstream</a>
+            </div>
+            <p class="footer-version">CLIProxyAPI+ Easy Installation v1.0</p>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8317';
+        let serverStartTime = null;
+        let statusCheckInterval = null;
+
+        // Logging
+        function log(message, type = 'info') {
+            const logsContent = document.getElementById('logsContent');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-msg ${type}">${message}</span>
+            `;
+            logsContent.appendChild(logLine);
+            logsContent.scrollTop = logsContent.scrollHeight;
+        }
+
+        function clearLogs() {
+            const logsContent = document.getElementById('logsContent');
+            logsContent.innerHTML = '';
+            log('Logs cleared', 'info');
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Status management
+        function updateStatus(running, pid = null) {
+            const orb = document.getElementById('statusOrb');
+            const text = document.getElementById('statusText');
+            const badge = document.getElementById('statusBadge');
+            const pidEl = document.getElementById('pid');
+            const uptimeEl = document.getElementById('uptime');
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
+
+            if (running) {
+                orb.className = 'status-orb running';
+                text.className = 'status-text running';
+                text.textContent = 'Running';
+                badge.textContent = 'ONLINE';
+                pidEl.textContent = pid || '--';
+                btnStart.disabled = true;
+                btnStop.disabled = false;
+                
+                if (serverStartTime) {
+                    const uptime = Math.floor((Date.now() - serverStartTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const mins = Math.floor((uptime % 3600) / 60);
+                    const secs = uptime % 60;
+                    uptimeEl.textContent = `${hours}h ${mins}m ${secs}s`;
+                }
+            } else {
+                orb.className = 'status-orb stopped';
+                text.className = 'status-text stopped';
+                text.textContent = 'Stopped';
+                badge.textContent = 'OFFLINE';
+                pidEl.textContent = '--';
+                uptimeEl.textContent = '--';
+                btnStart.disabled = false;
+                btnStop.disabled = true;
+                serverStartTime = null;
+            }
+        }
+
+        function setStarting() {
+            const orb = document.getElementById('statusOrb');
+            const text = document.getElementById('statusText');
+            const badge = document.getElementById('statusBadge');
+            
+            orb.className = 'status-orb starting';
+            text.className = 'status-text starting';
+            text.textContent = 'Starting...';
+            badge.textContent = 'STARTING';
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/models`, {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer sk-dummy' },
+                    signal: AbortSignal.timeout(2000)
+                });
+                
+                if (response.ok) {
+                    updateStatus(true, 'Active');
+                    return true;
+                }
+            } catch (e) {
+                updateStatus(false);
+            }
+            return false;
+        }
+
+        async function refreshStatus() {
+            log('Checking server status...', 'info');
+            const running = await checkStatus();
+            log(running ? 'Server is running' : 'Server is not running', running ? 'success' : 'warning');
+        }
+
+        // Server control (these will open PowerShell commands)
+        function startServer() {
+            log('Starting server...', 'info');
+            setStarting();
+            showToast('Starting server...', 'info');
+            
+            // Create a hidden link to trigger PowerShell
+            const cmd = `powershell -Command "Start-Process -FilePath '$env:USERPROFILE\\bin\\cliproxyapi-plus.exe' -ArgumentList '--config', '$env:USERPROFILE\\.cli-proxy-api\\config.yaml' -WindowStyle Hidden"`;
+            
+            // For web version, we'll just show instructions
+            showToast('Run: start-cliproxyapi.ps1 -Background', 'info');
+            log('Please run: start-cliproxyapi.ps1 -Background', 'warning');
+            
+            serverStartTime = Date.now();
+            setTimeout(checkStatus, 2000);
+        }
+
+        function stopServer() {
+            log('Stopping server...', 'warning');
+            showToast('Run: start-cliproxyapi.ps1 -Stop', 'info');
+            log('Please run: start-cliproxyapi.ps1 -Stop', 'warning');
+            
+            setTimeout(checkStatus, 1000);
+        }
+
+        function restartServer() {
+            log('Restarting server...', 'info');
+            showToast('Run: start-cliproxyapi.ps1 -Restart', 'info');
+            log('Please run: start-cliproxyapi.ps1 -Restart', 'warning');
+        }
+
+        function loginProvider(provider) {
+            const commands = {
+                'gemini': '--login',
+                'copilot': '--github-copilot-login',
+                'antigravity': '--antigravity-login',
+                'codex': '--codex-login',
+                'claude': '--claude-login',
+                'qwen': '--qwen-login',
+                'iflow': '--iflow-login',
+                'kiro': '--kiro-aws-login'
+            };
+            
+            const flag = commands[provider];
+            log(`Login to ${provider}: cliproxyapi-plus ${flag}`, 'info');
+            showToast(`Run: cliproxyapi-oauth.ps1 -${provider.charAt(0).toUpperCase() + provider.slice(1)}`, 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Control Center initialized', 'success');
+            checkStatus();
+            
+            // Check status every 5 seconds
+            statusCheckInterval = setInterval(checkStatus, 5000);
+        });
+    </script>
+</body>
+</html>

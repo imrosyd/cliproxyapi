@@ -186,8 +186,13 @@ Write-Success "config.json updated with $(($customModels.custom_models).Count) c
 Write-Step "Verifying installation..."
 $binaryPath = "$BIN_DIR\$BINARY_NAME"
 if (Test-Path $binaryPath) {
-    $help = & $binaryPath --help 2>&1 | Select-Object -First 5
-    Write-Success "Binary verification passed"
+    $fileInfo = Get-Item $binaryPath
+    if ($fileInfo.Length -gt 1MB) {
+        Write-Success "Binary verification passed ($([math]::Round($fileInfo.Length / 1MB, 1)) MB)"
+    } else {
+        Write-Error "Binary seems corrupted (too small)"
+        exit 1
+    }
 } else {
     Write-Error "Binary not found at $binaryPath"
     exit 1

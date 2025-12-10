@@ -21,6 +21,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Version
+$SCRIPT_VERSION = "1.1.0"
+
 # Paths
 $SCRIPT_DIR = $PSScriptRoot
 $GUI_PATH = Join-Path (Split-Path $SCRIPT_DIR -Parent) "gui\index.html"
@@ -84,22 +87,31 @@ function Start-ApiServer {
     
     try {
         $logFile = Join-Path $LOG_DIR "server.log"
-        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $startInfo.FileName = $BINARY
-        $startInfo.Arguments = "--config `"$CONFIG`""
-        $startInfo.UseShellExecute = $false
-        $startInfo.RedirectStandardOutput = $true
-        $startInfo.RedirectStandardError = $true
-        $startInfo.CreateNoWindow = $true
-        $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
         
-        $process = [System.Diagnostics.Process]::Start($startInfo)
+        # Clear old log on start
+        if (Test-Path $logFile) {
+            Clear-Content $logFile -Force
+        }
+        $script:LastLogPosition = 0
+        
+        # Start process with output redirected to log file
+        $processArgs = "--config `"$CONFIG`""
+        $process = Start-Process -FilePath $BINARY -ArgumentList $processArgs `
+            -RedirectStandardOutput $logFile -RedirectStandardError $logFile `
+            -PassThru -NoNewWindow -WindowStyle Hidden
+        
         Start-Sleep -Milliseconds 500
         
         if (-not $process.HasExited) {
             return @{ success = $true; pid = $process.Id; message = "Server started" }
         } else {
-            return @{ success = $false; error = "Server exited immediately" }
+            # Read error from log
+            $errorMsg = "Server exited immediately"
+            if (Test-Path $logFile) {
+                $logContent = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
+                if ($logContent) { $errorMsg += ": $logContent" }
+            }
+            return @{ success = $false; error = $errorMsg }
         }
     } catch {
         return @{ success = $false; error = $_.Exception.Message }
@@ -227,6 +239,254 @@ function Get-AvailableModels {
         return @{ success = $true; models = $models }
     } catch {
         return @{ success = $false; error = $_.Exception.Message; models = @() }
+    }
+}
+
+# ============================================
+# Request Stats Functions
+# ============================================
+
+$script:RequestStats = @{
+    total = 0
+    success = 0
+    errors = 0
+    totalLatency = 0
+    lastReset = (Get-Date).ToString("o")
+    recentRequests = [System.Collections.ArrayList]@()
+}
+$script:LastLogPosition = 0
+
+function Get-RequestStats {
+    # Parse server log for new entries
+    $logFile = Join-Path $LOG_DIR "server.log"
+    
+    if (Test-Path $logFile) {
+        try {
+            $content = [System.IO.File]::ReadAllText($logFile)
+            if ($content.Length -gt $script:LastLogPosition) {
+                $newContent = $content.Substring($script:LastLogPosition)
+                $script:LastLogPosition = $content.Length
+                
+                # Parse log lines for request patterns
+                # CLIProxyAPI logs format: timestamp | method path | status | latency
+                $lines = $newContent -split "`n"
+                foreach ($line in $lines) {
+                    if ($line -match "POST /v1/(chat/completions|completions|embeddings)") {
+                        $script:RequestStats.total++
+                        
+                        # Try to extract status code
+                        if ($line -match "\b(2\d{2})\b") {
+                            $script:RequestStats.success++
+                        } elseif ($line -match "\b([45]\d{2})\b") {
+                            $script:RequestStats.errors++
+                        } else {
+                            $script:RequestStats.success++  # Assume success if no error code
+                        }
+                        
+                        # Try to extract latency (e.g., "1.234s" or "234ms")
+                        if ($line -match "(\d+\.?\d*)(ms|s)") {
+                            $latency = [double]$matches[1]
+                            if ($matches[2] -eq "s") { $latency = $latency * 1000 }
+                            $script:RequestStats.totalLatency += $latency
+                        }
+                        
+                        # Add to recent requests (keep last 50)
+                        $requestInfo = @{
+                            time = (Get-Date).ToString("HH:mm:ss")
+                            endpoint = if ($line -match "/v1/(\S+)") { $matches[1] } else { "unknown" }
+                        }
+                        $script:RequestStats.recentRequests.Insert(0, $requestInfo) | Out-Null
+                        if ($script:RequestStats.recentRequests.Count -gt 50) {
+                            $script:RequestStats.recentRequests.RemoveAt(50)
+                        }
+                    }
+                }
+            }
+        } catch {
+            # Ignore log parsing errors
+        }
+    }
+    
+    $avgLatency = if ($script:RequestStats.total -gt 0) {
+        [math]::Round($script:RequestStats.totalLatency / $script:RequestStats.total, 0)
+    } else { 0 }
+    
+    $successRate = if ($script:RequestStats.total -gt 0) {
+        [math]::Round(($script:RequestStats.success / $script:RequestStats.total) * 100, 1)
+    } else { 0 }
+    
+    return @{
+        total = $script:RequestStats.total
+        success = $script:RequestStats.success
+        errors = $script:RequestStats.errors
+        successRate = $successRate
+        avgLatency = $avgLatency
+        lastReset = $script:RequestStats.lastReset
+        recentRequests = $script:RequestStats.recentRequests
+    }
+}
+
+function Reset-RequestStats {
+    $script:RequestStats = @{
+        total = 0
+        success = 0
+        errors = 0
+        totalLatency = 0
+        lastReset = (Get-Date).ToString("o")
+        recentRequests = [System.Collections.ArrayList]@()
+    }
+    $script:LastLogPosition = 0
+    return @{ success = $true; message = "Stats reset" }
+}
+
+# ============================================
+# Auto-Update Functions
+# ============================================
+
+$VERSION_FILE = Join-Path $CONFIG_DIR "version.json"
+$GITHUB_REPO = "julianromli/CLIProxyAPIPlus-Easy-Installation"
+$UPSTREAM_REPO = "router-for-me/CLIProxyAPIPlus"
+
+function Get-LocalVersion {
+    if (Test-Path $VERSION_FILE) {
+        try {
+            return Get-Content $VERSION_FILE -Raw | ConvertFrom-Json
+        } catch { }
+    }
+    
+    # Create default version file
+    $defaultVersion = @{
+        scripts = $SCRIPT_VERSION
+        binary = "unknown"
+        lastCheck = $null
+    }
+    $defaultVersion | ConvertTo-Json | Out-File $VERSION_FILE -Encoding UTF8
+    return $defaultVersion
+}
+
+function Get-UpdateInfo {
+    $local = Get-LocalVersion
+    
+    $result = @{
+        currentVersion = $local.scripts
+        latestVersion = $local.scripts
+        hasUpdate = $false
+        releaseNotes = ""
+        releaseUrl = ""
+        downloadUrl = ""
+        error = $null
+    }
+    
+    try {
+        # Check our repo for script updates
+        $headers = @{ "User-Agent" = "CLIProxyAPI-Plus-Updater" }
+        $releaseUrl = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
+        
+        $release = Invoke-RestMethod -Uri $releaseUrl -Headers $headers -TimeoutSec 10 -ErrorAction Stop
+        
+        $result.latestVersion = $release.tag_name -replace "^v", ""
+        $result.releaseNotes = $release.body
+        $result.releaseUrl = $release.html_url
+        
+        # Find download URL (zip asset)
+        $zipAsset = $release.assets | Where-Object { $_.name -like "*.zip" } | Select-Object -First 1
+        if ($zipAsset) {
+            $result.downloadUrl = $zipAsset.browser_download_url
+        }
+        
+        # Compare versions
+        try {
+            $currentVer = [version]($local.scripts -replace "[^0-9.]", "")
+            $latestVer = [version]($result.latestVersion -replace "[^0-9.]", "")
+            $result.hasUpdate = $latestVer -gt $currentVer
+        } catch {
+            $result.hasUpdate = $local.scripts -ne $result.latestVersion
+        }
+        
+        # Update last check time
+        $local.lastCheck = (Get-Date).ToString("o")
+        $local | ConvertTo-Json | Out-File $VERSION_FILE -Encoding UTF8
+        
+    } catch {
+        $result.error = $_.Exception.Message
+    }
+    
+    return $result
+}
+
+function Install-Update {
+    param([string]$DownloadUrl)
+    
+    if (-not $DownloadUrl) {
+        return @{ success = $false; error = "No download URL provided" }
+    }
+    
+    try {
+        # Stop server if running
+        $proc = Get-ServerProcess
+        $wasRunning = $null -ne $proc
+        if ($wasRunning) {
+            Stop-ApiServer | Out-Null
+            Start-Sleep -Seconds 1
+        }
+        
+        # Download to temp
+        $tempDir = Join-Path $env:TEMP "cliproxyapi-update"
+        $zipFile = Join-Path $tempDir "update.zip"
+        
+        if (Test-Path $tempDir) {
+            Remove-Item $tempDir -Recurse -Force
+        }
+        New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+        
+        Write-Log "Downloading update from $DownloadUrl"
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile $zipFile -UseBasicParsing
+        
+        # Extract
+        Write-Log "Extracting update..."
+        Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
+        
+        # Find extracted folder
+        $extractedFolder = Get-ChildItem -Path $tempDir -Directory | Select-Object -First 1
+        if (-not $extractedFolder) {
+            $extractedFolder = Get-Item $tempDir
+        }
+        
+        # Copy scripts
+        $scriptsSource = Join-Path $extractedFolder.FullName "scripts"
+        if (Test-Path $scriptsSource) {
+            Copy-Item -Path "$scriptsSource\*" -Destination $BIN_DIR -Force -Recurse
+        }
+        
+        # Copy GUI
+        $guiSource = Join-Path $extractedFolder.FullName "gui"
+        $guiDest = Split-Path $GUI_PATH -Parent
+        if (Test-Path $guiSource) {
+            Copy-Item -Path "$guiSource\*" -Destination $guiDest -Force -Recurse
+        }
+        
+        # Update version file
+        $local = Get-LocalVersion
+        $updateInfo = Get-UpdateInfo
+        $local.scripts = $updateInfo.latestVersion
+        $local | ConvertTo-Json | Out-File $VERSION_FILE -Encoding UTF8
+        
+        # Cleanup
+        Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+        
+        # Restart server if it was running
+        if ($wasRunning) {
+            Start-ApiServer | Out-Null
+        }
+        
+        return @{ 
+            success = $true
+            message = "Update installed successfully"
+            newVersion = $updateInfo.latestVersion
+            needsRestart = $true
+        }
+    } catch {
+        return @{ success = $false; error = $_.Exception.Message }
     }
 }
 
@@ -397,6 +657,53 @@ try {
                     } else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
+                }
+                "^/api/stats$" {
+                    if ($method -eq "GET") {
+                        $stats = Get-RequestStats
+                        Send-JsonResponse -Context $context -Data $stats
+                    } elseif ($method -eq "DELETE") {
+                        $result = Reset-RequestStats
+                        Send-JsonResponse -Context $context -Data $result
+                    } else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/update/check$" {
+                    $updateInfo = Get-UpdateInfo
+                    Send-JsonResponse -Context $context -Data $updateInfo
+                }
+                "^/api/update/apply$" {
+                    if ($method -eq "POST") {
+                        # Read request body for download URL
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        $downloadUrl = $null
+                        if ($body) {
+                            try {
+                                $data = $body | ConvertFrom-Json
+                                $downloadUrl = $data.downloadUrl
+                            } catch { }
+                        }
+                        
+                        # If no URL provided, get it from update check
+                        if (-not $downloadUrl) {
+                            $updateInfo = Get-UpdateInfo
+                            $downloadUrl = $updateInfo.downloadUrl
+                        }
+                        
+                        $result = Install-Update -DownloadUrl $downloadUrl
+                        Send-JsonResponse -Context $context -Data $result
+                    } else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/version$" {
+                    $version = Get-LocalVersion
+                    $version | Add-Member -NotePropertyName "scriptVersion" -NotePropertyValue $SCRIPT_VERSION -Force
+                    Send-JsonResponse -Context $context -Data $version
                 }
                 default {
                     Send-JsonResponse -Context $context -Data @{ error = "Not found" } -StatusCode 404

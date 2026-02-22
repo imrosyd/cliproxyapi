@@ -50,8 +50,7 @@
 ├── unix/              → Bash scripts (Linux/macOS)
 ├── configs/           → Example config files (YAML, JSON)
 ├── gui/               → HTML GUI for Control Center
-├── README.md          → English docs
-├── README_ID.md       → Indonesian docs
+├── README.md          → Documentation
 └── LICENSE            → MIT
 ```
 
@@ -121,4 +120,3 @@ Before PR:
 - [ ] Script runs without errors on clean Linux/macOS install
 - [ ] Help text updated (`Get-Help .\script.ps1` or `./script.sh --help`)
 - [ ] README updated if new features added
-- [ ] Both English and Indonesian READMEs in sync

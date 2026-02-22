@@ -696,6 +696,234 @@ function Remove-FactoryModels {
     }
 }
 
+# ============================================
+# CLI Tools Config Functions
+# ============================================
+
+$OPENCODE_CONFIG_PATH = "$env:USERPROFILE\.config\opencode\opencode.json"
+$CLAUDE_CONFIG_PATH = "$env:USERPROFILE\.claude\settings.json"
+$KILO_CONFIG_PATH = "$env:USERPROFILE\.config\kilo\opencode.json"
+
+function Get-OpenCodeConfig {
+    if (-not (Test-Path $OPENCODE_CONFIG_PATH)) {
+        return @{ success = $true; content = ""; exists = $false; path = $OPENCODE_CONFIG_PATH }
+    }
+    
+    try {
+        $content = Get-Content $OPENCODE_CONFIG_PATH -Raw -Encoding UTF8
+        return @{ success = $true; content = $content; exists = $true; path = $OPENCODE_CONFIG_PATH }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message; content = ""; path = $OPENCODE_CONFIG_PATH }
+    }
+}
+
+function Set-OpenCodeConfig {
+    param([string]$Content)
+    
+    try {
+        $configDir = Split-Path $OPENCODE_CONFIG_PATH -Parent
+        if (-not (Test-Path $configDir)) {
+            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+        }
+        
+        if (Test-Path $OPENCODE_CONFIG_PATH) {
+            Copy-Item -Path $OPENCODE_CONFIG_PATH -Destination "$OPENCODE_CONFIG_PATH.bak" -Force
+        }
+        
+        $Content | Out-File -FilePath $OPENCODE_CONFIG_PATH -Encoding UTF8 -Force
+        return @{ success = $true; message = "OpenCode config saved" }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message }
+    }
+}
+
+function Get-ClaudeConfig {
+    if (-not (Test-Path $CLAUDE_CONFIG_PATH)) {
+        return @{ success = $true; content = ""; exists = $false; path = $CLAUDE_CONFIG_PATH }
+    }
+    
+    try {
+        $content = Get-Content $CLAUDE_CONFIG_PATH -Raw -Encoding UTF8
+        return @{ success = $true; content = $content; exists = $true; path = $CLAUDE_CONFIG_PATH }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message; content = ""; path = $CLAUDE_CONFIG_PATH }
+    }
+}
+
+function Set-ClaudeConfig {
+    param([string]$Content)
+    
+    try {
+        $configDir = Split-Path $CLAUDE_CONFIG_PATH -Parent
+        if (-not (Test-Path $configDir)) {
+            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+        }
+        
+        if (Test-Path $CLAUDE_CONFIG_PATH) {
+            Copy-Item -Path $CLAUDE_CONFIG_PATH -Destination "$CLAUDE_CONFIG_PATH.bak" -Force
+        }
+        
+        $Content | Out-File -FilePath $CLAUDE_CONFIG_PATH -Encoding UTF8 -Force
+        return @{ success = $true; message = "Claude Code config saved" }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message }
+    }
+}
+
+function Get-KiloConfig {
+    if (-not (Test-Path $KILO_CONFIG_PATH)) {
+        return @{ success = $true; content = ""; exists = $false; path = $KILO_CONFIG_PATH }
+    }
+    
+    try {
+        $content = Get-Content $KILO_CONFIG_PATH -Raw -Encoding UTF8
+        return @{ success = $true; content = $content; exists = $true; path = $KILO_CONFIG_PATH }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message; content = ""; path = $KILO_CONFIG_PATH }
+    }
+}
+
+function Set-KiloConfig {
+    param([string]$Content)
+    
+    try {
+        $configDir = Split-Path $KILO_CONFIG_PATH -Parent
+        if (-not (Test-Path $configDir)) {
+            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+        }
+        
+        if (Test-Path $KILO_CONFIG_PATH) {
+            Copy-Item -Path $KILO_CONFIG_PATH -Destination "$KILO_CONFIG_PATH.bak" -Force
+        }
+        
+        $Content | Out-File -FilePath $KILO_CONFIG_PATH -Encoding UTF8 -Force
+        return @{ success = $true; message = "Kilo CLI config saved" }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message }
+    }
+}
+
+function New-AutoPopulateConfigs {
+    param([array]$Models)
+    
+    $results = @{
+        factory = @{ success = $false; error = "Not configured" }
+        opencode = @{ success = $false; error = "Not configured" }
+        claude = @{ success = $false; error = "Not configured" }
+        kilo = @{ success = $false; error = "Not configured" }
+    }
+    
+    $cliproxyUrl = "http://localhost:8317/v1"
+    $apiKey = "sk-dummy"
+    
+    if ($Models -and $Models.Count -gt 0) {
+        # Factory Droid config
+        try {
+            $factoryDir = Split-Path $FACTORY_CONFIG_PATH -Parent
+            if (-not (Test-Path $factoryDir)) {
+                New-Item -ItemType Directory -Path $factoryDir -Force | Out-Null
+            }
+            
+            $factoryConfig = @{ custom_models = @() }
+            foreach ($model in $Models) {
+                $factoryConfig.custom_models += @{
+                    model = $model
+                    model_display_name = $model
+                    base_url = "http://localhost:8317"
+                    api_key = $apiKey
+                    provider = "anthropic"
+                }
+            }
+            $factoryConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $FACTORY_CONFIG_PATH -Encoding UTF8 -Force
+            $results.factory = @{ success = $true; count = $Models.Count }
+        }
+        catch {
+            $results.factory = @{ success = $false; error = $_.Exception.Message }
+        }
+        
+        # OpenCode config
+        try {
+            $opencodeDir = Split-Path $OPENCODE_CONFIG_PATH -Parent
+            if (-not (Test-Path $opencodeDir)) {
+                New-Item -ItemType Directory -Path $opencodeDir -Force | Out-Null
+            }
+            
+            $opencodeConfig = @{
+                '$schema' = "https://opencode.ai/config.json"
+                provider = @{
+                    cliproxy = @{
+                        npm = "@ai-sdk/openai-compatible"
+                        name = "CLIProxyAPI"
+                        options = @{
+                            baseURL = $cliproxyUrl
+                            apiKey = $apiKey
+                        }
+                    }
+                }
+            }
+            $opencodeConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $OPENCODE_CONFIG_PATH -Encoding UTF8 -Force
+            $results.opencode = @{ success = $true }
+        }
+        catch {
+            $results.opencode = @{ success = $false; error = $_.Exception.Message }
+        }
+        
+        # Claude Code config
+        try {
+            $claudeDir = Split-Path $CLAUDE_CONFIG_PATH -Parent
+            if (-not (Test-Path $claudeDir)) {
+                New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
+            }
+            
+            $claudeConfig = @{
+                env = @{
+                    ANTHROPIC_BASE_URL = $cliproxyUrl
+                    ANTHROPIC_API_KEY = $apiKey
+                }
+            }
+            $claudeConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $CLAUDE_CONFIG_PATH -Encoding UTF8 -Force
+            $results.claude = @{ success = $true }
+        }
+        catch {
+            $results.claude = @{ success = $false; error = $_.Exception.Message }
+        }
+        
+        # Kilo CLI config
+        try {
+            $kiloDir = Split-Path $KILO_CONFIG_PATH -Parent
+            if (-not (Test-Path $kiloDir)) {
+                New-Item -ItemType Directory -Path $kiloDir -Force | Out-Null
+            }
+            
+            $kiloConfig = @{
+                '$schema' = "https://app.kilo.ai/config.json"
+                provider = @{
+                    cliproxy = @{
+                        npm = "@ai-sdk/openai-compatible"
+                        options = @{
+                            baseURL = $cliproxyUrl
+                            apiKey = $apiKey
+                        }
+                    }
+                }
+            }
+            $kiloConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $KILO_CONFIG_PATH -Encoding UTF8 -Force
+            $results.kilo = @{ success = $true }
+        }
+        catch {
+            $results.kilo = @{ success = $false; error = $_.Exception.Message }
+        }
+    }
+    
+    return @{ success = $true; results = $results; modelsCount = $Models.Count }
+}
+
 function Send-JsonResponse {
     param($Context, $Data, [int]$StatusCode = 200)
     
@@ -1299,6 +1527,95 @@ try {
                         try {
                             $data = $body | ConvertFrom-Json
                             $result = Test-ProviderConnection -BaseURL $data.baseURL -ApiKey $data.apiKey -Name $data.name
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid request: $($_.Exception.Message)" } -StatusCode 400
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/opencode-config$" {
+                    if ($method -eq "GET") {
+                        $result = Get-OpenCodeConfig
+                        Send-JsonResponse -Context $context -Data $result
+                    }
+                    elseif ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json
+                            $result = Set-OpenCodeConfig -Content $data.content
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid JSON" } -StatusCode 400
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/claude-config$" {
+                    if ($method -eq "GET") {
+                        $result = Get-ClaudeConfig
+                        Send-JsonResponse -Context $context -Data $result
+                    }
+                    elseif ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json
+                            $result = Set-ClaudeConfig -Content $data.content
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid JSON" } -StatusCode 400
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/kilo-config$" {
+                    if ($method -eq "GET") {
+                        $result = Get-KiloConfig
+                        Send-JsonResponse -Context $context -Data $result
+                    }
+                    elseif ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json
+                            $result = Set-KiloConfig -Content $data.content
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid JSON" } -StatusCode 400
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/configs/auto-populate$" {
+                    if ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json
+                            $models = @($data.models)
+                            $result = New-AutoPopulateConfigs -Models $models
                             Send-JsonResponse -Context $context -Data $result
                         }
                         catch {

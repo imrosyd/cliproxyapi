@@ -1714,12 +1714,11 @@
 
         <!-- TAB: SETTINGS -->
         <div class="tab-content" id="tab-settings">
-            <div class="card ani">
+            <div class="card ani" style="margin-bottom:16px">
                 <div class="card-header" style="align-items:flex-start">
                     <div>
-                        <span class="card-title">Configuration (config.yaml)</span>
-                        <div style="color:var(--text-3);font-size:12px;margin-top:4px">Settings are automatically loaded
-                            from disk.</div>
+                        <span class="card-title">CLIProxyAPI Configuration (config.yaml)</span>
+                        <div style="color:var(--text-3);font-size:12px;margin-top:4px">Main server settings</div>
                     </div>
                     <div style="display:flex;gap:6px">
                         <span class="card-subtitle" id="configStatus" style="margin-right:8px;line-height:28px"></span>
@@ -1737,6 +1736,108 @@
                 <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
                     <button class="btn" onclick="reloadConfig()">Reload</button>
                     <button class="btn btn-accent" onclick="saveConfig()">Save & Restart</button>
+                </div>
+            </div>
+            
+            <div class="card ani" style="margin-bottom:16px">
+                <div class="card-header">
+                    <span class="card-title">CLI Tools Configuration</span>
+                    <button class="btn btn-accent btn-sm" onclick="autoPopulateAllConfigs()">⚡ Auto-Populate All</button>
+                </div>
+                <div style="color:var(--text-3);font-size:12px;margin-bottom:16px;padding:0 16px">
+                    Configure CLI tools to use CLIProxyAPI. Click "Auto-Populate All" to automatically configure all tools with available models.
+                </div>
+                
+                <div class="config-collapsible" style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px">
+                    <div class="config-collapsible-header" onclick="toggleConfigSection('factory')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;background:var(--bg-2)">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span style="font-size:18px">🤖</span>
+                            <div>
+                                <div style="font-weight:500">Factory Droid</div>
+                                <div style="font-size:11px;color:var(--text-3)">~/.factory/config.json</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span id="factoryConfigStatus" style="font-size:11px;color:var(--text-3)"></span>
+                            <span class="arrow" style="transition:transform 0.2s">▼</span>
+                        </div>
+                    </div>
+                    <div id="factoryConfigBody" class="config-collapsible-body" style="display:none;padding:16px;border-top:1px solid var(--border)">
+                        <textarea class="config-editor" id="factoryConfigEditor" spellcheck="false" placeholder="Loading..." style="min-height:200px"></textarea>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+                            <button class="btn btn-sm" onclick="loadFactoryConfigEditor()">Reload</button>
+                            <button class="btn btn-sm btn-accent" onclick="saveFactoryConfigEditor()">Save</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-collapsible" style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px">
+                    <div class="config-collapsible-header" onclick="toggleConfigSection('opencode')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;background:var(--bg-2)">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span style="font-size:18px">💻</span>
+                            <div>
+                                <div style="font-weight:500">OpenCode</div>
+                                <div style="font-size:11px;color:var(--text-3)">~/.config/opencode/opencode.json</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span id="opencodeConfigStatus" style="font-size:11px;color:var(--text-3)"></span>
+                            <span class="arrow" style="transition:transform 0.2s">▼</span>
+                        </div>
+                    </div>
+                    <div id="opencodeConfigBody" class="config-collapsible-body" style="display:none;padding:16px;border-top:1px solid var(--border)">
+                        <textarea class="config-editor" id="opencodeConfigEditor" spellcheck="false" placeholder="Loading..." style="min-height:200px"></textarea>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+                            <button class="btn btn-sm" onclick="loadOpenCodeConfig()">Reload</button>
+                            <button class="btn btn-sm btn-accent" onclick="saveOpenCodeConfig()">Save</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-collapsible" style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px">
+                    <div class="config-collapsible-header" onclick="toggleConfigSection('claude')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;background:var(--bg-2)">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span style="font-size:18px">🧠</span>
+                            <div>
+                                <div style="font-weight:500">Claude Code</div>
+                                <div style="font-size:11px;color:var(--text-3)">~/.claude/settings.json</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span id="claudeConfigStatus" style="font-size:11px;color:var(--text-3)"></span>
+                            <span class="arrow" style="transition:transform 0.2s">▼</span>
+                        </div>
+                    </div>
+                    <div id="claudeConfigBody" class="config-collapsible-body" style="display:none;padding:16px;border-top:1px solid var(--border)">
+                        <textarea class="config-editor" id="claudeConfigEditor" spellcheck="false" placeholder="Loading..." style="min-height:200px"></textarea>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+                            <button class="btn btn-sm" onclick="loadClaudeConfig()">Reload</button>
+                            <button class="btn btn-sm btn-accent" onclick="saveClaudeConfig()">Save</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-collapsible" style="border:1px solid var(--border);border-radius:var(--r)">
+                    <div class="config-collapsible-header" onclick="toggleConfigSection('kilo')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;background:var(--bg-2)">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span style="font-size:18px">⚡</span>
+                            <div>
+                                <div style="font-weight:500">Kilo CLI</div>
+                                <div style="font-size:11px;color:var(--text-3)">~/.config/kilo/opencode.json</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span id="kiloConfigStatus" style="font-size:11px;color:var(--text-3)"></span>
+                            <span class="arrow" style="transition:transform 0.2s">▼</span>
+                        </div>
+                    </div>
+                    <div id="kiloConfigBody" class="config-collapsible-body" style="display:none;padding:16px;border-top:1px solid var(--border)">
+                        <textarea class="config-editor" id="kiloConfigEditor" spellcheck="false" placeholder="Loading..." style="min-height:200px"></textarea>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+                            <button class="btn btn-sm" onclick="loadKiloConfig()">Reload</button>
+                            <button class="btn btn-sm btn-accent" onclick="saveKiloConfig()">Save</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2897,6 +2998,269 @@
             list.appendChild(div);
             document.getElementById('btnSaveRoutes').disabled = false;
         }
+
+        // CLI Tools Config Functions
+        function toggleConfigSection(name) {
+            const body = document.getElementById(name + 'ConfigBody');
+            const header = body.previousElementSibling;
+            const arrow = header.querySelector('.arrow');
+            
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                if (name === 'factory') loadFactoryConfigEditor();
+                else if (name === 'opencode') loadOpenCodeConfig();
+                else if (name === 'claude') loadClaudeConfig();
+                else if (name === 'kilo') loadKiloConfig();
+            } else {
+                body.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        async function loadFactoryConfigEditor() {
+            try {
+                const r = await fetch('/api/factory-config');
+                const d = await r.json();
+                const editor = document.getElementById('factoryConfigEditor');
+                const status = document.getElementById('factoryConfigStatus');
+                
+                if (d.success && d.config) {
+                    editor.value = JSON.stringify(d.config, null, 2);
+                    status.textContent = d.models ? d.models.length + ' models' : 'configured';
+                    status.style.color = 'var(--success)';
+                } else {
+                    editor.value = '{\n  "custom_models": []\n}';
+                    status.textContent = 'not configured';
+                    status.style.color = 'var(--text-3)';
+                }
+            } catch (e) {
+                document.getElementById('factoryConfigEditor').value = '{\n  "custom_models": []\n}';
+            }
+        }
+        
+        async function saveFactoryConfigEditor() {
+            const content = document.getElementById('factoryConfigEditor').value;
+            try {
+                JSON.parse(content);
+                const r = await fetch('/api/factory-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showToast('Factory config saved');
+                    log('Factory Droid config saved', 'success', 'Settings');
+                } else {
+                    showToast('Save failed: ' + (d.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Invalid JSON format');
+            }
+        }
+        
+        async function loadOpenCodeConfig() {
+            try {
+                const r = await fetch('/api/opencode-config');
+                const d = await r.json();
+                const editor = document.getElementById('opencodeConfigEditor');
+                const status = document.getElementById('opencodeConfigStatus');
+                
+                if (d.success && d.exists) {
+                    editor.value = d.content;
+                    status.textContent = 'configured';
+                    status.style.color = 'var(--success)';
+                } else {
+                    editor.value = JSON.stringify({
+                        "$schema": "https://opencode.ai/config.json",
+                        "provider": {
+                            "cliproxy": {
+                                "npm": "@ai-sdk/openai-compatible",
+                                "name": "CLIProxyAPI",
+                                "options": {
+                                    "baseURL": "http://localhost:8317/v1",
+                                    "apiKey": "sk-dummy"
+                                }
+                            }
+                        }
+                    }, null, 2);
+                    status.textContent = 'not configured';
+                    status.style.color = 'var(--text-3)';
+                }
+            } catch (e) {
+                document.getElementById('opencodeConfigEditor').value = '// Error loading config';
+            }
+        }
+        
+        async function saveOpenCodeConfig() {
+            const content = document.getElementById('opencodeConfigEditor').value;
+            try {
+                JSON.parse(content);
+                const r = await fetch('/api/opencode-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showToast('OpenCode config saved');
+                    log('OpenCode config saved', 'success', 'Settings');
+                } else {
+                    showToast('Save failed: ' + (d.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Invalid JSON format');
+            }
+        }
+        
+        async function loadClaudeConfig() {
+            try {
+                const r = await fetch('/api/claude-config');
+                const d = await r.json();
+                const editor = document.getElementById('claudeConfigEditor');
+                const status = document.getElementById('claudeConfigStatus');
+                
+                if (d.success && d.exists) {
+                    editor.value = d.content;
+                    status.textContent = 'configured';
+                    status.style.color = 'var(--success)';
+                } else {
+                    editor.value = JSON.stringify({
+                        "env": {
+                            "ANTHROPIC_BASE_URL": "http://localhost:8317/v1",
+                            "ANTHROPIC_API_KEY": "sk-dummy"
+                        }
+                    }, null, 2);
+                    status.textContent = 'not configured';
+                    status.style.color = 'var(--text-3)';
+                }
+            } catch (e) {
+                document.getElementById('claudeConfigEditor').value = '// Error loading config';
+            }
+        }
+        
+        async function saveClaudeConfig() {
+            const content = document.getElementById('claudeConfigEditor').value;
+            try {
+                JSON.parse(content);
+                const r = await fetch('/api/claude-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showToast('Claude Code config saved');
+                    log('Claude Code config saved', 'success', 'Settings');
+                } else {
+                    showToast('Save failed: ' + (d.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Invalid JSON format');
+            }
+        }
+        
+        async function loadKiloConfig() {
+            try {
+                const r = await fetch('/api/kilo-config');
+                const d = await r.json();
+                const editor = document.getElementById('kiloConfigEditor');
+                const status = document.getElementById('kiloConfigStatus');
+                
+                if (d.success && d.exists) {
+                    editor.value = d.content;
+                    status.textContent = 'configured';
+                    status.style.color = 'var(--success)';
+                } else {
+                    editor.value = JSON.stringify({
+                        "$schema": "https://app.kilo.ai/config.json",
+                        "provider": {
+                            "cliproxy": {
+                                "npm": "@ai-sdk/openai-compatible",
+                                "options": {
+                                    "baseURL": "http://localhost:8317/v1",
+                                    "apiKey": "sk-dummy"
+                                }
+                            }
+                        }
+                    }, null, 2);
+                    status.textContent = 'not configured';
+                    status.style.color = 'var(--text-3)';
+                }
+            } catch (e) {
+                document.getElementById('kiloConfigEditor').value = '// Error loading config';
+            }
+        }
+        
+        async function saveKiloConfig() {
+            const content = document.getElementById('kiloConfigEditor').value;
+            try {
+                JSON.parse(content);
+                const r = await fetch('/api/kilo-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showToast('Kilo CLI config saved');
+                    log('Kilo CLI config saved', 'success', 'Settings');
+                } else {
+                    showToast('Save failed: ' + (d.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Invalid JSON format');
+            }
+        }
+        
+        async function autoPopulateAllConfigs() {
+            showToast('Fetching available models...');
+            
+            try {
+                const modelsR = await fetch('/api/models');
+                const modelsD = await modelsR.json();
+                const models = modelsD.models || modelsD.data || [];
+                
+                if (!models.length) {
+                    showToast('No models available. Start server and login first.');
+                    return;
+                }
+                
+                const r = await fetch('/api/configs/auto-populate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ models })
+                });
+                const d = await r.json();
+                
+                if (d.success) {
+                    const results = d.results;
+                    let successCount = 0;
+                    let failCount = 0;
+                    
+                    for (const [tool, result] of Object.entries(results)) {
+                        if (result.success) successCount++;
+                        else failCount++;
+                    }
+                    
+                    showToast(`Configured ${successCount} tools, ${failCount} failed`);
+                    log(`Auto-populated configs: ${successCount} successful, ${failCount} failed`, successCount > 0 ? 'success' : 'error', 'Settings');
+                    
+                    if (successCount > 0) {
+                        if (results.factory.success) loadFactoryConfigEditor();
+                        if (results.opencode.success) loadOpenCodeConfig();
+                        if (results.claude.success) loadClaudeConfig();
+                        if (results.kilo.success) loadKiloConfig();
+                    }
+                } else {
+                    showToast('Auto-populate failed: ' + (d.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message);
+            }
+        }
+        
         function saveRoutes() {
             document.getElementById('btnSaveRoutes').disabled = true;
             document.getElementById('btnSaveRoutes').textContent = 'Saved ✓';

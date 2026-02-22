@@ -106,7 +106,6 @@ if ($LASTEXITCODE -ne 0) {
 3. Add the 4 Write-* helper functions
 4. Use consistent path variables
 5. Add to README.md "Scripts Reference" section
-6. Add to README_ID.md (Indonesian version)
 
 ### Checklist for New Script
 ```powershell

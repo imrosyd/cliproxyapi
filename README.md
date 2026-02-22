@@ -178,6 +178,57 @@ export ANTHROPIC_BASE_URL="http://localhost:8317/v1"
 export ANTHROPIC_API_KEY="sk-dummy"
 ```
 
+Or create `~/.claude/settings.json`:
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:8317/v1",
+    "ANTHROPIC_API_KEY": "sk-dummy"
+  }
+}
+```
+
+### Kilo CLI
+
+Create or edit `~/.config/kilo/opencode.json`:
+
+```json
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "provider": {
+    "cliproxy": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:8317/v1",
+        "apiKey": "sk-dummy"
+      }
+    }
+  }
+}
+```
+
+**Field Explanation:**
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| `npm` | `"@ai-sdk/openai-compatible"` | Required for OpenAI-compatible APIs |
+| `options.baseURL` | `"http://localhost:8317/v1"` | CLIProxyAPI endpoint (with `/v1`) |
+| `options.apiKey` | `"sk-dummy"` | Any non-empty string |
+
+Then run:
+```bash
+cpa-start -b && kilo
+```
+
+**Set default model:**
+```bash
+kilo
+# Then use: /models
+# Select cliproxy provider and model
+```
+
+**Source:** [Kilo CLI Documentation](https://kilo.ai/docs/code-with-ai/platforms/cli)
+
 ### Cursor
 
 Go to **Settings → Models → OpenAI API**:

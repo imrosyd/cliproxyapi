@@ -502,6 +502,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.api_management_usage()
         elif parsed_path == '/api/factory-config':
             self.api_get_factory_config()
+        elif parsed_path == '/api/opencode-config':
+            self.api_get_opencode_config()
+        elif parsed_path == '/api/claude-config':
+            self.api_get_claude_config()
+        elif parsed_path == '/api/kilo-config':
+            self.api_get_kilo_config()
         elif parsed_path == '/api/providers':
             self.api_get_providers()
         elif parsed_path.startswith('/api/providers/'):
@@ -537,6 +543,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.api_factory_config_add(body)
         elif self.path == '/api/factory-config/remove':
             self.api_factory_config_remove(body)
+        elif self.path == '/api/opencode-config':
+            self.api_save_opencode_config(body)
+        elif self.path == '/api/claude-config':
+            self.api_save_claude_config(body)
+        elif self.path == '/api/kilo-config':
+            self.api_save_kilo_config(body)
+        elif self.path == '/api/configs/auto-populate':
+            self.api_auto_populate_configs(body)
         elif self.path == '/api/providers':
             self.api_save_providers(body)
         elif self.path == '/api/providers/test':
@@ -1215,6 +1229,193 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({'success': False, 'error': f'HTTP {e.code}: {e.reason}'})
         except urllib.error.URLError as e:
             self.send_json({'success': False, 'error': f'Connection failed: {e.reason}'})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_get_opencode_config(self):
+        '''Get OpenCode config'''
+        opencode_path = os.path.expanduser('~/.config/opencode/opencode.json')
+        try:
+            if os.path.exists(opencode_path):
+                with open(opencode_path, 'r') as f:
+                    content = f.read()
+                self.send_json({'success': True, 'content': content, 'exists': True, 'path': opencode_path})
+            else:
+                self.send_json({'success': True, 'content': '', 'exists': False, 'path': opencode_path})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e), 'content': '', 'path': opencode_path})
+    
+    def api_save_opencode_config(self, body):
+        '''Save OpenCode config'''
+        opencode_path = os.path.expanduser('~/.config/opencode/opencode.json')
+        try:
+            data = json.loads(body)
+            content = data.get('content', '')
+            os.makedirs(os.path.dirname(opencode_path), exist_ok=True)
+            if os.path.exists(opencode_path):
+                import shutil
+                shutil.copy(opencode_path, opencode_path + '.bak')
+            with open(opencode_path, 'w') as f:
+                f.write(content)
+            self.send_json({'success': True, 'message': 'OpenCode config saved'})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_get_claude_config(self):
+        '''Get Claude Code config'''
+        claude_path = os.path.expanduser('~/.claude/settings.json')
+        try:
+            if os.path.exists(claude_path):
+                with open(claude_path, 'r') as f:
+                    content = f.read()
+                self.send_json({'success': True, 'content': content, 'exists': True, 'path': claude_path})
+            else:
+                self.send_json({'success': True, 'content': '', 'exists': False, 'path': claude_path})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e), 'content': '', 'path': claude_path})
+    
+    def api_save_claude_config(self, body):
+        '''Save Claude Code config'''
+        claude_path = os.path.expanduser('~/.claude/settings.json')
+        try:
+            data = json.loads(body)
+            content = data.get('content', '')
+            os.makedirs(os.path.dirname(claude_path), exist_ok=True)
+            if os.path.exists(claude_path):
+                import shutil
+                shutil.copy(claude_path, claude_path + '.bak')
+            with open(claude_path, 'w') as f:
+                f.write(content)
+            self.send_json({'success': True, 'message': 'Claude Code config saved'})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_get_kilo_config(self):
+        '''Get Kilo CLI config'''
+        kilo_path = os.path.expanduser('~/.config/kilo/opencode.json')
+        try:
+            if os.path.exists(kilo_path):
+                with open(kilo_path, 'r') as f:
+                    content = f.read()
+                self.send_json({'success': True, 'content': content, 'exists': True, 'path': kilo_path})
+            else:
+                self.send_json({'success': True, 'content': '', 'exists': False, 'path': kilo_path})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e), 'content': '', 'path': kilo_path})
+    
+    def api_save_kilo_config(self, body):
+        '''Save Kilo CLI config'''
+        kilo_path = os.path.expanduser('~/.config/kilo/opencode.json')
+        try:
+            data = json.loads(body)
+            content = data.get('content', '')
+            os.makedirs(os.path.dirname(kilo_path), exist_ok=True)
+            if os.path.exists(kilo_path):
+                import shutil
+                shutil.copy(kilo_path, kilo_path + '.bak')
+            with open(kilo_path, 'w') as f:
+                f.write(content)
+            self.send_json({'success': True, 'message': 'Kilo CLI config saved'})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_auto_populate_configs(self, body):
+        '''Auto-populate all CLI tool configs with available models'''
+        cliproxy_url = 'http://localhost:' + str(API_PORT) + '/v1'
+        api_key = 'sk-dummy'
+        results = {
+            'factory': {'success': False, 'error': 'Not configured'},
+            'opencode': {'success': False, 'error': 'Not configured'},
+            'claude': {'success': False, 'error': 'Not configured'},
+            'kilo': {'success': False, 'error': 'Not configured'}
+        }
+        
+        try:
+            data = json.loads(body)
+            models = data.get('models', [])
+            
+            if models:
+                # Factory Droid config
+                try:
+                    factory_path = os.path.expanduser('~/.factory/config.json')
+                    factory_config = {'custom_models': []}
+                    for model in models:
+                        factory_config['custom_models'].append({
+                            'model': model,
+                            'model_display_name': model,
+                            'base_url': 'http://localhost:' + str(API_PORT),
+                            'api_key': api_key,
+                            'provider': 'anthropic'
+                        })
+                    os.makedirs(os.path.dirname(factory_path), exist_ok=True)
+                    with open(factory_path, 'w') as f:
+                        json.dump(factory_config, f, indent=2)
+                    results['factory'] = {'success': True, 'count': len(models)}
+                except Exception as e:
+                    results['factory'] = {'success': False, 'error': str(e)}
+                
+                # OpenCode config
+                try:
+                    opencode_path = os.path.expanduser('~/.config/opencode/opencode.json')
+                    opencode_config = {
+                        '$schema': 'https://opencode.ai/config.json',
+                        'provider': {
+                            'cliproxy': {
+                                'npm': '@ai-sdk/openai-compatible',
+                                'name': 'CLIProxyAPI',
+                                'options': {
+                                    'baseURL': cliproxy_url,
+                                    'apiKey': api_key
+                                }
+                            }
+                        }
+                    }
+                    os.makedirs(os.path.dirname(opencode_path), exist_ok=True)
+                    with open(opencode_path, 'w') as f:
+                        json.dump(opencode_config, f, indent=2)
+                    results['opencode'] = {'success': True}
+                except Exception as e:
+                    results['opencode'] = {'success': False, 'error': str(e)}
+                
+                # Claude Code config
+                try:
+                    claude_path = os.path.expanduser('~/.claude/settings.json')
+                    claude_config = {
+                        'env': {
+                            'ANTHROPIC_BASE_URL': cliproxy_url,
+                            'ANTHROPIC_API_KEY': api_key
+                        }
+                    }
+                    os.makedirs(os.path.dirname(claude_path), exist_ok=True)
+                    with open(claude_path, 'w') as f:
+                        json.dump(claude_config, f, indent=2)
+                    results['claude'] = {'success': True}
+                except Exception as e:
+                    results['claude'] = {'success': False, 'error': str(e)}
+                
+                # Kilo CLI config
+                try:
+                    kilo_path = os.path.expanduser('~/.config/kilo/opencode.json')
+                    kilo_config = {
+                        '$schema': 'https://app.kilo.ai/config.json',
+                        'provider': {
+                            'cliproxy': {
+                                'npm': '@ai-sdk/openai-compatible',
+                                'options': {
+                                    'baseURL': cliproxy_url,
+                                    'apiKey': api_key
+                                }
+                            }
+                        }
+                    }
+                    os.makedirs(os.path.dirname(kilo_path), exist_ok=True)
+                    with open(kilo_path, 'w') as f:
+                        json.dump(kilo_config, f, indent=2)
+                    results['kilo'] = {'success': True}
+                except Exception as e:
+                    results['kilo'] = {'success': False, 'error': str(e)}
+            
+            self.send_json({'success': True, 'results': results, 'modelsCount': len(models)})
         except Exception as e:
             self.send_json({'success': False, 'error': str(e)})
 

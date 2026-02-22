@@ -670,7 +670,7 @@ Latency benchmark for all available models.
 | Config | `~/.cliproxyapi/config.yaml` | Proxy configuration |
 | Auth tokens | `~/.cliproxyapi/*.json` | OAuth tokens for each provider |
 | Droid config | `~/.factory/config.json` | Custom models for Factory Droid |
-| Source | `~/CLIProxyAPI/` | Cloned source (if built from source) |
+| Source | `~/CLIProxyAPI-source/` | Cloned source (if built from source) |
 
 ### Linux / macOS
 
@@ -681,7 +681,7 @@ Latency benchmark for all available models.
 | Auth tokens | `~/.cliproxyapi/*.json` | OAuth tokens for each provider |
 | Systemd | `~/.config/systemd/user/cliproxyapi.service` | Auto-start service |
 | Benchmark | `~/.cliproxyapi/benchmark.json` | Latest benchmark results |
-| Source | `~/cliproxyapi/` | Cloned source (if built from source) |
+| Source | `~/CLIProxyAPI-source/` | Cloned source (if built from source) |
 
 ---
 

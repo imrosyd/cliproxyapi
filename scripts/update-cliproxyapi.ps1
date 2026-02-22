@@ -18,9 +18,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$REPO_URL = "https://github.com/imrosyd/cliproxyapi.git"
-$RELEASE_API = "https://api.github.com/repos/imrosyd/cliproxyapi/releases/latest"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
+$REPO_URL = "https://github.com/router-for-me/CLIProxyAPIPlus.git"
+$RELEASE_API = "https://api.github.com/repos/router-for-me/CLIProxyAPIPlus/releases/latest"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI-source"
 $BIN_DIR = "$env:USERPROFILE\bin"
 $CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
 $BINARY_NAME = "cliproxyapi.exe"
@@ -94,6 +94,10 @@ if (-not $UsePrebuilt -and (Test-Path $CLONE_DIR)) {
     
     Pop-Location
     Write-Success "Binary rebuilt from source"
+    
+    # Cleanup source directory
+    Remove-Item -Recurse -Force $CLONE_DIR -ErrorAction SilentlyContinue
+    Write-Success "Source directory cleaned up"
     
 } else {
     Write-Step "Downloading latest pre-built binary..."

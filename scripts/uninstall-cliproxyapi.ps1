@@ -22,7 +22,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 $BIN_DIR = "$env:USERPROFILE\bin"
 $CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI-source"
 $FACTORY_CONFIG = "$env:USERPROFILE\.factory\config.json"
 
 $items = @(

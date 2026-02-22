@@ -16,7 +16,7 @@ set -e
 
 BIN_DIR="$HOME/bin"
 CONFIG_DIR="$HOME/.cliproxyapi"
-CLONE_DIR="$HOME/CLIProxyAPI"
+CLONE_DIR="$HOME/CLIProxyAPI-source"
 
 ALL=false
 KEEP_AUTH=true
@@ -97,15 +97,18 @@ check_item() {
 
 check_item "Binary" "$BIN_DIR/cliproxyapi" "file" "true"
 check_item "Binary backup" "$BIN_DIR/cliproxyapi.old" "file" "true"
-check_item "Install script" "$BIN_DIR/install-cliproxyapi.sh" "file" "true"
-check_item "Update script" "$BIN_DIR/update-cliproxyapi.sh" "file" "true"
-check_item "OAuth script" "$BIN_DIR/cliproxyapi-oauth.sh" "file" "true"
-check_item "Start script" "$BIN_DIR/start-cliproxyapi.sh" "file" "true"
-check_item "Uninstall script" "$BIN_DIR/uninstall-cliproxyapi.sh" "file" "true"
+check_item "Start script" "$BIN_DIR/start-cliproxyapi" "file" "true"
+check_item "OAuth script" "$BIN_DIR/cliproxyapi-oauth" "file" "true"
+check_item "Update script" "$BIN_DIR/update-cliproxyapi" "file" "true"
+check_item "Uninstall script" "$BIN_DIR/uninstall-cliproxyapi" "file" "true"
+check_item "GUI script" "$BIN_DIR/gui-cliproxyapi" "file" "true"
+check_item "Benchmark script" "$BIN_DIR/cliproxyapi-benchmark" "file" "true"
 check_item "Clone directory" "$CLONE_DIR" "dir" "true"
 check_item "Config (config.yaml)" "$CONFIG_DIR/config.yaml" "file" "true"
 check_item "PID file" "$CONFIG_DIR/cliproxyapi.pid" "file" "true"
 check_item "Logs directory" "$CONFIG_DIR/logs" "dir" "true"
+check_item "GUI files" "$CONFIG_DIR/gui" "dir" "true"
+check_item "Benchmark results" "$CONFIG_DIR/benchmark.json" "file" "true"
 check_item "Auth files (*.json)" "$CONFIG_DIR/*.json" "glob" "false"
 check_item "Config directory" "$CONFIG_DIR" "dir" "false"
 
@@ -138,6 +141,35 @@ if [ "$FORCE" = false ]; then
         echo -e "\n${YELLOW}[*] Uninstall cancelled.${NC}"
         exit 0
     fi
+fi
+
+# Stop and disable systemd services
+if command -v systemctl &> /dev/null; then
+    write_step "Removing systemd services..."
+    SYSTEMD_DIR="$HOME/.config/systemd/user"
+    
+    for svc in cliproxyapi cliproxyapi-update; do
+        if systemctl --user is-active "$svc" &> /dev/null; then
+            systemctl --user stop "$svc" 2>/dev/null || true
+        fi
+        if systemctl --user is-enabled "$svc" &> /dev/null; then
+            systemctl --user disable "$svc" 2>/dev/null || true
+        fi
+    done
+    
+    # Disable timer separately
+    systemctl --user disable --now cliproxyapi-update.timer 2>/dev/null || true
+    
+    # Remove unit files
+    for unit in cliproxyapi.service cliproxyapi-update.service cliproxyapi-update.timer; do
+        if [ -f "$SYSTEMD_DIR/$unit" ]; then
+            rm -f "$SYSTEMD_DIR/$unit"
+            write_success "Removed: $unit"
+        fi
+    done
+    
+    systemctl --user daemon-reload 2>/dev/null || true
+    write_success "Systemd services cleaned up"
 fi
 
 write_step "Removing CLIProxyAPI..."

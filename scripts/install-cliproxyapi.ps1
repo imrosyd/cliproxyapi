@@ -20,9 +20,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$REPO_URL = "https://github.com/imrosyd/cliproxyapi.git"
-$RELEASE_API = "https://api.github.com/repos/imrosyd/cliproxyapi/releases/latest"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
+$REPO_URL = "https://github.com/router-for-me/CLIProxyAPIPlus.git"
+$RELEASE_API = "https://api.github.com/repos/router-for-me/CLIProxyAPIPlus/releases/latest"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI-source"
 $BIN_DIR = "$env:USERPROFILE\bin"
 $CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
 $FACTORY_DIR = "$env:USERPROFILE\.factory"
@@ -139,6 +139,10 @@ if ($UsePrebuilt) {
         if ($LASTEXITCODE -ne 0) { Pop-Location; Write-Error "Build failed"; exit 1 }
         Pop-Location
         Write-Success "Binary built: $BIN_DIR\$BINARY_NAME"
+        
+        # Cleanup source directory
+        Remove-Item -Recurse -Force $CLONE_DIR -ErrorAction SilentlyContinue
+        Write-Success "Source directory cleaned up"
     }
 }
 

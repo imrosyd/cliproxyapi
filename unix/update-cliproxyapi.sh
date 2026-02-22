@@ -15,11 +15,11 @@
 
 set -e
 
-REPO_URL="https://github.com/imrosyd/cliproxyapi.git"
-RELEASE_API="https://api.github.com/repos/imrosyd/cliproxyapi/releases/latest"
+REPO_URL="https://github.com/router-for-me/CLIProxyAPIPlus.git"
+RELEASE_API="https://api.github.com/repos/router-for-me/CLIProxyAPIPlus/releases/latest"
 BIN_DIR="$HOME/bin"
 CONFIG_DIR="$HOME/.cliproxyapi"
-CLONE_DIR="$HOME/cliproxyapi"
+CLONE_DIR="$HOME/CLIProxyAPI-source"
 BINARY_NAME="cliproxyapi"
 
 USE_PREBUILT=false
@@ -124,6 +124,11 @@ if [ "$USE_PREBUILT" = false ] && [ -d "$CLONE_DIR" ]; then
     echo "    Building binary..."
     go build -o "$BIN_DIR/$BINARY_NAME" ./cmd/server
     write_success "Binary rebuilt from source"
+    
+    # Cleanup source directory
+    cd "$HOME"
+    rm -rf "$CLONE_DIR"
+    write_success "Source directory cleaned up"
     
 else
     write_step "Downloading latest pre-built binary..."

@@ -4,7 +4,7 @@
 
 ## Package Identity
 
-- **Purpose**: Automation scripts for CLIProxyAPIPlus installation/management
+- **Purpose**: Automation scripts for CLIProxyAPI installation/management
 - **Language**: PowerShell 5.1+ (Windows-native)
 - **No dependencies**: Scripts are self-contained
 
@@ -57,11 +57,11 @@ function Write-Error { param($msg) Write-Host "[-] $msg" -ForegroundColor Red }
 Always use expandable paths:
 ```powershell
 # ✅ DO: Use environment variables
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
 $BIN_DIR = "$env:USERPROFILE\bin"
 
 # ❌ DON'T: Hardcode paths
-$CONFIG_DIR = "C:\Users\faiz\.cli-proxy-api"
+$CONFIG_DIR = "C:\Users\faiz\.cliproxyapi"
 ```
 
 ### Error Handling

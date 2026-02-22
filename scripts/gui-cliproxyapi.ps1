@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus GUI Control Center with Management Server
+    CLIProxyAPI GUI Control Center with Management Server
 .DESCRIPTION
     Starts an HTTP management server that serves the GUI and provides API endpoints
-    for controlling the CLIProxyAPI-Plus server (start/stop/restart/oauth).
+    for controlling the CLIProxyAPI server (start/stop/restart/oauth).
 .PARAMETER Port
     Port for the management server (default: 8318)
 .PARAMETER NoBrowser
@@ -22,22 +22,22 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Version
-$SCRIPT_VERSION = "1.1.0"
+$SCRIPT_VERSION = "1.2.0"
 
 # Paths
 $SCRIPT_DIR = $PSScriptRoot
 $GUI_PATH = Join-Path (Split-Path $SCRIPT_DIR -Parent) "gui\index.html"
 $BIN_DIR = "$env:USERPROFILE\bin"
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
-$BINARY = "$BIN_DIR\cliproxyapi-plus.exe"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
+$BINARY = "$BIN_DIR\cliproxyapi.exe"
 $CONFIG = "$CONFIG_DIR\config.yaml"
 $LOG_DIR = "$CONFIG_DIR\logs"
 $API_PORT = 8317
-$PROCESS_NAMES = @("cliproxyapi-plus", "cli-proxy-api")
+$PROCESS_NAMES = @("cliproxyapi", "cli-proxy-api")
 
 # Fallback GUI path
 if (-not (Test-Path $GUI_PATH)) {
-    $GUI_PATH = "$env:USERPROFILE\CLIProxyAPIPlus-Easy-Installation\gui\index.html"
+    $GUI_PATH = "$env:USERPROFILE\cliproxyapi\gui\index.html"
 }
 
 function Write-Log { param($msg) Write-Host "[$(Get-Date -Format 'HH:mm:ss')] $msg" }
@@ -55,12 +55,12 @@ function Get-ServerStatus {
     $running = $null -ne $proc
     
     $status = @{
-        running = $running
-        pid = if ($running) { $proc.Id } else { $null }
-        memory = if ($running) { [math]::Round($proc.WorkingSet64 / 1MB, 1) } else { $null }
+        running   = $running
+        pid       = if ($running) { $proc.Id } else { $null }
+        memory    = if ($running) { [math]::Round($proc.WorkingSet64 / 1MB, 1) } else { $null }
         startTime = if ($running -and $proc.StartTime) { $proc.StartTime.ToString("o") } else { $null }
-        port = $API_PORT
-        endpoint = "http://localhost:$API_PORT/v1"
+        port      = $API_PORT
+        endpoint  = "http://localhost:$API_PORT/v1"
     }
     
     return $status
@@ -128,7 +128,8 @@ function Start-ApiServer {
         
         if (-not $process.HasExited) {
             return @{ success = $true; pid = $process.Id; message = "Server started" }
-        } else {
+        }
+        else {
             # Read error from logs
             $errorMsg = "Server exited immediately"
             $stdout = if (Test-Path $stdoutLog) { Get-Content $stdoutLog -Raw -ErrorAction SilentlyContinue } else { "" }
@@ -137,7 +138,8 @@ function Start-ApiServer {
             if ($combinedLog) { $errorMsg += ": $combinedLog" }
             return @{ success = $false; error = $errorMsg }
         }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -152,13 +154,14 @@ function Stop-ApiServer {
         $proc | Stop-Process -Force
         Start-Sleep -Milliseconds 300
         return @{ success = $true; message = "Server stopped" }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
 
 function Restart-ApiServer {
-    $stopResult = Stop-ApiServer
+    Stop-ApiServer | Out-Null
     Start-Sleep -Milliseconds 500
     $startResult = Start-ApiServer
     return $startResult
@@ -168,14 +171,14 @@ function Start-OAuthLogin {
     param([string]$Provider)
     
     $flags = @{
-        "gemini" = "--login"
-        "copilot" = "--github-copilot-login"
+        "gemini"      = "--login"
+        "copilot"     = "--github-copilot-login"
         "antigravity" = "--antigravity-login"
-        "codex" = "--codex-login"
-        "claude" = "--claude-login"
-        "qwen" = "--qwen-login"
-        "iflow" = "--iflow-login"
-        "kiro" = "--kiro-aws-login"
+        "codex"       = "--codex-login"
+        "claude"      = "--claude-login"
+        "qwen"        = "--qwen-login"
+        "iflow"       = "--iflow-login"
+        "kiro"        = "--kiro-aws-login"
     }
     
     if (-not $flags.ContainsKey($Provider.ToLower())) {
@@ -188,7 +191,8 @@ function Start-OAuthLogin {
         # Start OAuth in a new window so user can interact
         Start-Process -FilePath $BINARY -ArgumentList "--config `"$CONFIG`" $flag" -Wait:$false
         return @{ success = $true; message = "OAuth login started for $Provider" }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -196,14 +200,14 @@ function Start-OAuthLogin {
 function Get-AuthStatus {
     # Check for auth token files to determine which providers are logged in
     $authPatterns = @{
-        gemini = "gemini-*.json"
-        copilot = "github-copilot-*.json"
+        gemini      = "gemini-*.json"
+        copilot     = "github-copilot-*.json"
         antigravity = "antigravity-*.json"
-        codex = "codex-*.json"
-        claude = "claude-*.json"
-        qwen = "qwen-*.json"
-        iflow = "iflow-*.json"
-        kiro = "kiro-*.json"
+        codex       = "codex-*.json"
+        claude      = "claude-*.json"
+        qwen        = "qwen-*.json"
+        iflow       = "iflow-*.json"
+        kiro        = "kiro-*.json"
     }
     
     $status = @{}
@@ -217,7 +221,7 @@ function Get-AuthStatus {
 }
 
 function Get-ConfigContent {
-    $configPath = "$env:USERPROFILE\.cli-proxy-api\config.yaml"
+    $configPath = "$env:USERPROFILE\.cliproxyapi\config.yaml"
     if (-not (Test-Path $configPath)) {
         return @{ success = $false; error = "Config file not found at: $configPath"; content = "" }
     }
@@ -225,7 +229,8 @@ function Get-ConfigContent {
     try {
         $content = [System.IO.File]::ReadAllText($configPath)
         return @{ success = $true; content = $content }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message; content = "" }
     }
 }
@@ -243,7 +248,8 @@ function Set-ConfigContent {
         # Write new content
         $Content | Out-File -FilePath $CONFIG -Encoding UTF8 -Force
         return @{ success = $true; message = "Config saved" }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -261,7 +267,8 @@ function Get-AvailableModels {
             $models = $response.data | ForEach-Object { $_.id }
         }
         return @{ success = $true; models = $models }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message; models = @() }
     }
 }
@@ -270,49 +277,105 @@ function Get-AvailableModels {
 # Request Stats Functions
 # ============================================
 
+$STATS_FILE = Join-Path $CONFIG_DIR "stats.json"
+
 function Get-RequestStats {
-    # CLIProxyAPI doesn't output access logs to stdout/stderr by default
-    # Stats tracking would require intercepting requests or reading from a stats endpoint
-    # For now, return placeholder data indicating stats are not available
-    
-    # Check if server has a /stats endpoint
-    $proc = Get-ServerProcess
-    if ($proc) {
+    if (Test-Path $STATS_FILE) {
         try {
-            # Try to fetch stats from server's internal stats endpoint if available
-            $response = Invoke-RestMethod -Uri "http://localhost:$API_PORT/stats" -TimeoutSec 2 -ErrorAction SilentlyContinue
-            if ($response) {
-                return @{
-                    total = $response.total_requests ?? 0
-                    success = $response.successful_requests ?? 0
-                    errors = $response.failed_requests ?? 0
-                    successRate = if ($response.total_requests -gt 0) { [math]::Round(($response.successful_requests / $response.total_requests) * 100, 1) } else { 0 }
-                    avgLatency = $response.avg_latency_ms ?? 0
-                    lastReset = $response.start_time ?? (Get-Date).ToString("o")
-                    available = $true
-                }
+            $stats = Get-Content $STATS_FILE -Raw | ConvertFrom-Json
+            $total = $(if ($stats.total_requests) { $stats.total_requests } else { 0 })
+            $successful = $(if ($stats.successful) { $stats.successful } else { 0 })
+            $failed = $(if ($stats.failed) { $stats.failed } else { 0 })
+            $successRate = if ($total -gt 0) { [math]::Round(($successful / $total) * 100, 1) } else { 0 }
+            $avgLatency = if ($stats.latencies -and $stats.latencies.Count -gt 0) { 
+                [math]::Round(($stats.latencies | Measure-Object -Average).Average, 0)
             }
-        } catch {
-            # Stats endpoint not available
+            else { 0 }
+            
+            return @{
+                total        = $total
+                successful   = $successful
+                failed       = $failed
+                successRate  = $successRate
+                avgLatency   = $avgLatency
+                available    = $true
+                by_provider  = $stats.by_provider
+                by_model     = $stats.by_model
+                start_time   = $stats.start_time
+                last_request = $stats.last_request
+            }
         }
+        catch { }
     }
     
-    # Return unavailable stats
+    $defaultStats = @{
+        total_requests = 0
+        successful     = 0
+        failed         = 0
+        by_provider    = @{}
+        by_model       = @{}
+        latencies      = @()
+        start_time     = (Get-Date).ToString("o")
+        last_request   = $null
+    }
+    $defaultStats | ConvertTo-Json -Depth 10 | Out-File $STATS_FILE -Encoding UTF8
+    
     return @{
-        total = 0
-        success = 0
-        errors = 0
-        successRate = 0
-        avgLatency = 0
-        lastReset = (Get-Date).ToString("o")
-        available = $false
-        message = "Stats not available - CLIProxyAPI doesn't expose request metrics"
+        total        = 0
+        successful   = 0
+        failed       = 0
+        successRate  = 0
+        avgLatency   = 0
+        available    = $true
+        by_provider  = @{}
+        by_model     = @{}
+        start_time   = $defaultStats.start_time
+        last_request = $null
     }
 }
 
 function Reset-RequestStats {
-    # Stats are fetched from server, cannot be reset from GUI
-    return @{ success = $false; message = "Stats reset not supported - stats are read-only from server" }
+    $defaultStats = @{
+        total_requests = 0
+        successful     = 0
+        failed         = 0
+        by_provider    = @{}
+        by_model       = @{}
+        latencies      = @()
+        start_time     = (Get-Date).ToString("o")
+        last_request   = $null
+    }
+    $defaultStats | ConvertTo-Json -Depth 10 | Out-File $STATS_FILE -Encoding UTF8
+    return @{ success = $true; message = "Stats reset" }
+}
+
+function Get-ServerLogs {
+    param([int]$Lines = 100)
+    
+    $logFile = Join-Path $LOG_DIR "server.log"
+    if (-not (Test-Path $logFile)) {
+        return @{ success = $true; lines = @(); total = 0 }
+    }
+    
+    try {
+        $allLines = Get-Content $logFile -ErrorAction SilentlyContinue
+        $total = if ($allLines) { $allLines.Count } else { 0 }
+        $recent = if ($allLines -and $allLines.Count -gt $Lines) { 
+            $allLines | Select-Object -Last $Lines 
+        }
+        else { 
+            $allLines 
+        }
+        
+        return @{
+            success = $true
+            lines   = @($recent)
+            total   = $total
+        }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message }
+    }
 }
 
 # ============================================
@@ -320,8 +383,7 @@ function Reset-RequestStats {
 # ============================================
 
 $VERSION_FILE = Join-Path $CONFIG_DIR "version.json"
-$GITHUB_REPO = "julianromli/CLIProxyAPIPlus-Easy-Installation"
-$UPSTREAM_REPO = "router-for-me/CLIProxyAPIPlus"
+$GITHUB_REPO = "imrosyd/cliproxyapi"
 
 function Get-LocalVersion {
     if (Test-Path $VERSION_FILE) {
@@ -332,15 +394,16 @@ function Get-LocalVersion {
                 $version | Add-Member -NotePropertyName "commitSha" -NotePropertyValue "unknown" -Force
             }
             return $version
-        } catch { }
+        }
+        catch { }
     }
     
     # Create default version file
     $defaultVersion = @{
-        scripts = $SCRIPT_VERSION
-        commitSha = "unknown"
+        scripts    = $SCRIPT_VERSION
+        commitSha  = "unknown"
         commitDate = $null
-        lastCheck = $null
+        lastCheck  = $null
     }
     $defaultVersion | ConvertTo-Json | Out-File $VERSION_FILE -Encoding UTF8
     return $defaultVersion
@@ -350,20 +413,20 @@ function Get-UpdateInfo {
     $local = Get-LocalVersion
     
     $result = @{
-        currentVersion = $local.scripts
-        currentCommit = $local.commitSha
-        latestCommit = $null
-        latestCommitDate = $null
+        currentVersion      = $local.scripts
+        currentCommit       = $local.commitSha
+        latestCommit        = $null
+        latestCommitDate    = $null
         latestCommitMessage = ""
-        hasUpdate = $false
-        downloadUrl = "https://github.com/$GITHUB_REPO/archive/refs/heads/main.zip"
-        repoUrl = "https://github.com/$GITHUB_REPO"
-        error = $null
+        hasUpdate           = $false
+        downloadUrl         = "https://github.com/$GITHUB_REPO/archive/refs/heads/main.zip"
+        repoUrl             = "https://github.com/$GITHUB_REPO"
+        error               = $null
     }
     
     try {
         # Check latest commit on main branch
-        $headers = @{ "User-Agent" = "CLIProxyAPI-Plus-Updater" }
+        $headers = @{ "User-Agent" = "CLIProxyAPI-Updater" }
         $apiUrl = "https://api.github.com/repos/$GITHUB_REPO/commits/main"
         
         $commit = Invoke-RestMethod -Uri $apiUrl -Headers $headers -TimeoutSec 10 -ErrorAction Stop
@@ -376,7 +439,8 @@ function Get-UpdateInfo {
         # Has update if commit SHA is different (and not unknown)
         if ($local.commitSha -eq "unknown") {
             $result.hasUpdate = $true
-        } else {
+        }
+        else {
             $result.hasUpdate = ($local.commitSha -ne $result.latestCommit)
         }
         
@@ -384,7 +448,8 @@ function Get-UpdateInfo {
         $local.lastCheck = (Get-Date).ToString("o")
         $local | ConvertTo-Json | Out-File $VERSION_FILE -Encoding UTF8
         
-    } catch {
+    }
+    catch {
         $result.error = $_.Exception.Message
     }
     
@@ -460,13 +525,14 @@ function Install-Update {
         }
         
         return @{ 
-            success = $true
-            message = "Update installed successfully"
-            newCommit = $updateInfo.latestCommit
+            success       = $true
+            message       = "Update installed successfully"
+            newCommit     = $updateInfo.latestCommit
             commitMessage = $updateInfo.latestCommitMessage
-            needsRestart = $true
+            needsRestart  = $true
         }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -489,14 +555,15 @@ function Get-FactoryConfig {
         if ($config.custom_models) {
             $models = $config.custom_models | ForEach-Object {
                 @{
-                    model = $_.model
+                    model        = $_.model
                     display_name = $_.model_display_name
-                    base_url = $_.base_url
+                    base_url     = $_.base_url
                 }
             }
         }
         return @{ success = $true; config = $config; models = $models }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message; models = @() }
     }
 }
@@ -535,15 +602,16 @@ function Add-FactoryModels {
             if ($modelId -notin $existingModels) {
                 $displayName = if ($DisplayNames -and $DisplayNames[$modelId]) { 
                     $DisplayNames[$modelId] 
-                } else { 
+                }
+                else { 
                     $modelId 
                 }
                 
                 $newEntry = @{
-                    api_key = "sk-dummy"
-                    provider = "openai"
-                    model = $modelId
-                    base_url = "http://localhost:8317/v1"
+                    api_key            = "sk-dummy"
+                    provider           = "openai"
+                    model              = $modelId
+                    base_url           = "http://localhost:8317/v1"
                     model_display_name = $displayName
                 }
                 
@@ -556,7 +624,8 @@ function Add-FactoryModels {
         $config | ConvertTo-Json -Depth 10 | Out-File -FilePath $FACTORY_CONFIG_PATH -Encoding UTF8 -Force
         
         return @{ success = $true; added = $added; total = $config.custom_models.Count }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -584,12 +653,14 @@ function Remove-FactoryModels {
         if ($All) {
             $removed = $config.custom_models | ForEach-Object { $_.model }
             $config.custom_models = @()
-        } else {
+        }
+        else {
             $remaining = @()
             foreach ($entry in $config.custom_models) {
                 if ($entry.model -in $Models) {
                     $removed += $entry.model
-                } else {
+                }
+                else {
                     $remaining += $entry
                 }
             }
@@ -600,7 +671,8 @@ function Remove-FactoryModels {
         $config | ConvertTo-Json -Depth 10 | Out-File -FilePath $FACTORY_CONFIG_PATH -Encoding UTF8 -Force
         
         return @{ success = $true; removed = $removed; total = $config.custom_models.Count }
-    } catch {
+    }
+    catch {
         return @{ success = $false; error = $_.Exception.Message }
     }
 }
@@ -685,7 +757,8 @@ for ($i = 0; $i -lt $maxRetries; $i++) {
         if ($i -eq 0) {
             Write-Host "[!] Port $testPort in use, trying alternatives..." -ForegroundColor Yellow
         }
-    } else {
+    }
+    else {
         $Port = $testPort
         $portFound = $true
         break
@@ -769,7 +842,8 @@ try {
                     if ($method -eq "GET") {
                         $config = Get-ConfigContent
                         Send-JsonResponse -Context $context -Data $config
-                    } elseif ($method -eq "POST") {
+                    }
+                    elseif ($method -eq "POST") {
                         # Read request body
                         $reader = New-Object System.IO.StreamReader($request.InputStream)
                         $body = $reader.ReadToEnd()
@@ -779,10 +853,12 @@ try {
                             $data = $body | ConvertFrom-Json
                             $result = Set-ConfigContent -Content $data.content
                             Send-JsonResponse -Context $context -Data $result
-                        } catch {
+                        }
+                        catch {
                             Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid JSON" } -StatusCode 400
                         }
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -790,7 +866,8 @@ try {
                     if ($method -eq "POST") {
                         $result = Start-ApiServer
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -798,7 +875,8 @@ try {
                     if ($method -eq "POST") {
                         $result = Stop-ApiServer
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -806,7 +884,8 @@ try {
                     if ($method -eq "POST") {
                         $result = Restart-ApiServer
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -815,7 +894,8 @@ try {
                         $provider = $matches[1]
                         $result = Start-OAuthLogin -Provider $provider
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -823,10 +903,25 @@ try {
                     if ($method -eq "GET") {
                         $stats = Get-RequestStats
                         Send-JsonResponse -Context $context -Data $stats
-                    } elseif ($method -eq "DELETE") {
+                    }
+                    elseif ($method -eq "DELETE") {
                         $result = Reset-RequestStats
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/logs$" {
+                    if ($method -eq "GET") {
+                        $lines = 100
+                        if ($request.Url.Query -match "lines=(\d+)") {
+                            $lines = [int]$matches[1]
+                        }
+                        $logs = Get-ServerLogs -Lines $lines
+                        Send-JsonResponse -Context $context -Data $logs
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -846,7 +941,8 @@ try {
                             try {
                                 $data = $body | ConvertFrom-Json
                                 $downloadUrl = $data.downloadUrl
-                            } catch { }
+                            }
+                            catch { }
                         }
                         
                         # If no URL provided, get it from update check
@@ -857,7 +953,8 @@ try {
                         
                         $result = Install-Update -DownloadUrl $downloadUrl
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -870,7 +967,8 @@ try {
                     if ($method -eq "GET") {
                         $result = Get-FactoryConfig
                         Send-JsonResponse -Context $context -Data $result
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -891,10 +989,12 @@ try {
                             }
                             $result = Add-FactoryModels -Models $models -DisplayNames $displayNames
                             Send-JsonResponse -Context $context -Data $result
-                        } catch {
+                        }
+                        catch {
                             Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid request: $($_.Exception.Message)" } -StatusCode 400
                         }
-                    } else {
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -908,15 +1008,39 @@ try {
                             $data = $body | ConvertFrom-Json
                             if ($data.all -eq $true) {
                                 $result = Remove-FactoryModels -All
-                            } else {
+                            }
+                            else {
                                 $models = @($data.models)
                                 $result = Remove-FactoryModels -Models $models
                             }
                             Send-JsonResponse -Context $context -Data $result
-                        } catch {
+                        }
+                        catch {
                             Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid request: $($_.Exception.Message)" } -StatusCode 400
                         }
-                    } else {
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/management/usage$" {
+                    if ($method -eq "GET") {
+                        try {
+                            $usageData = Invoke-RestMethod -Uri "http://localhost:8317/v0/management/usage" -Method GET -TimeoutSec 5 -ErrorAction Stop
+                            Send-JsonResponse -Context $context -Data $usageData
+                        }
+                        catch {
+                            try {
+                                $headers = @{ "Authorization" = "Bearer sk-dummy" }
+                                $usageData = Invoke-RestMethod -Uri "http://localhost:8317/v0/management/usage" -Method GET -Headers $headers -TimeoutSec 5 -ErrorAction Stop
+                                Send-JsonResponse -Context $context -Data $usageData
+                            }
+                            catch {
+                                Send-JsonResponse -Context $context -Data @{ available = $false; error = "Management API not available. Enable usage-statistics-enabled in config.yaml" }
+                            }
+                        }
+                    }
+                    else {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
@@ -924,13 +1048,16 @@ try {
                     Send-JsonResponse -Context $context -Data @{ error = "Not found" } -StatusCode 404
                 }
             }
-        } catch {
+        }
+        catch {
             Write-Host "[-] Request error: $_" -ForegroundColor Red
         }
     }
-} catch {
+}
+catch {
     Write-Host "[-] Server error: $_" -ForegroundColor Red
-} finally {
+}
+finally {
     if ($listener.IsListening) {
         $listener.Stop()
     }

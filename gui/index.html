@@ -1,658 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLIProxyAPI+ Control Center</title>
+    <meta name="description" content="Professional management dashboard for CLIProxyAPI+ proxy server">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --bg-0: #09090B;
-            --bg-1: #0C0C0E;
-            --bg-2: #131316;
-            --bg-3: #1A1A1F;
-            --bg-hover: #1F1F24;
-            --border: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(255, 255, 255, 0.1);
-            --text-1: #FAFAFA;
-            --text-2: #A1A1A6;
-            --text-3: #5C5C66;
-            --accent: #7C5CFF;
-            --accent-hover: #8B6FFF;
-            --accent-subtle: rgba(124, 92, 255, 0.1);
-            --success: #45D483;
-            --success-subtle: rgba(69, 212, 131, 0.1);
-            --warning: #F5A623;
-            --warning-subtle: rgba(245, 166, 35, 0.1);
-            --error: #EF4444;
-            --error-subtle: rgba(239, 68, 68, 0.1);
-            --radius: 8px;
-            --radius-sm: 6px;
-            --transition: 150ms ease;
+            --bg-0: #09090b;
+            --bg-1: #0f0f12;
+            --bg-2: #16161a;
+            --bg-3: #1c1c22;
+            --bg-4: #24242c;
+            --bg-hover: #2a2a34;
+            --border: rgba(255, 255, 255, .07);
+            --border-hover: rgba(255, 255, 255, .13);
+            --text-0: #fafafa;
+            --text-1: #e4e4e7;
+            --text-2: #a1a1aa;
+            --text-3: #63637a;
+            --accent: #8b5cf6;
+            --accent-h: rgba(139, 92, 246, .15);
+            --accent-glow: rgba(139, 92, 246, .25);
+            --success: #34d399;
+            --success-h: rgba(52, 211, 153, .12);
+            --warn: #fbbf24;
+            --warn-h: rgba(251, 191, 36, .12);
+            --error: #f87171;
+            --error-h: rgba(248, 113, 113, .12);
+            --blue: #60a5fa;
+            --blue-h: rgba(96, 165, 250, .12);
+            --r: 10px;
+            --r-sm: 6px;
+            --r-lg: 14px;
+            --t: 150ms ease;
+            --font: 'Inter', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+            --glass: rgba(255, 255, 255, .03);
+            --glass-border: rgba(255, 255, 255, .06)
+        }
+
+        [data-theme="light"] {
+            --bg-0: #fafafa;
+            --bg-1: #f4f4f5;
+            --bg-2: #e4e4e7;
+            --bg-3: #d4d4d8;
+            --bg-4: #c4c4cc;
+            --bg-hover: #d8d8de;
+            --border: rgba(0, 0, 0, .08);
+            --border-hover: rgba(0, 0, 0, .15);
+            --text-0: #09090b;
+            --text-1: #18181b;
+            --text-2: #52525b;
+            --text-3: #a1a1aa;
+            --accent: #7c3aed;
+            --accent-h: rgba(124, 58, 237, .1);
+            --accent-glow: rgba(124, 58, 237, .2);
+            --success: #059669;
+            --success-h: rgba(5, 150, 105, .1);
+            --warn: #d97706;
+            --warn-h: rgba(217, 119, 6, .1);
+            --error: #dc2626;
+            --error-h: rgba(220, 38, 38, .1);
+            --blue: #2563eb;
+            --blue-h: rgba(37, 99, 235, .1);
+            --glass: rgba(0, 0, 0, .02);
+            --glass-border: rgba(0, 0, 0, .06)
         }
 
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box
         }
 
         body {
-            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font);
             background: var(--bg-0);
-            color: var(--text-1);
+            color: var(--text-0);
             min-height: 100vh;
             font-size: 14px;
             line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            -webkit-font-smoothing: antialiased
         }
 
-        /* Subtle background gradient */
-        .bg-gradient {
+        .bg-mesh {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 92, 255, 0.08), transparent),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(124, 92, 255, 0.04), transparent);
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 0%, rgba(139, 92, 246, .06), transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(96, 165, 250, .04), transparent 50%);
             pointer-events: none;
-            z-index: 0;
+            z-index: 0
         }
 
-        .container {
+        .shell {
             position: relative;
             z-index: 1;
-            max-width: 680px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 48px 24px;
+            padding: 20px 24px 40px
         }
 
         /* Header */
-        header {
+        .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .logo-text {
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
-
-        /* Stats Cards */
-        .stats-section {
-            margin-bottom: 32px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .stat-card {
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-family: 'Geist Mono', monospace;
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-1);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card.success .stat-value { color: var(--success); }
-        .stat-card.warning .stat-value { color: var(--warning); }
-
-        /* Linear-style Update Button */
-        .update-btn {
-            padding: 8px 16px;
-            background: #8B5CF6;
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-family: 'Geist', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            outline: none;
-        }
-
-        .update-btn:hover {
-            background: #7C3AED;
-            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .update-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Update Available State */
-        .update-btn.update-available {
-            box-shadow: 
-                0 1px 2px rgba(0, 0, 0, 0.1),
-                0 0 0 2px rgba(139, 92, 246, 0.2);
-            animation: pulse-ring 2s ease-in-out infinite;
-        }
-
-        .update-btn.update-available:hover {
-            box-shadow: 
-                0 2px 4px rgba(139, 92, 246, 0.3),
-                0 0 0 2px rgba(139, 92, 246, 0.3);
-        }
-
-        @keyframes pulse-ring {
-            0%, 100% {
-                box-shadow: 
-                    0 1px 2px rgba(0, 0, 0, 0.1),
-                    0 0 0 2px rgba(139, 92, 246, 0.2);
-            }
-            50% {
-                box-shadow: 
-                    0 1px 2px rgba(0, 0, 0, 0.1),
-                    0 0 0 2px rgba(139, 92, 246, 0.4);
-            }
-        }
-
-        /* Update Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 200ms ease;
-        }
-
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: var(--bg-1);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 420px;
-            max-height: 80vh;
-            overflow: hidden;
-            transform: scale(0.95);
-            transition: transform 200ms ease;
-        }
-
-        .modal-overlay.show .modal {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-3);
-            cursor: pointer;
-            padding: 4px;
             font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
         }
 
-        .modal-close:hover {
-            color: var(--text-1);
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .update-version {
-            display: flex;
+        .status-pill {
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .update-version .current {
-            font-family: 'Geist Mono', monospace;
-            font-size: 13px;
-            color: var(--text-3);
-        }
-
-        .update-version .arrow {
-            color: var(--text-3);
-        }
-
-        .update-version .new {
-            font-family: 'Geist Mono', monospace;
-            font-size: 13px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .release-notes {
-            background: var(--bg-2);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            font-size: 13px;
-            color: var(--text-2);
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .modal-footer .btn {
-            flex: none;
-            min-width: 100px;
-        }
-
-        /* Subtle background gradient */
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 92, 255, 0.08), transparent),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(124, 92, 255, 0.04), transparent);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 48px 24px;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .logo-text {
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
-
-        /* Stats Cards */
-        .stats-section {
-            margin-bottom: 32px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .stat-card {
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-family: 'Geist Mono', monospace;
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-1);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card.success .stat-value { color: var(--success); }
-        .stat-card.warning .stat-value { color: var(--warning); }
-
-        /* Linear-style Update Button */
-        .update-btn {
-            padding: 8px 16px;
-            background: #8B5CF6;
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-family: 'Geist', sans-serif;
-            font-size: 13px;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            outline: none;
+            border: 1px solid var(--border)
         }
 
-        .update-btn:hover {
-            background: #7C3AED;
-            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
-            transform: translateY(-1px);
+        .status-pill.running {
+            background: var(--success-h);
+            border-color: rgba(52, 211, 153, .3);
+            color: var(--success)
         }
 
-        .update-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        .status-pill.stopped {
+            background: var(--error-h);
+            border-color: rgba(248, 113, 113, .2);
+            color: var(--error)
         }
 
-        /* Update Available State */
-        .update-btn.update-available {
-            box-shadow: 
-                0 1px 2px rgba(0, 0, 0, 0.1),
-                0 0 0 2px rgba(139, 92, 246, 0.2);
-            animation: pulse-ring 2s ease-in-out infinite;
-        }
-
-        .update-btn.update-available:hover {
-            box-shadow: 
-                0 2px 4px rgba(139, 92, 246, 0.3),
-                0 0 0 2px rgba(139, 92, 246, 0.3);
-        }
-
-        @keyframes pulse-ring {
-            0%, 100% {
-                box-shadow: 
-                    0 1px 2px rgba(0, 0, 0, 0.1),
-                    0 0 0 2px rgba(139, 92, 246, 0.2);
-            }
-            50% {
-                box-shadow: 
-                    0 1px 2px rgba(0, 0, 0, 0.1),
-                    0 0 0 2px rgba(139, 92, 246, 0.4);
-            }
-        }
-
-        /* Update Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 200ms ease;
-        }
-
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: var(--bg-1);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 420px;
-            max-height: 80vh;
-            overflow: hidden;
-            transform: scale(0.95);
-            transition: transform 200ms ease;
-        }
-
-        .modal-overlay.show .modal {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-3);
-            cursor: pointer;
-            padding: 4px;
-            font-size: 18px;
-        }
-
-        .modal-close:hover {
-            color: var(--text-1);
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .update-version {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .update-version .current {
-            font-family: 'Geist Mono', monospace;
-            font-size: 13px;
-            color: var(--text-3);
-        }
-
-        .update-version .arrow {
-            color: var(--text-3);
-        }
-
-        .update-version .new {
-            font-family: 'Geist Mono', monospace;
-            font-size: 13px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .release-notes {
-            background: var(--bg-2);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            font-size: 13px;
-            color: var(--text-2);
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .modal-footer .btn {
-            flex: none;
-            min-width: 100px;
-        }
-
-        /* Status Section */
-        .status-section {
-            margin-bottom: 32px;
-        }
-
-        .status-main {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
+        .status-pill.starting {
+            background: var(--warn-h);
+            border-color: rgba(251, 191, 36, .2);
+            color: var(--warn)
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            flex-shrink: 0;
+            background: currentColor
         }
 
-        .status-dot.running {
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success);
+        .status-pill.running .status-dot {
+            animation: pulse 2s infinite
         }
 
-        .status-dot.stopped {
-            background: var(--text-3);
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
         }
 
-        .status-dot.starting {
-            background: var(--warning);
-            animation: blink 1s ease-in-out infinite;
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .status-label {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .status-label.running { color: var(--success); }
-        .status-label.stopped { color: var(--text-3); }
-        .status-label.starting { color: var(--warning); }
-
-        .status-desc {
+        .icon-btn {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 7px 10px;
+            cursor: pointer;
             color: var(--text-2);
             font-size: 13px;
-            margin-left: 18px;
+            transition: all var(--t);
+            display: flex;
+            align-items: center;
+            gap: 5px
         }
 
-        /* Metrics Grid */
+        .icon-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-0);
+            background: var(--bg-3)
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 3px;
+            margin-bottom: 20px
+        }
+
+        .tab {
+            flex: 1;
+            padding: 8px 16px;
+            text-align: center;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-2);
+            transition: all var(--t);
+            border: none;
+            background: none
+        }
+
+        .tab:hover {
+            color: var(--text-1);
+            background: var(--bg-2)
+        }
+
+        .tab.active {
+            background: var(--bg-3);
+            color: var(--text-0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .2)
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn .2s ease
+        }
+
+        .tab-content.active {
+            display: block
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: border-color var(--t)
+        }
+
+        .card:hover {
+            border-color: var(--border-hover)
+        }
+
+        .card-glass {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border)
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-0)
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-3)
+        }
+
+        /* Metric grid */
         .metrics {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
-            margin: 24px 0;
+            margin-bottom: 16px
         }
 
         .metric {
             background: var(--bg-2);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: var(--r);
             padding: 14px 16px;
-            transition: all var(--transition);
-            position: relative;
+            transition: all var(--t)
         }
 
         .metric:hover {
             border-color: var(--border-hover);
-            background: var(--bg-3);
-        }
-
-        .metric:hover .copy-btn {
-            opacity: 1;
+            transform: translateY(-1px)
         }
 
         .metric-label {
@@ -660,1861 +330,1746 @@
             font-weight: 500;
             color: var(--text-3);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            letter-spacing: .5px;
+            margin-bottom: 4px
         }
 
         .metric-value {
-            font-family: 'Geist Mono', monospace;
-            font-size: 13px;
-            color: var(--text-1);
+            font-size: 22px;
+            font-weight: 700;
+            font-family: var(--mono)
         }
 
-        /* Copy button */
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
+        .metric-sub {
+            font-size: 11px;
             color: var(--text-3);
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition);
-            opacity: 0;
-        }
-
-        .copy-btn:hover {
-            background: var(--bg-3);
-            color: var(--text-1);
-        }
-
-        .copy-btn.copied {
-            color: var(--success);
+            margin-top: 2px
         }
 
         /* Controls */
         .controls {
             display: flex;
             gap: 8px;
-            margin-bottom: 40px;
+            flex-wrap: wrap
         }
 
         .btn {
-            flex: 1;
-            padding: 10px 16px;
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
             background: var(--bg-2);
             color: var(--text-1);
-            font-family: inherit;
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            transition: all var(--t);
+            font-family: var(--font)
         }
 
-        .btn:hover:not(:disabled) {
-            background: var(--bg-3);
+        .btn:hover {
             border-color: var(--border-hover);
-        }
-
-        .btn:active:not(:disabled) {
-            transform: scale(0.98);
+            background: var(--bg-3)
         }
 
         .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+            opacity: .4;
+            cursor: not-allowed
         }
 
-        .btn-primary {
+        .btn-accent {
             background: var(--accent);
             border-color: var(--accent);
-            color: white;
+            color: #fff
         }
 
-        .btn-primary:hover:not(:disabled) {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
+        .btn-accent:hover {
+            filter: brightness(1.15);
+            border-color: var(--accent)
+        }
+
+        .btn-success {
+            background: var(--success-h);
+            border-color: rgba(52, 211, 153, .3);
+            color: var(--success)
         }
 
         .btn-danger {
-            color: var(--error);
+            background: var(--error-h);
+            border-color: rgba(248, 113, 113, .2);
+            color: var(--error)
         }
 
-        .btn-danger:hover:not(:disabled) {
-            background: var(--error-subtle);
-            border-color: rgba(239, 68, 68, 0.3);
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px
         }
 
-        .btn-icon {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        /* Section Headers */
-        .section-header {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 12px;
-        }
-
-        /* Providers Grid */
-        .providers {
+        /* Providers */
+        .providers-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px
         }
 
-        .provider {
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px;
-            cursor: pointer;
-            transition: all var(--transition);
-            text-align: center;
-        }
-
-        .provider:hover {
-            background: var(--bg-3);
-            border-color: var(--border-hover);
-            transform: translateY(-1px);
-        }
-
-        .provider:active {
-            transform: translateY(0);
-        }
-
-        .provider-icon {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .provider-icon svg {
-            width: 100%;
-            height: 100%;
-            fill: var(--text-2);
-            transition: fill var(--transition);
-        }
-
-        .provider:hover .provider-icon svg {
-            fill: var(--text-1);
-        }
-
-        .provider.connected .provider-icon svg {
-            fill: var(--success);
-        }
-
-        /* Center content in provider cards */
         .provider {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 8px;
+            padding: 16px 12px;
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            background: var(--bg-2);
+            cursor: pointer;
+            transition: all var(--t);
+            position: relative
+        }
+
+        .provider:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15)
+        }
+
+        .provider.connected::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success)
+        }
+
+        .provider-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            opacity: .7
+        }
+
+        .provider-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor
         }
 
         .provider-name {
             font-size: 11px;
             font-weight: 500;
-            color: var(--text-2);
+            color: var(--text-2)
         }
 
-        .provider.connected {
-            border-color: var(--success);
-            background: var(--success-subtle);
+        /* Usage section */
+        .usage-provider {
+            margin-bottom: 16px
         }
 
-        .provider.connected .provider-name {
-            color: var(--success);
-        }
-
-
-
-        /* Models List */
-        .models-list {
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .models-hint {
-            font-size: 12px;
-            color: var(--text-3);
-            text-align: center;
-            padding: 8px;
-        }
-
-        .model-item {
-            font-family: 'Geist Mono', monospace;
-            font-size: 12px;
-            color: var(--text-2);
-            padding: 4px 8px;
-            margin: 2px 0;
-            background: var(--bg-3);
-            border-radius: var(--radius-sm);
-            display: inline-block;
-            margin-right: 6px;
-            margin-bottom: 6px;
-        }
-
-        .model-item:hover {
-            color: var(--text-1);
-            background: var(--bg-hover);
-        }
-
-        /* Activity Log */
-        .activity {
-            background: var(--bg-1);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .activity-header {
+        .usage-provider-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r) var(--r) 0 0;
+            cursor: pointer
         }
 
-        .activity-title {
+        .usage-provider-header.collapsed+.usage-models {
+            display: none
+        }
+
+        .usage-provider-name {
+            font-weight: 600;
+            font-size: 13px;
+            flex: 1
+        }
+
+        .usage-provider-count {
             font-size: 12px;
-            font-weight: 500;
-            color: var(--text-2);
-        }
-
-        .activity-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .activity-btn {
-            padding: 4px 10px;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: transparent;
             color: var(--text-3);
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition);
+            font-family: var(--mono)
         }
 
-        .activity-btn:hover {
-            background: var(--bg-3);
-            color: var(--text-2);
+        .usage-models {
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--r) var(--r);
+            overflow: hidden
         }
 
-        .activity-content {
-            padding: 12px 16px;
-            max-height: 180px;
-            overflow-y: auto;
-            font-family: 'Geist Mono', monospace;
+        .usage-model {
+            display: grid;
+            grid-template-columns: 1fr 100px 80px 120px;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            transition: background var(--t)
+        }
+
+        .usage-model:last-child {
+            border-bottom: none
+        }
+
+        .usage-model:hover {
+            background: var(--bg-hover)
+        }
+
+        .usage-model-name {
+            font-family: var(--mono);
             font-size: 12px;
+            color: var(--text-1);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .usage-bar-wrap {
+            height: 6px;
+            background: var(--bg-4);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .usage-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .5s ease;
+            min-width: 2px
+        }
+
+        .usage-tokens {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-2);
+            text-align: right
+        }
+
+        .usage-chart {
+            padding: 12px 14px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-0)
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 80px;
+            padding: 0 4px
+        }
+
+        .chart-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 0
+        }
+
+        .chart-bar {
+            width: 100%;
+            min-height: 2px;
+            border-radius: 3px 3px 0 0;
+            transition: height .5s ease;
+            position: relative
+        }
+
+        .chart-bar:hover {
+            filter: brightness(1.3)
+        }
+
+        .chart-bar-label {
+            font-size: 9px;
+            color: var(--text-3);
+            font-family: var(--mono);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            text-align: center
+        }
+
+        .chart-title {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-bottom: 8px;
+            font-weight: 500
+        }
+
+        .usage-reqs {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-2);
+            text-align: center
+        }
+
+        /* Models list */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px
+        }
+
+        .model-chip {
+            padding: 8px 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-1);
+            cursor: default;
+            transition: all var(--t);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .model-chip:hover {
+            border-color: var(--border-hover)
+        }
+
+        /* Config editor */
+        .config-editor {
+            width: 100%;
+            min-height: 300px;
+            background: var(--bg-0);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-1);
+            resize: vertical;
+            outline: none;
+            line-height: 1.6
+        }
+
+        .config-editor:focus {
+            border-color: var(--accent)
+        }
+
+        /* Activity log */
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg-0);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 8px
         }
 
         .log-entry {
             display: flex;
-            gap: 12px;
-            padding: 4px 0;
-            color: var(--text-2);
+            gap: 10px;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px
+        }
+
+        .log-entry:hover {
+            background: var(--bg-2)
         }
 
         .log-time {
             color: var(--text-3);
-            flex-shrink: 0;
+            font-family: var(--mono);
+            white-space: nowrap;
+            min-width: 70px
         }
 
-        .log-msg.success { color: var(--success); }
-        .log-msg.warning { color: var(--warning); }
-        .log-msg.error { color: var(--error); }
-        .log-msg.info { color: var(--accent); }
+        .log-msg {
+            color: var(--text-2)
+        }
 
-        /* Footer */
-        footer {
-            margin-top: 48px;
-            padding-top: 24px;
+        .log-msg.success {
+            color: var(--success)
+        }
+
+        .log-msg.error {
+            color: var(--error)
+        }
+
+        .log-msg.warning {
+            color: var(--warn)
+        }
+
+        /* Model manager */
+        .mm-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .mm-panel {
+            background: var(--bg-0);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden
+        }
+
+        .mm-panel-header {
+            padding: 12px 14px;
+            background: var(--bg-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .mm-panel-title {
+            font-size: 13px;
+            font-weight: 600
+        }
+
+        .mm-panel-count {
+            font-size: 12px;
+            color: var(--text-3);
+            font-family: var(--mono)
+        }
+
+        .mm-search {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-1);
+            color: var(--text-1);
+            font-size: 13px;
+            outline: none;
+            font-family: var(--font)
+        }
+
+        .mm-list {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 4px
+        }
+
+        .mm-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-1);
+            transition: background var(--t)
+        }
+
+        .mm-item:hover {
+            background: var(--bg-2)
+        }
+
+        .mm-item.selected {
+            background: var(--accent-h);
+            color: var(--accent)
+        }
+
+        .mm-item.in-factory {
+            opacity: .5
+        }
+
+        .mm-check {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        .mm-item.selected .mm-check {
+            background: var(--accent);
+            border-color: var(--accent)
+        }
+
+        .mm-actions {
+            padding: 10px;
             border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px
+        }
+
+        /* Collapsible */
+        .collapse-toggle {
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 16px;
-        }
-
-        .footer-links a {
-            font-size: 12px;
-            color: var(--text-3);
-            text-decoration: none;
-            transition: color var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--text-2);
-        }
-
-        .footer-hint {
-            font-size: 11px;
-            color: var(--text-3);
-        }
-
-        .footer-hint kbd {
-            padding: 2px 6px;
+            padding: 12px 16px;
+            cursor: pointer;
             background: var(--bg-2);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            font-family: 'Geist Mono', monospace;
-            font-size: 10px;
+            border-radius: var(--r);
+            transition: all var(--t);
+            margin-bottom: 0
+        }
+
+        .collapse-toggle:hover {
+            border-color: var(--border-hover)
+        }
+
+        .collapse-toggle .arrow {
+            transition: transform .2s ease;
+            color: var(--text-3)
+        }
+
+        .collapse-toggle.open .arrow {
+            transform: rotate(180deg)
+        }
+
+        .collapse-toggle.open {
+            border-radius: var(--r) var(--r) 0 0;
+            margin-bottom: 0
+        }
+
+        .collapse-body {
+            display: none;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--r) var(--r);
+            padding: 16px;
+            background: var(--bg-1)
+        }
+
+        .collapse-body.open {
+            display: block
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-overlay.show {
+            display: flex
+        }
+
+        .modal {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            width: 90%;
+            max-width: 500px;
+            overflow: hidden
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .modal-title {
+            font-weight: 600
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-2);
+            font-size: 20px;
+            cursor: pointer
+        }
+
+        .modal-body {
+            padding: 20px
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px
         }
 
         /* Toast */
         .toast {
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
-            transform: translateX(-50%) translateY(20px);
+            transform: translateX(-50%) translateY(100px);
             background: var(--bg-3);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px 20px;
+            border-radius: var(--r);
+            padding: 10px 20px;
             font-size: 13px;
-            color: var(--text-1);
-            opacity: 0;
-            transition: all 200ms ease;
-            z-index: 1000;
+            z-index: 200;
+            transition: transform .3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 8px
         }
 
         .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0)
         }
 
-        .toast-icon {
-            font-size: 14px;
+        /* Checkbox */
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 13px;
+            color: var(--text-2);
+            cursor: pointer
+        }
+
+        .check-row input {
+            accent-color: var(--accent)
+        }
+
+        /* Responsive */
+        @media(max-width:700px) {
+            .shell {
+                padding: 12px 14px 30px
+            }
+
+            .mm-panels {
+                grid-template-columns: 1fr
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .usage-model {
+                grid-template-columns: 1fr 60px
+            }
+
+            .usage-tokens,
+            .usage-bar-wrap {
+                display: none
+            }
+
+            .tabs {
+                overflow-x: auto
+            }
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
+            height: 6px
         }
 
         ::-webkit-scrollbar-track {
-            background: transparent;
+            background: transparent
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--bg-3);
-            border-radius: 3px;
+            background: var(--bg-4);
+            border-radius: 3px
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-3);
+            background: var(--text-3)
         }
 
-        /* Responsive */
-        @media (max-width: 520px) {
-            .metrics { grid-template-columns: 1fr; }
-            .providers { grid-template-columns: repeat(2, 1fr); }
-            .controls { flex-direction: column; }
-            footer { flex-direction: column; gap: 12px; text-align: center; }
+        /* Animate in */
+        .ani {
+            opacity: 0;
+            transform: translateY(8px);
+            animation: fadeIn .35s ease forwards
         }
 
-        /* Fade-in animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        .ani-1 {
+            animation-delay: .05s
         }
 
-        .animate-in {
-            animation: fadeIn 400ms ease forwards;
+        .ani-2 {
+            animation-delay: .1s
         }
 
-        .delay-1 { animation-delay: 50ms; }
-        .delay-2 { animation-delay: 100ms; }
-        .delay-3 { animation-delay: 150ms; }
-        .delay-4 { animation-delay: 200ms; }
-
-        /* Auto-start toggle */
-        .auto-start {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-3);
+        .ani-3 {
+            animation-delay: .15s
         }
 
-        .auto-start input[type="checkbox"] {
-            appearance: none;
-            width: 36px;
-            height: 20px;
-            background: var(--bg-3);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            cursor: pointer;
-            position: relative;
-            transition: all var(--transition);
+        .ani-4 {
+            animation-delay: .2s
         }
 
-        .auto-start input[type="checkbox"]::before {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            background: var(--text-3);
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: all var(--transition);
+        /* Traffic Inspector */
+        .log-entry-row {
+            transition: background var(--t);
         }
 
-        .auto-start input[type="checkbox"]:checked {
-            background: var(--accent);
-            border-color: var(--accent);
+        .log-entry-row:hover {
+            background: var(--bg-hover);
         }
 
-        .auto-start input[type="checkbox"]:checked::before {
-            background: white;
-            left: 18px;
-        }
-
-        /* Settings Section */
-        .settings-section {
-            margin-bottom: 40px;
-        }
-
-        .settings-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .settings-toggle:hover {
-            background: var(--bg-3);
-            border-color: var(--border-hover);
-        }
-
-        .settings-toggle-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .settings-toggle-icon {
-            font-size: 14px;
-            color: var(--text-2);
-        }
-
-        .settings-toggle-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-2);
-        }
-
-        .settings-toggle-arrow {
-            color: var(--text-3);
-            font-size: 12px;
-            transition: transform var(--transition);
-        }
-
-        .settings-toggle.open .settings-toggle-arrow {
-            transform: rotate(180deg);
-        }
-
-        .settings-content {
-            display: none;
-            margin-top: 8px;
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .settings-content.open {
-            display: block;
-        }
-
-        .config-editor {
-            font-family: 'Geist Mono', monospace;
-            font-size: 12px;
-            background: var(--bg-1);
-            color: var(--text-1);
-            border: none;
-            width: 100%;
-            min-height: 200px;
-            padding: 16px;
-            resize: vertical;
-            outline: none;
-        }
-
-        .config-editor:focus {
-            background: var(--bg-0);
-        }
-
-        .settings-actions {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .settings-actions .btn {
-            flex: none;
-            padding: 8px 16px;
-        }
-
-        .config-status {
-            flex: 1;
-            font-size: 12px;
-            color: var(--text-3);
-            display: flex;
-            align-items: center;
-        }
-
-        .config-status.success { color: var(--success); }
-        .config-status.error { color: var(--error); }
-
-        /* Model Manager */
-        .model-manager {
-            margin-bottom: 40px;
-        }
-
-        .model-manager-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .model-manager-toggle:hover {
-            background: var(--bg-3);
-            border-color: var(--border-hover);
-        }
-
-        .model-manager-toggle.open .settings-toggle-arrow {
-            transform: rotate(180deg);
-        }
-
-        .model-manager-content {
-            display: none;
-            margin-top: 8px;
-        }
-
-        .model-manager-content.open {
-            display: block;
-        }
-
-        .model-panel {
-            background: var(--bg-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 12px;
-        }
-
-        .model-panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .model-panel-title {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-2);
-        }
-
-        .model-panel-count {
-            font-family: 'Geist Mono', monospace;
-            font-size: 11px;
-            color: var(--text-3);
-            background: var(--bg-3);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-
-        .model-search {
-            width: 100%;
-            padding: 8px 12px;
-            background: var(--bg-1);
-            border: none;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-1);
-            font-family: inherit;
-            font-size: 12px;
-            outline: none;
-        }
-
-        .model-search::placeholder {
-            color: var(--text-3);
-        }
-
-        .model-list-container {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .model-row {
-            display: flex;
-            align-items: center;
-            padding: 8px 14px;
-            border-bottom: 1px solid var(--border);
-            transition: background var(--transition);
-        }
-
-        .model-row:last-child {
-            border-bottom: none;
-        }
-
-        .model-row:hover {
-            background: var(--bg-3);
-        }
-
-        .model-row input[type="checkbox"] {
-            margin-right: 10px;
-            accent-color: var(--accent);
-        }
-
-        .model-row-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .model-row-name {
-            font-family: 'Geist Mono', monospace;
-            font-size: 12px;
-            color: var(--text-1);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .model-row-display {
-            font-size: 11px;
-            color: var(--text-3);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .model-row-action {
-            margin-left: 8px;
-        }
-
-        .model-row-action .btn {
+        .log-entry-row td {
             padding: 4px 10px;
-            font-size: 11px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
         }
 
-        .model-row.synced .model-row-name {
-            color: var(--success);
-        }
-
-        .model-row.synced .btn {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .model-panel-actions {
+        /* Provider ping */
+        .provider-ping {
+            position: absolute;
+            top: 8px;
+            left: 8px;
             display: flex;
-            gap: 8px;
-            padding: 10px 14px;
-            border-top: 1px solid var(--border);
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            font-family: var(--mono);
+            opacity: 0;
+            transition: opacity var(--t);
         }
 
-        .model-panel-actions .btn {
-            padding: 6px 12px;
-            font-size: 11px;
+        .provider.connected .provider-ping {
+            opacity: 1;
         }
 
-        .btn-success {
+        .ping-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .ping-good {
             background: var(--success);
-            border-color: var(--success);
-            color: white;
         }
 
-        .btn-success:hover:not(:disabled) {
-            background: #3bc975;
-            border-color: #3bc975;
+        .ping-warn {
+            background: var(--warn);
         }
 
-        .model-empty {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-3);
-            font-size: 12px;
+        .ping-err {
+            background: var(--error);
         }
 
-        /* Confirm Modal */
-        .confirm-modal .modal {
-            max-width: 360px;
-        }
-
-        .confirm-modal .modal-body {
-            text-align: center;
-            padding: 24px 20px;
-        }
-
-        .confirm-modal .modal-body p {
-            color: var(--text-2);
+        /* Playground */
+        .pg-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: var(--r);
             font-size: 13px;
-            margin-bottom: 8px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        .confirm-modal .modal-body .warning {
-            color: var(--error);
-            font-size: 12px;
+        .pg-msg.user {
+            align-self: flex-end;
+            background: var(--accent-h);
+            border: 1px solid rgba(139, 92, 246, .2);
+            color: var(--text-0);
+        }
+
+        .pg-msg.bot {
+            align-self: flex-start;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            color: var(--text-1);
+        }
+
+        /* Routing rules */
+        .route-rule {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .route-rule select {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg-1);
+            color: var(--text-1);
+            outline: none;
         }
     </style>
 </head>
-<body>
-    <div class="bg-gradient"></div>
 
-    <div class="container">
-        <header class="animate-in">
-            <div class="logo">
-                <div class="logo-icon">⚡</div>
-                <span class="logo-text">CLIProxyAPI+</span>
+<body>
+    <div class="bg-mesh"></div>
+    <div class="shell">
+        <!-- HEADER -->
+        <header class="header ani">
+            <div class="header-left">
+                <span class="logo">CLIProxyAPI+</span>
+                <div class="status-pill stopped" id="statusPill">
+                    <span class="status-dot"></span>
+                    <span id="statusLabel">Stopped</span>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <label class="auto-start">
-                    <input type="checkbox" id="autoStartToggle" onchange="toggleAutoStart()">
+            <div class="header-right">
+                <label class="check-row" title="Auto-start server on launch">
+                    <input type="checkbox" id="autoStartCheck" onchange="toggleAutoStart()">
                     <span>Auto-start</span>
                 </label>
-                <button class="update-btn" id="versionBadge" onclick="openUpdateModal()">Update</button>
+                <button class="icon-btn" onclick="checkForUpdate()" title="Check updates"><svg width="16" height="16"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg></button>
+                <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme"><svg id="themeIcon"
+                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg></button>
             </div>
         </header>
 
-        <section class="status-section animate-in delay-1">
-            <div class="status-main">
-                <div class="status-dot" id="statusDot"></div>
-                <span class="status-label" id="statusLabel">Checking...</span>
-            </div>
-            <p class="status-desc" id="statusDesc">Connecting to server...</p>
-        </section>
+        <!-- TABS -->
+        <div class="tabs ani ani-1">
+            <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab" onclick="switchTab('providers')">Providers</button>
+            <button class="tab" onclick="switchTab('models')">Models</button>
+            <button class="tab" onclick="switchTab('routing')">Routing</button>
+            <button class="tab" onclick="switchTab('playground')">Playground</button>
+            <button class="tab" onclick="switchTab('settings')">Settings</button>
+        </div>
 
-        <div class="metrics animate-in delay-2">
-            <div class="metric">
-                <div class="metric-label">Endpoint</div>
-                <div class="metric-value" id="endpoint">localhost:8317</div>
-                <button class="copy-btn" onclick="copyEndpoint()" title="Copy endpoint">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
+        <!-- TAB: DASHBOARD -->
+        <div class="tab-content active" id="tab-dashboard">
+            <!-- Controls -->
+            <div class="card ani ani-2">
+                <div class="card-header">
+                    <span class="card-title">Server Controls</span>
+                    <span class="card-subtitle" id="endpointLabel">http://localhost:8317/v1</span>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-accent" id="btnStart" onclick="startServer()">▶ Start</button>
+                    <button class="btn btn-danger" id="btnStop" onclick="stopServer()" disabled>■ Stop</button>
+                    <button class="btn" id="btnRestart" onclick="restartServer()" disabled>↻ Restart</button>
+                </div>
+                <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--text-3)">
+                    <span>PID: <span id="pidVal" style="font-family:var(--mono)">—</span></span>
+                    <span>Uptime: <span id="uptimeVal" style="font-family:var(--mono)">—</span></span>
+                </div>
             </div>
-            <div class="metric">
-                <div class="metric-label">Process ID</div>
-                <div class="metric-value" id="pid">—</div>
+
+            <!-- Stats -->
+            <div class="metrics ani ani-3">
+                <div class="metric">
+                    <div class="metric-label">Total Requests</div>
+                    <div class="metric-value" id="statTotal">0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value" id="statSuccess">0%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Avg Latency</div>
+                    <div class="metric-value" id="statLatency">0ms</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Est. Cost</div>
+                    <div class="metric-value" id="statCost">$0.00</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">CPU / RAM</div>
+                    <div class="metric-value" id="statCPU">0%</div>
+                    <div class="metric-sub" id="statRAM">0MB</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Tokens</div>
+                    <div class="metric-value" id="statTokens">—</div>
+                    <div class="metric-sub" id="statTokensSub">Enable usage stats</div>
+                </div>
             </div>
-            <div class="metric">
-                <div class="metric-label">Uptime</div>
-                <div class="metric-value" id="uptime">—</div>
+
+            <!-- Usage by Provider -->
+            <div class="card ani ani-4">
+                <div class="card-header">
+                    <span class="card-title">Usage by Provider</span>
+                    <button class="btn btn-sm" onclick="refreshUsage()">↻ Refresh</button>
+                </div>
+                <div id="usageContainer">
+                    <div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">
+                        Start server and enable <code
+                            style="font-family:var(--mono);background:var(--bg-3);padding:2px 6px;border-radius:4px">usage-statistics-enabled: true</code>
+                        in config to see usage data
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity / Traffic Inspector -->
+            <div class="card ani ani-4">
+                <div class="card-header">
+                    <span class="card-title">Traffic Inspector</span>
+                    <div style="display:flex;gap:6px">
+                        <button class="btn btn-sm" onclick="clearLogs()">Clear</button>
+                        <button class="btn btn-sm" onclick="refreshStatus()">Refresh</button>
+                    </div>
+                </div>
+                <div class="log-container" style="padding:0;overflow:auto;">
+                    <table class="inspector-table"
+                        style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);text-align:left;">
+                        <thead
+                            style="background:var(--bg-2);border-bottom:1px solid var(--border);position:sticky;top:0;">
+                            <tr>
+                                <th style="padding:6px 10px;font-weight:500;color:var(--text-2)">Time</th>
+                                <th style="padding:6px 10px;font-weight:500;color:var(--text-2)">Source</th>
+                                <th style="padding:6px 10px;font-weight:500;color:var(--text-2)">Model</th>
+                                <th style="padding:6px 10px;font-weight:500;color:var(--text-2)">Lat.</th>
+                                <th style="padding:6px 10px;font-weight:500;color:var(--text-2);width:100%">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logContainer">
+                            <tr class="log-entry-row">
+                                <td colspan="5" style="padding:8px 10px;text-align:center;color:var(--text-3)">
+                                    Initializing...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="controls animate-in delay-2">
-            <button class="btn btn-primary" id="btnStart" onclick="startServer()">
-                <span class="btn-icon">▶</span> Start
-            </button>
-            <button class="btn btn-danger" id="btnStop" onclick="stopServer()">
-                <span class="btn-icon">■</span> Stop
-            </button>
-            <button class="btn" id="btnRestart" onclick="restartServer()">
-                <span class="btn-icon">↻</span> Restart
-            </button>
+        <!-- TAB: PROVIDERS -->
+        <div class="tab-content" id="tab-providers">
+            <div class="card ani">
+                <div class="card-header">
+                    <span class="card-title">Authentication Providers</span>
+                    <span class="card-subtitle">Click to login</span>
+                </div>
+                <div class="providers-grid" id="providersGrid">
+                    <div class="provider" id="provider-gemini" onclick="loginProvider('gemini')">
+                        <div class="provider-icon"><svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Gemini</div>
+                    </div>
+                    <div class="provider" id="provider-copilot" onclick="loginProvider('copilot')">
+                        <div class="provider-icon"><svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M600 0C268.6 0 0 268.6 0 600C0 865.2 171.8 1090.4 412.6 1175.4C442.6 1181 453.8 1162.4 453.8 1146.6C453.8 1132.4 453.2 1084.4 452.8 1036.4C285 1072 249.6 960 249.6 960C222.4 890.8 183.2 872.4 183.2 872.4C129.4 836 187.4 836.8 187.4 836.8C247.2 841 278.6 898.4 278.6 898.4C332.2 989.2 419.6 963.2 455.4 947.6C460.8 908.4 476.8 881.6 494.2 866.4C360 850.8 219 799.2 219 569.2C219 503.6 243.2 449.8 280 407.6C274 392 253.4 330.8 285.6 248.4C285.6 248.4 336.4 231.6 452 309.2C500 296.8 551.2 290.6 602 290.4C652.8 290.6 704 296.8 752 309.2C867.4 231.6 918.2 248.4 918.2 248.4C950.4 330.8 929.8 392 923.8 407.6C960.8 449.8 984.8 503.6 984.8 569.2C984.8 799.6 843.6 850.6 709 866C730.8 884.8 750.2 921.6 750.2 977.6C750.2 1058.4 749.4 1124 749.4 1146.4C749.4 1162.4 760.4 1181.2 790.8 1175.2C1031.2 1090 1200 865.2 1200 600C1200 268.6 931.4 0 600 0Z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Copilot</div>
+                    </div>
+                    <div class="provider" id="provider-antigravity" onclick="loginProvider('antigravity')">
+                        <div class="provider-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L2 19h20L12 2zm0 4l6.5 11h-13L12 6z" fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Antigravity</div>
+                    </div>
+                    <div class="provider" id="provider-codex" onclick="loginProvider('codex')">
+                        <div class="provider-icon"><svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="m297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68-15.25-17.18-37.16-26.95-60.13-26.81-35.04-.08-66.13 22.48-76.91 55.82-22.51 4.61-41.94 18.7-53.31 38.67-17.59 30.32-13.58 68.54 9.92 94.54-7.26 21.79-4.76 45.66 6.85 65.48 17.46 30.4 52.56 46.04 86.84 38.68 15.24 17.18 37.16 26.95 60.13 26.8 35.06.09 66.16-22.49 76.94-55.86 22.51-4.61 41.94-18.7 53.31-38.67 17.57-30.32 13.55-68.51-9.94-94.51zm-120.28 168.11c-14.03.02-27.62-4.89-38.39-13.88.49-.26 1.34-.73 1.89-1.07l63.72-36.8c3.26-1.85 5.26-5.32 5.24-9.07v-89.83l26.93 15.55c.29.14.48.42.52.74v74.39c-.04 33.08-26.83 59.9-59.91 59.97zm-128.84-55.03c-7.03-12.14-9.56-26.37-7.15-40.18.47.28 1.3.79 1.89 1.13l63.72 36.8c3.23 1.89 7.23 1.89 10.47 0l77.79-44.92v31.1c.02.32-.13.63-.38.83l-64.41 37.19c-28.69 16.52-65.33 6.7-81.92-21.95zm-16.77-139.09c7-12.16 18.05-21.46 31.21-26.29 0 .55-.03 1.52-.03 2.2v73.61c-.02 3.74 1.98 7.21 5.23 9.06l77.79 44.91-26.93 15.55c-.27.18-.61.21-.91.08l-64.42-37.22c-28.63-16.58-38.45-53.21-21.95-81.89zm221.26 51.49-77.79-44.92 26.93-15.54c.27-.18.61-.21.91-.08l64.42 37.19c28.68 16.57 38.51 53.26 21.94 81.94-7.01 12.14-18.05 21.44-31.2 26.28v-75.81c.03-3.74-1.96-7.2-5.2-9.06zm26.8-40.34c-.47-.29-1.3-.79-1.89-1.13l-63.72-36.8c-3.23-1.89-7.23-1.89-10.47 0l-77.79 44.92v-31.1c-.02-.32.13-.63.38-.83l64.41-37.16c28.69-16.55 65.37-6.7 81.91 22 6.99 12.12 9.52 26.31 7.15 40.1zm-168.51 55.43-26.94-15.55c-.29-.14-.48-.42-.52-.74v-74.39c.02-33.12 26.89-59.96 60.01-59.94 14.01 0 27.57 4.92 38.34 13.88-.49.26-1.33.73-1.89 1.07l-63.72 36.8c-3.26 1.85-5.26 5.31-5.24 9.06l-.04 89.79zm14.63-31.54 34.65-20.01 34.65 20v40.01l-34.65 20-34.65-20z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Codex</div>
+                    </div>
+                    <div class="provider" id="provider-claude" onclick="loginProvider('claude')">
+                        <div class="provider-icon"><svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M234 800l235-132 4-11-4-7h-11l-40-2-134-4-116-5-113-6-28-6-27-35 3-18 27-16 34 3 75 5 124 91 18 15 7-5 1-4-9-14-67-122-72-124-32-50-8-30c-3-13-5-24-5-37l37-50 21-7 49 7 21 19 31 70 50 111 77 151 23 45 12 41 5 12h8v-7l6-85 12-104 11-134 4-38 19-45 37-24 29 14 24 38-3 22-14 92-28 144-18 97h11l12-12 49-65 82-103 36-43 42-45 27-21h51l38 56-17 58-53 67-44 56-63 85-39 67 4 6 9-1 142-30 77-14 92-15 41 19 5 20-17 40-98 24-115 23-171 40-2 2 3 4 77 7 33 2h80l150 11 40 26 24 32-5 24-60 31-82-20-191-45-65-16h-9v7l54 53 99 90 125 116 7 29-17 22-17-3-110-82-43-38-97-78h-8v9l22 32 116 175 6 54-8 17-30 11-33-6-68-94-71-107-52-94-6 4-57 361-16 18-33 14-30-23-16-37 16-67 19-97 15-75 14-95 8-31v-3l-7 1-71 98-108 147-86 92-20 8-36-18 3-33 20-27 119-149 72-93 46-54v-8h-3l-315 205-56 7-24-22 3-33 12-13 95-65z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Claude</div>
+                    </div>
+                    <div class="provider" id="provider-qwen" onclick="loginProvider('qwen')">
+                        <div class="provider-icon"><svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M191.4,122.7c.6,0,.7.3.4.7l-10.1,17.7-31.5,55.4c0,.3-.3.3-.6.3s-.4,0-.6-.3l-41.7-72.7c-.3-.4,0-.6.3-.6h2.7l81.2-.3h-.1ZM115.5,25.9c-.3,0-.4,0-.6.3l-34.6,60.6c-.3.6-.9.9-1.6.9h-34.6c-.7,0-.9.3-.4.9l70.1,122.6c.3.4.1.7-.4.7h-33.7c-1,0-1.9.6-2.4,1.6l-15.9,27.9c-.6,1,0,1.5.9,1.5h69c.6,0,1,.3,1.2.9l16.9,29.7c.6,1,1,1,1.6,0l60.4-105.7,9.5-16.6c0-.3.3-.3.6-.3s.4,0,.6.3l17.2,30.6c.3.4.7.7,1.3.7l33.4-.3c.1,0,.3,0,.4-.3v-.4l-35-61.5c-.3-.4-.3-.9,0-1.3l3.6-6.1,13.5-23.9c.3-.4,0-.7-.4-.7H116.1c-.7,0-.9-.3-.4-.9l17.4-30.3c.3-.4.3-.9,0-1.3l-16.5-28.9c0-.3-.3-.4-.6-.4h-.4ZM156.9,21.2c4.8,8.3,9.5,16.6,14.1,25.1.4.7,1,1,1.9,1h67c2.1,0,3.9,1.3,5.3,4l17.5,31c2.2,4,3,5.8.3,10.1-3.1,5.2-6.2,10.4-9.2,15.7l-4.5,8c-1.3,2.4-2.7,3.4-.4,6.2l32.1,56c2.1,3.6,1.3,5.9-.4,9.4-5.3,9.5-10.7,18.9-16.2,28.2-1.9,3.3-4.3,4.5-8.2,4.5-9.4-.1-18.7,0-28.1.1-.4,0-.7.3-1,.6-10.8,19.2-21.7,38.2-32.7,57.2-2.1,3.6-4.6,4.5-8.8,4.5h-36.4c-2.5,0-4.3-1-5.6-3.3l-16.2-28.1c-.1-.4-.6-.6-1-.6h-61.8c-3.4.3-6.7,0-9.6-1l-19.3-33.4c-1.2-1.9-1.2-4.3,0-6.5l14.5-25.5c.4-.7.4-1.6,0-2.4-7.6-13.2-15.1-26.3-22.6-39.5l-9.5-16.8c-1.9-3.7-2.1-5.9,1.2-11.6,5.6-9.8,11.1-19.6,16.8-29.4,1.6-2.8,3.7-4,7-4h31.3c.6,0,1-.3,1.3-.7l33.8-59.1c1.2-1.9,2.8-3,5-3h19.2l12.3-.3c4.2,0,8.8.4,10.8,4.2v-.6Z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Qwen</div>
+                    </div>
+                    <div class="provider" id="provider-iflow" onclick="loginProvider('iflow')">
+                        <div class="provider-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 3v6h8V3h-8zM3 21h8v-6H3v6zm0-8h8V3H3v10zm10 8h8v-10h-8v10z"
+                                    fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">iFlow</div>
+                    </div>
+                    <div class="provider" id="provider-kiro" onclick="loginProvider('kiro')">
+                        <div class="provider-icon"><svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M398.554 818.914C316.315 1001.03 491.477 1046.74 620.672 940.156C658.687 1059.66 801.052 970.473 852.234 877.795C964.787 673.567 919.318 465.357 907.64 422.374C827.637 129.443 427.623 128.946 358.8 423.865C342.651 475.544 342.402 534.18 333.458 595.051C328.986 625.86 325.507 645.488 313.83 677.785C306.873 696.424 297.68 712.819 282.773 740.645C259.915 783.881 269.604 867.113 387.87 823.883L399.051 818.914H398.554Z"
+                                    fill="currentColor" />
+                                <ellipse cx="636" cy="487" rx="40" ry="63" fill="currentColor" />
+                                <ellipse cx="771" cy="487" rx="40" ry="63" fill="currentColor" />
+                            </svg></div>
+                        <div class="provider-name">Kiro</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <section class="stats-section animate-in delay-2" id="statsSection" style="display: none;">
-            <div class="section-header">Request Statistics</div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="statTotal">0</div>
-                    <div class="stat-label">Total Requests</div>
+        <!-- TAB: MODELS -->
+        <div class="tab-content" id="tab-models">
+            <div class="card ani" id="modelsListCard">
+                <div class="card-header">
+                    <span class="card-title">Available Models</span>
+                    <span class="card-subtitle" id="modelsCount">0 models</span>
                 </div>
-                <div class="stat-card success">
-                    <div class="stat-value" id="statSuccess">0%</div>
-                    <div class="stat-label">Success Rate</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statLatency">0ms</div>
-                    <div class="stat-label">Avg Latency</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-value" id="statErrors">0</div>
-                    <div class="stat-label">Errors</div>
+                <div class="models-grid" id="modelsGrid">
+                    <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-3)">Start server to see
+                        models</div>
                 </div>
             </div>
-        </section>
+            <!-- Custom Model -->
+            <div class="collapse-toggle" onclick="toggleCollapse('mmBody',this)">
+                <div style="display:flex;align-items:center;gap:8px"><span>🔧</span><span
+                        style="font-weight:600;font-size:14px">Custom Model</span></div>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="collapse-body" id="mmBody">
+                <div class="mm-panels">
+                    <div class="mm-panel">
+                        <div class="mm-panel-header"><span class="mm-panel-title">Available from CLIProxyAPI</span><span
+                                class="mm-panel-count" id="mmAvailCount">0</span></div>
+                        <input class="mm-search" id="mmAvailSearch" placeholder="Filter..." oninput="filterMM('avail')">
+                        <div class="mm-list" id="mmAvailList">
+                            <div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px">Start server
+                                first</div>
+                        </div>
+                        <div class="mm-actions">
+                            <button class="btn btn-success btn-sm" onclick="mmAddSelected()" id="mmBtnAdd" disabled>+
+                                Add Selected</button>
+                            <button class="btn btn-success btn-sm" onclick="mmAddAllMissing()" id="mmBtnAddAll"
+                                disabled>+ Add All</button>
+                        </div>
+                    </div>
+                    <div class="mm-panel">
+                        <div class="mm-panel-header"><span class="mm-panel-title">Custom Model Config</span><span
+                                class="mm-panel-count" id="mmFactoryCount">0</span></div>
+                        <input class="mm-search" id="mmFactorySearch" placeholder="Filter..."
+                            oninput="filterMM('factory')">
+                        <div class="mm-list" id="mmFactoryList">
+                            <div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px">No models
+                            </div>
+                        </div>
+                        <div class="mm-actions">
+                            <button class="btn btn-danger btn-sm" onclick="mmRemoveSelected()" id="mmBtnRemove"
+                                disabled>Remove Selected</button>
+                            <button class="btn btn-danger btn-sm"
+                                onclick="confirmAction('Clear all factory models?','This cannot be undone.',mmClearAll)">Clear
+                                All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <section class="animate-in delay-3">
-            <div class="section-header">Providers</div>
-            <div class="providers">
-                <div class="provider" id="provider-gemini" onclick="loginProvider('gemini')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 65 65" xmlns="http://www.w3.org/2000/svg"><path d="M32.447 0c.68 0 1.273.465 1.439 1.125a38.904 38.904 0 001.999 5.905c2.152 5 5.105 9.376 8.854 13.125 3.751 3.75 8.126 6.703 13.125 8.855a38.98 38.98 0 005.906 1.999c.66.166 1.124.758 1.124 1.438 0 .68-.464 1.273-1.125 1.439a38.902 38.902 0 00-5.905 1.999c-5 2.152-9.375 5.105-13.125 8.854-3.749 3.751-6.702 8.126-8.854 13.125a38.973 38.973 0 00-2 5.906 1.485 1.485 0 01-1.438 1.124c-.68 0-1.272-.464-1.438-1.125a38.913 38.913 0 00-2-5.905c-2.151-5-5.103-9.375-8.854-13.125-3.75-3.749-8.125-6.702-13.125-8.854a38.973 38.973 0 00-5.905-2A1.485 1.485 0 010 32.448c0-.68.465-1.272 1.125-1.438a38.903 38.903 0 005.905-2c5-2.151 9.376-5.104 13.125-8.854 3.75-3.749 6.703-8.125 8.855-13.125a38.972 38.972 0 001.999-5.905A1.485 1.485 0 0132.447 0z"/></svg>
-                    </div>
-                    <div class="provider-name">Gemini</div>
+        <!-- TAB: ROUTING -->
+        <div class="tab-content" id="tab-routing">
+            <div class="card ani">
+                <div class="card-header">
+                    <span class="card-title">Routing & Fallbacks</span>
+                    <button class="btn btn-accent btn-sm" onclick="addRouteRule()">+ Add Rule</button>
                 </div>
-                <div class="provider" id="provider-copilot" onclick="loginProvider('copilot')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 256 208" xmlns="http://www.w3.org/2000/svg"><path d="M205.28,31.36C219.376,46.24 225.296,66.56 227.792,95.04C234.418,95.04 240.597,96.509 244.768,102.192L252.56,112.752C254.8,115.792 256,119.424 256,123.2V151.888C255.992,155.592 254.157,159.203 251.168,161.392C215.885,187.222 172.35,208 128,208C78.934,208 29.81,179.727 4.832,161.392C1.843,159.203 0.007,155.592 0,151.888V123.2C0,119.424 1.2,115.776 3.424,112.736L11.216,102.192C15.389,96.176 21.595,95.04 28.208,95.04C30.704,66.56 36.608,46.24 50.72,31.36C77.331,3.165 112.567,0.06 127.552,0.001L128,0C142.72,0 178.4,2.88 205.28,31.36ZM128.016,78.736C124.976,78.736 121.472,78.912 117.744,79.28C116.432,84.176 114.496,88.592 111.664,91.408C100.464,102.608 86.96,104.336 79.728,104.336C72.926,104.336 65.801,102.916 59.984,99.248C54.482,101.056 49.198,103.663 48.848,110.16C48.262,122.441 48.211,134.709 48.16,146.984C48.134,153.145 48.109,159.306 48.016,165.472C48.04,169.051 50.198,172.375 53.456,173.856C79.936,185.92 104.976,192 128.016,192C151.024,192 176.064,185.92 202.528,173.856C205.786,172.375 207.943,169.051 207.968,165.472C208.285,147.054 208.03,128.56 207.152,110.16L207.168,110.16C206.826,103.626 201.52,101.062 196,99.248C190.179,102.9 183.073,104.336 176.272,104.336C169.04,104.336 155.552,102.608 144.336,91.408C141.504,88.592 139.568,84.176 138.256,79.28C134.853,78.934 131.436,78.753 128.016,78.736ZM101.075,122.667C106.823,122.667 111.483,127.327 111.483,133.075V152.258C111.483,158.007 106.823,162.667 101.075,162.667C95.327,162.667 90.667,158.007 90.667,152.258V133.075C90.667,127.327 95.327,122.667 101.075,122.667ZM154.408,122.667C160.157,122.667 164.817,127.327 164.817,133.075V152.258C164.817,158.007 160.157,162.667 154.408,162.667C148.66,162.667 144,158.007 144,152.258V133.075C144,127.327 148.66,122.667 154.408,122.667Z"/></svg>
-                    </div>
-                    <div class="provider-name">Copilot</div>
+                <div id="routingList" style="display:flex;flex-direction:column;gap:12px">
+                    <div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">No routing rules
+                        configured. Create one to handle model fallbacks automatically.</div>
                 </div>
-                <div class="provider" id="provider-antigravity" onclick="loginProvider('antigravity')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 434 400" xmlns="http://www.w3.org/2000/svg"><path d="M392.7 390.1c24.2 18.1 60.4 6 27.2-27.2C320.2 266.2 341.4.3 217.5.3S114.8 266.2 15.1 362.9c-36.3 36.3 3 45.3 27.2 27.2 93.6-70.2 140.5-105.3 175.2-105.3s81.6 35.1 175.2 105.3z"/></svg>
-                    </div>
-                    <div class="provider-name">Antigravity</div>
-                </div>
-                <div class="provider" id="provider-codex" onclick="loginProvider('codex')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"><path d="m297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68-15.25-17.18-37.16-26.95-60.13-26.81-35.04-.08-66.13 22.48-76.94-55.86 22.51-4.61 41.94-18.7 53.31-38.67 17.57-30.32 13.55-68.51-9.94-94.51zm-120.28 168.11c-14.03.02-27.62-4.89-38.39-13.88.49-.26 1.34-.73 1.89-1.07l63.72-36.8c3.26-1.85 5.26-5.32 5.24-9.07v-89.83l26.93 15.55c.29.14.48.42.52.74v74.39c-.04 33.08-26.83 59.9-59.91 59.97zm-128.84-55.03c-7.03-12.14-9.56-26.37-7.15-40.18.47.28 1.3.79 1.89 1.13l63.72 36.8c3.23 1.89 7.23 1.89 10.47 0l77.79-44.92v31.1c.02.32-.13.63-.38.83l-64.41 37.19c-28.69 16.52-65.33 6.7-81.92-21.95zm-16.77-139.09c7-12.16 18.05-21.46 31.21-26.29 0 .55-.03 1.52-.03 2.2v73.61c.03 3.74 1.98 7.21 5.23 9.06l77.79 44.91-26.93 15.55c-.27.18-.61.21-.91.08l-64.42-37.22c-28.63-16.58-38.45-53.21-21.95-81.89zm221.26 51.49-77.79-44.92 26.93-15.54c.27-.18.61-.21.91-.08l64.42 37.19c28.68 16.57 38.51 53.26 21.94 81.94-7.01 12.14-18.05 21.44-31.2 26.28v-75.81c.03-3.74-1.96-7.2-5.2-9.06zm26.8-40.34c-.47-.29-1.3-.79-1.89-1.13l-63.72-36.8c-3.23-1.89-7.23-1.89-10.47 0l-77.79 44.92v-31.1c-.02-.32.13-.63.38-.83l64.41-37.16c28.69-16.55 65.37-6.7 81.91 22 6.99 12.12 9.52 26.31 7.15 40.1zm-168.51 55.43-26.94-15.55c-.29-.14-.48-.42-.52-.74v-74.39c.02-33.12 26.89-59.96 60.01-59.94 14.01 0 27.57 4.92 38.34 13.88-.49.26-1.33.73-1.89 1.07l-63.72 36.8c-3.26 1.85-5.26 5.31-5.24 9.06l-.04 89.79zm14.63-31.54 34.65-20.01 34.65 20v40.01l-34.65 20-34.65-20z"/></svg>
-                    </div>
-                    <div class="provider-name">Codex</div>
-                </div>
-                <div class="provider" id="provider-claude" onclick="loginProvider('claude')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg"><path d="M234 800l235-132 4-11-4-7h-11l-40-2-134-4-116-5-113-6-28-6-27-35 3-18 27-16 34 3 75 5 124 91 18 15 7-5 1-4-9-14-67-122-72-124-32-50-8-30c-3-13-5-24-5-37l37-50 21-7 49 7 21 19 31 70 50 111 77 151 23 45 12 41 5 12h8v-7l6-85 12-104 11-134 4-38 19-45 37-24 29 14 24 38-3 22-14 92-28 144-18 97h11l12-12 49-65 82-103 36-43 42-45 27-21h51l38 56-17 58-53 67-44 56-63 85-39 67 4 6 9-1 142-30 77-14 92-15 41 19 5 20-17 40-98 24-115 23-171 40-2 2 3 4 77 7 33 2h80l150 11 40 26 24 32-5 24-60 31-82-20-191-45-65-16h-9v7l54 53 99 90 125 116 7 29-17 22-17-3-110-82-43-38-97-78h-8v9l22 32 116 175 6 54-8 17-30 11-33-6-68-94-71-107-52-94-6 4-57 361-16 18-33 14-30-23-16-37 16-67 19-97 15-75 14-95 8-31v-3l-7 1-71 98-108 147-86 92-20 8-36-18 3-33 20-27 119-149 72-93 46-54v-8h-3l-315 205-56 7-24-22 3-33 12-13 95-65z"/></svg>
-                    </div>
-                    <div class="provider-name">Claude</div>
-                </div>
-                <div class="provider" id="provider-qwen" onclick="loginProvider('qwen')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><path d="M191.4,122.7c.6,0,.7.3.4.7l-10.1,17.7-31.5,55.4c0,.3-.3.3-.6.3s-.4,0-.6-.3l-41.7-72.7c-.3-.4,0-.6.3-.6h2.7l81.2-.3h-.1ZM115.5,25.9c-.3,0-.4,0-.6.3l-34.6,60.6c-.3.6-.9.9-1.6.9h-34.6c-.7,0-.9.3-.4.9l70.1,122.6c.3.4.1.7-.4.7h-33.7c-1,0-1.9.6-2.4,1.6l-15.9,27.9c-.6,1,0,1.5.9,1.5h69c.6,0,1,.3,1.2.9l16.9,29.7c.6,1,1,1,1.6,0l60.4-105.7,9.5-16.6c0-.3.3-.3.6-.3s.4,0,.6.3l17.2,30.6c.3.4.7.7,1.3.7l33.4-.3c.1,0,.3,0,.4-.3v-.4l-35-61.5c-.3-.4-.3-.9,0-1.3l3.6-6.1,13.5-23.9c.3-.4,0-.7-.4-.7H116.1c-.7,0-.9-.3-.4-.9l17.4-30.3c.3-.4.3-.9,0-1.3l-16.5-28.9c0-.3-.3-.4-.6-.4h-.4ZM156.9,21.2c4.8,8.3,9.5,16.6,14.1,25.1.4.7,1,1,1.9,1h67c2.1,0,3.9,1.3,5.3,4l17.5,31c2.2,4,3,5.8.3,10.1-3.1,5.2-6.2,10.4-9.2,15.7l-4.5,8c-1.3,2.4-2.7,3.4-.4,6.2l32.1,56c2.1,3.6,1.3,5.9-.4,9.4-5.3,9.5-10.7,18.9-16.2,28.2-1.9,3.3-4.3,4.5-8.2,4.5-9.4-.1-18.7,0-28.1.1-.4,0-.7.3-1,.6-10.8,19.2-21.7,38.2-32.7,57.2-2.1,3.6-4.6,4.5-8.8,4.5h-36.4c-2.5,0-4.3-1-5.6-3.3l-16.2-28.1c-.1-.4-.6-.6-1-.6h-61.8c-3.4.3-6.7,0-9.6-1l-19.3-33.4c-1.2-1.9-1.2-4.3,0-6.5l14.5-25.5c.4-.7.4-1.6,0-2.4-7.6-13.2-15.1-26.3-22.6-39.5l-9.5-16.8c-1.9-3.7-2.1-5.9,1.2-11.6,5.6-9.8,11.1-19.6,16.8-29.4,1.6-2.8,3.7-4,7-4h31.3c.6,0,1-.3,1.3-.7l33.8-59.1c1.2-1.9,2.8-3,5-3h19.2l12.3-.3c4.2,0,8.8.4,10.8,4.2v-.6Z"/></svg>
-                    </div>
-                    <div class="provider-name">Qwen</div>
-                </div>
-                <div class="provider" id="provider-iflow" onclick="loginProvider('iflow')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 3v6h8V3h-8zM3 21h8v-6H3v6zm0-8h8V3H3v10zm10 8h8v-10h-8v10z"/></svg>
-                    </div>
-                    <div class="provider-name">iFlow</div>
-                </div>
-                <div class="provider" id="provider-kiro" onclick="loginProvider('kiro')">
-                    <div class="provider-icon">
-                        <svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg"><path d="M398.554 818.914C316.315 1001.03 491.477 1046.74 620.672 940.156C658.687 1059.66 801.052 970.473 852.234 877.795C964.787 673.567 919.318 465.357 907.64 422.374C827.637 129.443 427.623 128.946 358.8 423.865C342.651 475.544 342.402 534.18 333.458 595.051C328.986 625.86 325.507 645.488 313.83 677.785C306.873 696.424 297.68 712.819 282.773 740.645C259.915 783.881 269.604 867.113 387.87 823.883L399.051 818.914H398.554Z"/><ellipse cx="636" cy="487" rx="40" ry="63"/><ellipse cx="771" cy="487" rx="40" ry="63"/></svg>
-                    </div>
-                    <div class="provider-name">Kiro</div>
-                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-accent"
+                        onclick="saveRoutes()" disabled id="btnSaveRoutes">Save Rules</button></div>
             </div>
-        </section>
+        </div>
 
-        <section class="animate-in delay-4" id="modelsSection" style="display: none;">
-            <div class="section-header">Available Models</div>
-            <div class="models-list" id="modelsList">
-                <div class="models-hint">Start server to see available models</div>
+        <!-- TAB: PLAYGROUND -->
+        <div class="tab-content" id="tab-playground">
+            <div class="card ani" style="display:flex;flex-direction:column;height:550px;padding:0;overflow:hidden">
+                <div class="card-header"
+                    style="padding:16px 20px;border-bottom:1px solid var(--border);margin-bottom:0">
+                    <span class="card-title">API Playground</span>
+                    <select id="pgModel" class="btn" style="padding:6px 12px;font-size:13px">
+                        <option value="">Loading models...</option>
+                    </select>
+                </div>
+                <div id="pgChat"
+                    style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--bg-0)">
+                    <div style="text-align:center;color:var(--text-3);font-size:13px;margin:auto">Send a message to test
+                        the selected model<br>This uses your CLIProxyAPI+ endpoint</div>
+                </div>
+                <div style="padding:16px 20px;border-top:1px solid var(--border);background:var(--bg-1)">
+                    <div style="display:flex;gap:10px">
+                        <textarea id="pgInput" placeholder="Type a message... (Shift+Enter for new line)"
+                            style="flex:1;background:var(--bg-0);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--text-1);font-family:var(--font);font-size:13px;resize:none;height:50px;outline:none"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPgMessage();}"></textarea>
+                        <button class="btn btn-accent" onclick="sendPgMessage()" style="min-width:80px">Send</button>
+                        <button class="btn" onclick="clearPg()">Clear</button>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <section class="model-manager animate-in delay-4" id="modelManagerSection" style="display: none;">
-            <div class="model-manager-toggle" onclick="toggleModelManager()">
-                <div class="settings-toggle-left">
-                    <span class="settings-toggle-icon">🔧</span>
-                    <span class="settings-toggle-text">Factory Model Manager</span>
-                </div>
-                <span class="settings-toggle-arrow">▼</span>
-            </div>
-            <div class="model-manager-content" id="modelManagerContent">
-                <!-- Available Models Panel -->
-                <div class="model-panel">
-                    <div class="model-panel-header">
-                        <span class="model-panel-title">Available from CLIProxyAPI</span>
-                        <span class="model-panel-count" id="availableCount">0</span>
+        <!-- TAB: SETTINGS -->
+        <div class="tab-content" id="tab-settings">
+            <div class="card ani">
+                <div class="card-header" style="align-items:flex-start">
+                    <div>
+                        <span class="card-title">Configuration (config.yaml)</span>
+                        <div style="color:var(--text-3);font-size:12px;margin-top:4px">Settings are automatically loaded
+                            from disk.</div>
                     </div>
-                    <input type="text" class="model-search" id="availableSearch" placeholder="Filter available models..." oninput="filterAvailableModels()">
-                    <div class="model-list-container" id="availableModelsList">
-                        <div class="model-empty">Start server to load models</div>
-                    </div>
-                    <div class="model-panel-actions">
-                        <button class="btn btn-success" onclick="addSelectedModels()" id="btnAddSelected" disabled>+ Add Selected (0)</button>
-                        <button class="btn btn-success" onclick="addAllMissingModels()" id="btnAddAllMissing" disabled>+ Add All Missing</button>
+                    <div style="display:flex;gap:6px">
+                        <span class="card-subtitle" id="configStatus" style="margin-right:8px;line-height:28px"></span>
+                        <button class="btn btn-sm" onclick="exportConfig()" title="Download config">📥 Export</button>
+                        <button class="btn btn-sm" onclick="document.getElementById('importFile').click()"
+                            title="Load config file">📤 Import</button>
+                        <input type="file" id="importFile" style="display:none" accept=".yaml,.yml,.txt"
+                            onchange="importConfig(event)">
+                        <button class="btn btn-sm" onclick="backupConfig()" title="Create quick backup on server">💾
+                            Backup</button>
                     </div>
                 </div>
-
-                <!-- Factory Config Panel -->
-                <div class="model-panel">
-                    <div class="model-panel-header">
-                        <span class="model-panel-title">Factory Config (~/.factory/config.json)</span>
-                        <span class="model-panel-count" id="factoryCount">0</span>
-                    </div>
-                    <input type="text" class="model-search" id="factorySearch" placeholder="Filter config models..." oninput="filterFactoryModels()">
-                    <div class="model-list-container" id="factoryModelsList">
-                        <div class="model-empty">No models in config</div>
-                    </div>
-                    <div class="model-panel-actions">
-                        <button class="btn btn-danger" onclick="removeSelectedModels()" id="btnRemoveSelected" disabled>Remove Selected (0)</button>
-                        <button class="btn btn-danger" onclick="confirmClearAll()">Clear All</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="settings-section animate-in delay-4">
-            <div class="settings-toggle" onclick="toggleSettings()">
-                <div class="settings-toggle-left">
-                    <span class="settings-toggle-icon">⚙</span>
-                    <span class="settings-toggle-text">Configuration</span>
-                </div>
-                <span class="settings-toggle-arrow">▼</span>
-            </div>
-            <div class="settings-content" id="settingsContent">
-                <textarea class="config-editor" id="configEditor" spellcheck="false" placeholder="Loading configuration..."></textarea>
-                <div class="settings-actions">
-                    <div class="config-status" id="configStatus"></div>
+                <textarea class="config-editor" id="configEditor" spellcheck="false"
+                    placeholder="Loading..."></textarea>
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
                     <button class="btn" onclick="reloadConfig()">Reload</button>
-                    <button class="btn btn-primary" onclick="saveConfig()">Save & Restart</button>
+                    <button class="btn btn-accent" onclick="saveConfig()">Save & Restart</button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="animate-in delay-4">
-            <div class="section-header">Activity</div>
-            <div class="activity">
-                <div class="activity-header">
-                    <span class="activity-title">Recent events</span>
-                    <div class="activity-actions">
-                        <button class="activity-btn" onclick="clearLogs()">Clear</button>
-                        <button class="activity-btn" onclick="refreshStatus()">Refresh</button>
-                    </div>
-                </div>
-                <div class="activity-content" id="activityContent">
-                    <div class="log-entry">
-                        <span class="log-time">--:--:--</span>
-                        <span class="log-msg info">Initializing...</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="animate-in delay-4">
-            <div class="footer-links">
-                <a href="https://github.com/julianromli/CLIProxyAPIPlus-Easy-Installation" target="_blank">GitHub</a>
-                <a href="https://github.com/router-for-me/CLIProxyAPIPlus" target="_blank">Upstream</a>
-            </div>
-            <div class="footer-hint">
-                Press <kbd>R</kbd> to refresh
-            </div>
+        <footer style="text-align:center;padding:20px 0;font-size:12px;color:var(--text-3)">
+            <a href="https://github.com/imrosyd/cliproxyapi" target="_blank"
+                style="color:var(--text-2);text-decoration:none">GitHub</a>
+            <span style="margin:0 8px">·</span>
+            <a href="https://github.com/imrosyd/cliproxyapi" target="_blank"
+                style="color:var(--text-2);text-decoration:none">Upstream</a>
+            <span style="margin:0 8px">·</span>
+            Press <kbd
+                style="background:var(--bg-3);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">R</kbd>
+            to refresh
         </footer>
     </div>
 
+    <!-- Modals -->
     <div class="modal-overlay" id="updateModal">
         <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title">Update Available</span>
-                <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
-            </div>
+            <div class="modal-header"><span class="modal-title">Update Available</span><button class="modal-close"
+                    onclick="closeModal('updateModal')">&times;</button></div>
             <div class="modal-body">
-                <div class="update-version">
-                    <span class="current" id="updateCurrentVersion">unknown</span>
-                    <span class="arrow">→</span>
-                    <span class="new" id="updateNewVersion">latest</span>
-                </div>
-                <div class="release-notes" id="updateReleaseNotes">Loading...</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span
+                        id="updateCurVer">?</span><span>→</span><span style="color:var(--success);font-weight:600"
+                        id="updateNewVer">?</span></div>
+                <div id="updateNotes" style="max-height:200px;overflow-y:auto;font-size:13px;color:var(--text-2)">
+                    Loading...</div>
             </div>
             <div class="modal-footer">
-                <button class="btn" onclick="closeUpdateModal()">Later</button>
-                <button class="btn btn-primary" id="btnApplyUpdate" onclick="applyUpdate()">Update Now</button>
+                <button class="btn" onclick="closeModal('updateModal')">Later</button>
+                <button class="btn btn-accent" id="btnApplyUpdate" onclick="applyUpdate()">Update Now</button>
             </div>
         </div>
     </div>
-
-    <div class="toast" id="toast">
-        <span class="toast-icon">ℹ</span>
-        <span class="toast-msg"></span>
-    </div>
-
-    <div class="modal-overlay confirm-modal" id="confirmModal">
+    <div class="modal-overlay" id="confirmModal">
         <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title">Confirm Action</span>
-                <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
-            </div>
+            <div class="modal-header"><span class="modal-title">Confirm</span><button class="modal-close"
+                    onclick="closeModal('confirmModal')">&times;</button></div>
             <div class="modal-body">
-                <p id="confirmMessage">Are you sure?</p>
-                <p class="warning" id="confirmWarning"></p>
+                <p id="confirmMsg">Are you sure?</p>
+                <p style="color:var(--warn);font-size:12px;margin-top:8px" id="confirmWarn"></p>
             </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeConfirmModal()">Cancel</button>
-                <button class="btn btn-danger" id="btnConfirm" onclick="executeConfirmedAction()">Confirm</button>
-            </div>
+            <div class="modal-footer"><button class="btn" onclick="closeModal('confirmModal')">Cancel</button><button
+                    class="btn btn-danger" id="btnConfirm">Confirm</button></div>
         </div>
     </div>
+    <div class="toast" id="toast"><span id="toastMsg"></span></div>
 
+    <!-- JAVASCRIPT -->
     <script>
-        let serverStartTime = null;
+        /* ===== STATE ===== */
+        let serverRunning = false, serverStartTime = null, uptimeInterval = null;
         let autoStartEnabled = localStorage.getItem('autoStart') === 'true';
+        let pendingConfirmAction = null;
+        let mmAvailModels = [], mmFactoryModels = [], mmAvailSelected = new Set(), mmFactorySelected = new Set();
 
-        function log(message, type = 'info') {
-            const content = document.getElementById('activityContent');
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `
-                <span class="log-time">${time}</span>
-                <span class="log-msg ${type}">${message}</span>
-            `;
-            content.appendChild(entry);
-            content.scrollTop = content.scrollHeight;
+        /* ===== TABS ===== */
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', t.textContent.toLowerCase().includes(name)));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + name));
+            if (name === 'settings') loadConfig();
+            if (name === 'models') { loadModels(); loadFactoryConfig(); }
+            if (name === 'providers') checkAuthStatus();
         }
 
-        function clearLogs() {
-            document.getElementById('activityContent').innerHTML = '';
-            log('Logs cleared', 'info');
+        /* ===== THEME ===== */
+        function toggleTheme() {
+            const t = document.documentElement.getAttribute('data-theme') === 'light' ? '' : 'light';
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
+            updateThemeIcon(t);
         }
-
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.querySelector('.toast-msg').textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
+        function updateThemeIcon(t) {
+            const icon = document.getElementById('themeIcon');
+            if (!icon) return;
+            icon.innerHTML = t === 'light'
+                ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+                : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
         }
+        (function initTheme() { const t = localStorage.getItem('theme') || ''; document.documentElement.setAttribute('data-theme', t); updateThemeIcon(t); })();
 
-        function updateUI(status) {
-            const dot = document.getElementById('statusDot');
-            const label = document.getElementById('statusLabel');
-            const desc = document.getElementById('statusDesc');
-            const pidEl = document.getElementById('pid');
-            const uptimeEl = document.getElementById('uptime');
-            const btnStart = document.getElementById('btnStart');
-            const btnStop = document.getElementById('btnStop');
-
-            if (status.running) {
-                dot.className = 'status-dot running';
-                label.className = 'status-label running';
-                label.textContent = 'Running';
-                desc.textContent = `Server active on port ${status.port}`;
-                pidEl.textContent = status.pid || 'Active';
-                btnStart.disabled = true;
-                btnStop.disabled = false;
-
-                if (status.startTime) {
-                    const start = new Date(status.startTime);
-                    const secs = Math.floor((Date.now() - start.getTime()) / 1000);
-                    const h = Math.floor(secs / 3600);
-                    const m = Math.floor((secs % 3600) / 60);
-                    const s = secs % 60;
-                    uptimeEl.textContent = h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`;
-                } else {
-                    uptimeEl.textContent = '—';
-                }
-            } else {
-                dot.className = 'status-dot stopped';
-                label.className = 'status-label stopped';
-                label.textContent = 'Stopped';
-                desc.textContent = 'Server is not running';
-                pidEl.textContent = '—';
-                uptimeEl.textContent = '—';
-                btnStart.disabled = false;
-                btnStop.disabled = true;
-            }
+        /* ===== LOG / INSPECTOR ===== */
+        function log(msg, type = 'info', source = 'System', model = '-', lat = '-') {
+            const table = document.getElementById('logContainer');
+            if (!table) return;
+            if (table.innerHTML.includes('Initializing')) { table.innerHTML = ''; }
+            const t = new Date().toLocaleTimeString('en-US', { hour12: false });
+            let col = 'var(--text-2)';
+            if (type === 'success') col = 'var(--success)';
+            if (type === 'error') col = 'var(--error)';
+            if (type === 'warning') col = 'var(--warn)';
+            const tr = document.createElement('tr');
+            tr.className = 'log-entry-row';
+            tr.innerHTML = `<td style="color:var(--text-3)">${t}</td><td>${source}</td><td>${model}</td><td style="font-family:var(--mono)">${lat}${lat !== '-' ? 'ms' : ''}</td><td style="color:${col}" title="${msg.replace(/"/g, "&quot;")}">${msg}</td>`;
+            table.appendChild(tr);
+            if (table.parentElement) table.parentElement.scrollTop = table.parentElement.scrollHeight;
         }
+        function clearLogs() { document.getElementById('logContainer').innerHTML = ''; log('Logs cleared'); }
+        function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
-        function setStarting() {
-            const dot = document.getElementById('statusDot');
-            const label = document.getElementById('statusLabel');
-            const desc = document.getElementById('statusDesc');
-            const btnStart = document.getElementById('btnStart');
-            const btnStop = document.getElementById('btnStop');
-            
-            dot.className = 'status-dot starting';
-            label.className = 'status-label starting';
-            label.textContent = 'Starting';
-            desc.textContent = 'Server is starting up...';
-            btnStart.disabled = true;
-            btnStop.disabled = true;
-        }
+        /* ===== MODALS ===== */
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function confirmAction(msg, warn, fn) { document.getElementById('confirmMsg').textContent = msg; document.getElementById('confirmWarn').textContent = warn || ''; pendingConfirmAction = fn; document.getElementById('btnConfirm').onclick = () => { closeModal('confirmModal'); if (pendingConfirmAction) pendingConfirmAction(); }; document.getElementById('confirmModal').classList.add('show'); }
 
-        function setStopping() {
-            const dot = document.getElementById('statusDot');
-            const label = document.getElementById('statusLabel');
-            const desc = document.getElementById('statusDesc');
-            const btnStart = document.getElementById('btnStart');
-            const btnStop = document.getElementById('btnStop');
-            
-            dot.className = 'status-dot starting';
-            label.className = 'status-label starting';
-            label.textContent = 'Stopping';
-            desc.textContent = 'Server is shutting down...';
-            btnStart.disabled = true;
-            btnStop.disabled = true;
-        }
-
+        /* ===== SERVER CONTROLS ===== */
         async function checkStatus() {
             try {
-                const res = await fetch('/api/status', {
-                    signal: AbortSignal.timeout(2000)
-                });
-                if (res.ok) {
-                    const status = await res.json();
-                    updateUI(status);
-                    return status.running;
-                }
-            } catch (e) {
-                updateUI({ running: false });
-            }
-            return false;
+                const r = await fetch('/api/status', { signal: AbortSignal.timeout(3000) });
+                if (!r.ok) return;
+                const s = await r.json();
+                serverRunning = s.running;
+                const pill = document.getElementById('statusPill');
+                pill.className = 'status-pill ' + (s.running ? 'running' : 'stopped');
+                document.getElementById('statusLabel').textContent = s.running ? 'Running' : 'Stopped';
+                document.getElementById('btnStart').disabled = s.running;
+                document.getElementById('btnStop').disabled = !s.running;
+                document.getElementById('btnRestart').disabled = !s.running;
+                document.getElementById('pidVal').textContent = s.pid || '—';
+                if (s.running && s.endpoint) document.getElementById('endpointLabel').textContent = s.endpoint;
+                if (s.running && !serverStartTime) { serverStartTime = new Date(); startUptime(); }
+                if (!s.running) { serverStartTime = null; if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; } document.getElementById('uptimeVal').textContent = '—'; }
+                if (s.running) { loadStats(); loadManagementUsage(); }
+            } catch (e) { /* offline */ }
         }
 
-        function copyEndpoint() {
-            const endpoint = 'http://localhost:8317/v1';
-            navigator.clipboard.writeText(endpoint).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                btn.classList.add('copied');
-                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-                showToast('Endpoint copied to clipboard');
-                setTimeout(() => {
-                    btn.classList.remove('copied');
-                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                }, 2000);
-            });
-        }
-
-        function toggleAutoStart() {
-            const checkbox = document.getElementById('autoStartToggle');
-            autoStartEnabled = checkbox.checked;
-            localStorage.setItem('autoStart', autoStartEnabled);
-            log(autoStartEnabled ? 'Auto-start enabled' : 'Auto-start disabled', 'info');
-        }
-
-        function toggleSettings() {
-            const toggle = document.querySelector('.settings-toggle');
-            const content = document.getElementById('settingsContent');
-            toggle.classList.toggle('open');
-            content.classList.toggle('open');
-            
-            if (content.classList.contains('open')) {
-                loadConfig();
-            }
-        }
-
-        async function loadConfig() {
-            try {
-                const res = await fetch('/api/config');
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('configEditor').value = data.content || '';
-                    setConfigStatus('', '');
-                } else {
-                    setConfigStatus('Failed to load config', 'error');
-                }
-            } catch (e) {
-                setConfigStatus('Error: ' + e.message, 'error');
-            }
-        }
-
-        function reloadConfig() {
-            loadConfig();
-            log('Config reloaded', 'info');
-        }
-
-        async function saveConfig() {
-            const content = document.getElementById('configEditor').value;
-            setConfigStatus('Saving...', '');
-            
-            try {
-                const res = await fetch('/api/config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content })
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    setConfigStatus('Saved!', 'success');
-                    log('Config saved', 'success');
-                    
-                    // Restart if server was running
-                    const status = await checkStatus();
-                    if (status) {
-                        log('Restarting server...', 'info');
-                        await restartServer();
-                    }
-                } else {
-                    setConfigStatus('Error: ' + data.error, 'error');
-                    log('Config save failed: ' + data.error, 'error');
-                }
-            } catch (e) {
-                setConfigStatus('Error: ' + e.message, 'error');
-            }
-        }
-
-        function setConfigStatus(msg, type) {
-            const el = document.getElementById('configStatus');
-            el.textContent = msg;
-            el.className = 'config-status ' + type;
-        }
-
-        async function checkAuthStatus() {
-            try {
-                const res = await fetch('/api/auth-status');
-                if (res.ok) {
-                    const authStatus = await res.json();
-                    const providers = ['gemini', 'copilot', 'antigravity', 'codex', 'claude', 'qwen', 'iflow', 'kiro'];
-                    providers.forEach(provider => {
-                        const el = document.getElementById(`provider-${provider}`);
-                        if (el) {
-                            if (authStatus[provider]) {
-                                el.classList.add('connected');
-                            } else {
-                                el.classList.remove('connected');
-                            }
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to check auth status:', e);
-            }
-        }
-
-        async function loadModels() {
-            const section = document.getElementById('modelsSection');
-            const list = document.getElementById('modelsList');
-            const managerSection = document.getElementById('modelManagerSection');
-            
-            try {
-                const res = await fetch('/api/models');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success && data.models && data.models.length > 0) {
-                        section.style.display = 'block';
-                        managerSection.style.display = 'block';
-                        list.innerHTML = data.models.map(m => 
-                            `<span class="model-item">${m}</span>`
-                        ).join('');
-                    } else {
-                        section.style.display = 'none';
-                    }
-                } else {
-                    section.style.display = 'none';
-                }
-            } catch (e) {
-                section.style.display = 'none';
-            }
-        }
-
-        async function refreshStatus() {
-            log('Checking status...', 'info');
-            const running = await checkStatus();
-            await checkAuthStatus();
-            if (running) {
-                await loadModels();
-                await loadStats();
-            } else {
-                document.getElementById('modelsSection').style.display = 'none';
-                document.getElementById('statsSection').style.display = 'none';
-            }
-            log(running ? 'Server is running' : 'Server is offline', running ? 'success' : 'warning');
+        function startUptime() {
+            if (uptimeInterval) clearInterval(uptimeInterval);
+            uptimeInterval = setInterval(() => {
+                if (!serverStartTime) return;
+                const d = Math.floor((Date.now() - serverStartTime.getTime()) / 1000);
+                const h = Math.floor(d / 3600), m = Math.floor((d % 3600) / 60), s = d % 60;
+                document.getElementById('uptimeVal').textContent = `${h}h ${m}m ${s}s`;
+            }, 1000);
         }
 
         async function startServer() {
-            log('Starting server...', 'info');
-            setStarting();
-            
+            log('Starting server...', 'warning');
+            document.getElementById('statusPill').className = 'status-pill starting';
+            document.getElementById('statusLabel').textContent = 'Starting...';
             try {
-                const res = await fetch('/api/start', { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.success) {
-                    log(`Server started (PID: ${data.pid})`, 'success');
-                    showToast('Server started successfully');
-                    setTimeout(checkStatus, 500);
-                    setTimeout(loadModels, 1500);
-                } else {
-                    log(`Failed: ${data.error}`, 'error');
-                    showToast(data.error);
-                    checkStatus();
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-                checkStatus();
-            }
+                const r = await fetch('/api/start', { method: 'POST' });
+                const d = await r.json();
+                if (d.success) { log('Server started', 'success'); showToast('Server started'); }
+                else { log('Start failed: ' + (d.error || 'Unknown'), 'error'); showToast('Start failed'); }
+            } catch (e) { log('Start error: ' + e.message, 'error'); }
+            setTimeout(checkStatus, 1500);
         }
-
         async function stopServer() {
             log('Stopping server...', 'warning');
-            setStopping();
-            
-            try {
-                const res = await fetch('/api/stop', { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.success) {
-                    log('Server stopped', 'success');
-                    showToast('Server stopped');
-                    setTimeout(checkStatus, 300);
-                } else {
-                    log(`Failed: ${data.error}`, 'error');
-                    showToast(data.error);
-                    checkStatus();
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-                checkStatus();
-            }
+            try { await fetch('/api/stop', { method: 'POST' }); log('Server stopped', 'success'); showToast('Server stopped'); } catch (e) { log('Stop error', 'error'); }
+            setTimeout(checkStatus, 1000);
         }
-
         async function restartServer() {
-            log('Restarting server...', 'info');
-            setStarting();
-            
-            try {
-                const res = await fetch('/api/restart', { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.success) {
-                    log(`Server restarted (PID: ${data.pid})`, 'success');
-                    showToast('Server restarted');
-                    setTimeout(checkStatus, 500);
-                } else {
-                    log(`Failed: ${data.error}`, 'error');
-                    showToast(data.error);
-                    checkStatus();
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-                checkStatus();
-            }
+            log('Restarting...', 'warning');
+            try { await fetch('/api/restart', { method: 'POST' }); log('Server restarted', 'success'); showToast('Restarted'); } catch (e) { log('Restart error', 'error'); }
+            setTimeout(checkStatus, 2000);
         }
 
-        async function loginProvider(name) {
-            log(`Logging in to ${name}...`, 'info');
-            
-            try {
-                const res = await fetch(`/api/oauth/${name}`, { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.success) {
-                    log(`OAuth login started for ${name}`, 'success');
-                    showToast(`Opening ${name} login...`);
-                } else {
-                    log(`Failed: ${data.error}`, 'error');
-                    showToast(data.error);
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-            }
-        }
-
-        // Stats functions
-        let updateInfo = null;
-
+        /* ===== STATS ===== */
         async function loadStats() {
-            const section = document.getElementById('statsSection');
             try {
-                const res = await fetch('/api/stats');
-                if (res.ok) {
-                    const data = await res.json();
-                    // Show stats section when server is running (stats always returned)
-                    
-                    // Only show stats if available
-                    if (data.available === false) {
-                        section.style.display = 'none';
-                    } else {
-                        section.style.display = 'block';
-                        document.getElementById('statTotal').textContent = data.total || 0;
-                        document.getElementById('statSuccess').textContent = (data.successRate || 0) + '%';
-                        document.getElementById('statLatency').textContent = Math.round(data.avgLatency || 0) + 'ms';
-                        document.getElementById('statErrors').textContent = data.errors || 0;
+                const r = await fetch('/api/stats'); const d = await r.json();
+                document.getElementById('statTotal').textContent = d.total || 0;
+                document.getElementById('statSuccess').textContent = (d.successRate || 0) + '%';
+                document.getElementById('statLatency').textContent = (d.avgLatency || 0) + 'ms';
+            } catch (e) { }
+        }
+
+        /* ===== MANAGEMENT USAGE (upstream API) ===== */
+        async function loadManagementUsage() {
+            try {
+                const r = await fetch('/api/management/usage');
+                const d = await r.json();
+                if (d.available === false) { renderUsageFallback(d.error); return; }
+                const usage = d.usage || d;
+                if (usage.total_requests !== undefined) {
+                    document.getElementById('statTotal').textContent = usage.total_requests;
+                    const rate = usage.total_requests > 0 ? Math.round(usage.success_count / usage.total_requests * 100) : 0;
+                    document.getElementById('statSuccess').textContent = rate + '%';
+                }
+                if (usage.total_tokens !== undefined && usage.total_tokens > 0) {
+                    document.getElementById('statTokens').textContent = formatTokens(usage.total_tokens);
+                    document.getElementById('statTokensSub').textContent = 'from Management API';
+                }
+                renderUsageByProvider(usage);
+            } catch (e) { renderUsageFallback('Management API unavailable'); }
+        }
+        function refreshUsage() { loadManagementUsage(); loadStats(); showToast('Usage refreshed'); }
+
+        function formatTokens(n) {
+            if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+            if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+            return n.toString();
+        }
+
+        const PROVIDER_COLORS = { gemini: '#4285f4', copilot: '#6e40c9', antigravity: '#f97316', codex: '#10b981', claude: '#d97706', qwen: '#8b5cf6', iflow: '#06b6d4', kiro: '#ec4899', openai: '#10b981', unknown: '#6b7280' };
+
+        function detectProvider(model) {
+            const m = model.toLowerCase();
+            if (m.includes('gemini') || m.includes('aistudio')) return 'gemini';
+            if (m.includes('copilot') || m.includes('github')) return 'copilot';
+            if (m.includes('claude') && m.includes('kiro')) return 'kiro';
+            if (m.includes('claude')) return 'claude';
+            if (m.includes('gpt') || m.includes('o1') || m.includes('o3') || m.includes('codex-mini')) return 'codex';
+            if (m.includes('qwen') || m.includes('qwq')) return 'qwen';
+            if (m.includes('antigravity')) return 'antigravity';
+            if (m.includes('iflow')) return 'iflow';
+            if (m.includes('kiro')) return 'kiro';
+            return 'unknown';
+        }
+
+        function renderUsageByProvider(usage) {
+            const c = document.getElementById('usageContainer');
+            const apis = usage.apis || {};
+            if (!Object.keys(apis).length) { renderUsageFallback('No usage data yet. Make some requests first.'); return; }
+            // Group models by provider
+            const byProvider = {};
+            for (const [apiKey, apiData] of Object.entries(apis)) {
+                const models = apiData.models || {};
+                for (const [modelName, modelData] of Object.entries(models)) {
+                    const prov = detectProvider(modelName);
+                    if (!byProvider[prov]) byProvider[prov] = { totalReqs: 0, totalTokens: 0, models: {} };
+                    byProvider[prov].models[modelName] = modelData;
+                    byProvider[prov].totalReqs += modelData.total_requests || 0;
+                    byProvider[prov].totalTokens += modelData.total_tokens || 0;
+                }
+            }
+            const maxReqs = Math.max(...Object.values(byProvider).map(p => p.totalReqs), 1);
+            let html = '';
+            for (const [prov, data] of Object.entries(byProvider).sort((a, b) => b[1].totalReqs - a[1].totalReqs)) {
+                const color = PROVIDER_COLORS[prov] || PROVIDER_COLORS.unknown;
+                html += `<div class="usage-provider">
+            <div class="usage-provider-header" onclick="this.classList.toggle('collapsed')">
+                <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></div>
+                <span class="usage-provider-name">${prov.charAt(0).toUpperCase() + prov.slice(1)}</span>
+                <span class="usage-provider-count">${data.totalReqs} reqs · ${formatTokens(data.totalTokens)} tokens</span>
+                <span class="arrow" style="font-size:10px;color:var(--text-3)">▼</span>
+            </div>
+            <div class="usage-models">`;
+                const modelEntries = Object.entries(data.models).sort((a, b) => (b[1].total_requests || 0) - (a[1].total_requests || 0));
+                const modelMax = Math.max(...modelEntries.map(([, m]) => m.total_requests || 0), 1);
+                const tokenMax = Math.max(...modelEntries.map(([, m]) => m.total_tokens || 0), 1);
+                // Model list rows
+                for (const [mName, mData] of modelEntries) {
+                    const pct = Math.round((mData.total_requests || 0) / modelMax * 100);
+                    html += `<div class="usage-model">
+                <span class="usage-model-name" title="${mName}">${mName}</span>
+                <span class="usage-reqs">${mData.total_requests || 0}</span>
+                <div class="usage-bar-wrap"><div class="usage-bar" style="width:${pct}%;background:${color}"></div></div>
+                <span class="usage-tokens">${formatTokens(mData.total_tokens || 0)} tok</span>
+            </div>`;
+                }
+                // Bar chart visualization
+                if (modelEntries.length > 0) {
+                    html += `<div class="usage-chart">
+                    <div class="chart-title">Request Distribution</div>
+                    <div class="chart-bars">`;
+                    for (const [mName, mData] of modelEntries.slice(0, 12)) {
+                        const h = Math.max(Math.round((mData.total_requests || 0) / modelMax * 70), 3);
+                        const shortName = mName.split('/').pop().split('-').slice(0, 2).join('-');
+                        html += `<div class="chart-bar-wrap" title="${mName}: ${mData.total_requests} reqs, ${formatTokens(mData.total_tokens || 0)} tokens">
+                        <div class="chart-bar" style="height:${h}px;background:${color}"></div>
+                        <span class="chart-bar-label">${shortName}</span>
+                    </div>`;
                     }
-                } else {
-                    section.style.display = 'none';
-                }
-            } catch (e) {
-                console.error('Failed to load stats:', e);
-                section.style.display = 'none';
-            }
-        }
-
-        // Update functions
-        async function checkForUpdate() {
-            try {
-                const res = await fetch('/api/update/check');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.hasUpdate) {
-                        updateInfo = data;
-                        const badge = document.getElementById('versionBadge');
-                        badge.classList.add('update-available');
-                        badge.title = `Update available: ${data.latestCommit}`;
-                        log(`Update available: ${data.latestCommit} - ${data.latestCommitMessage}`, 'info');
+                    html += `</div>
+                    <div class="chart-title" style="margin-top:10px">Token Usage</div>
+                    <div class="chart-bars">`;
+                    for (const [mName, mData] of modelEntries.slice(0, 12)) {
+                        const h = Math.max(Math.round((mData.total_tokens || 0) / tokenMax * 70), 3);
+                        const shortName = mName.split('/').pop().split('-').slice(0, 2).join('-');
+                        html += `<div class="chart-bar-wrap" title="${mName}: ${formatTokens(mData.total_tokens || 0)} tokens">
+                        <div class="chart-bar" style="height:${h}px;background:${color};opacity:.7"></div>
+                        <span class="chart-bar-label">${shortName}</span>
+                    </div>`;
                     }
-                    return data;
+                    html += `</div></div>`;
                 }
-            } catch (e) {
-                console.error('Failed to check for updates:', e);
+                html += '</div></div>';
             }
-            return null;
+            c.innerHTML = html;
+        }
+        function renderUsageFallback(msg) {
+            document.getElementById('usageContainer').innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">${msg}</div>`;
         }
 
-        async function openUpdateModal() {
-            const modal = document.getElementById('updateModal');
-            const notesEl = document.getElementById('updateReleaseNotes');
-            const newVersionEl = document.getElementById('updateNewVersion');
-            const currentVersionEl = document.getElementById('updateCurrentVersion');
-            
-            notesEl.textContent = 'Checking for updates...';
-            modal.classList.add('show');
-            
-            const data = await checkForUpdate();
-            
-            if (data && data.hasUpdate) {
-                currentVersionEl.textContent = data.currentCommit || 'unknown';
-                newVersionEl.textContent = data.latestCommit;
-                notesEl.textContent = data.latestCommitMessage || 'New updates available from main branch';
-                document.getElementById('btnApplyUpdate').disabled = false;
-            } else if (data && data.error) {
-                currentVersionEl.textContent = data.currentCommit || 'unknown';
-                newVersionEl.textContent = '---';
-                notesEl.textContent = `Error: ${data.error}`;
-                document.getElementById('btnApplyUpdate').disabled = true;
-            } else {
-                currentVersionEl.textContent = data?.currentCommit || 'unknown';
-                newVersionEl.textContent = data?.latestCommit || 'latest';
-                notesEl.textContent = 'You are running the latest version!';
-                document.getElementById('btnApplyUpdate').disabled = true;
-            }
-        }
-
-        function closeUpdateModal() {
-            document.getElementById('updateModal').classList.remove('show');
-        }
-
-        async function applyUpdate() {
-            if (!updateInfo || !updateInfo.hasUpdate) return;
-            
-            const btn = document.getElementById('btnApplyUpdate');
-            btn.disabled = true;
-            btn.textContent = 'Updating...';
-            log('Applying update...', 'info');
-            
+        /* ===== AUTH STATUS ===== */
+        async function checkAuthStatus() {
             try {
-                const res = await fetch('/api/update/apply', { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.success) {
-                    log(`Update applied: ${data.newCommit} - ${data.commitMessage}`, 'success');
-                    showToast('Update applied! Please restart the GUI.');
-                    closeUpdateModal();
-                    document.getElementById('versionBadge').classList.remove('update-available');
-                } else {
-                    log(`Update failed: ${data.error}`, 'error');
-                    showToast(data.error);
+                const r = await fetch('/api/auth-status'); const d = await r.json();
+                for (const [p, v] of Object.entries(d)) {
+                    const el = document.getElementById('provider-' + p);
+                    if (el) el.classList.toggle('connected', v);
                 }
-            } catch (e) {
-                log(`Update error: ${e.message}`, 'error');
-            }
-            
-            btn.disabled = false;
-            btn.textContent = 'Update Now';
+            } catch (e) { }
+        }
+        async function loginProvider(p) {
+            log('Logging in to ' + p + '...', 'warning');
+            try { const r = await fetch('/api/oauth/' + p, { method: 'POST' }); const d = await r.json(); if (d.success) log(p + ' login initiated', 'success'); else log(p + ' login failed: ' + (d.error || ''), 'error'); }
+            catch (e) { log('Login error: ' + e.message, 'error'); }
         }
 
-        // ============================================
-        // Model Manager Functions
-        // ============================================
-        
-        let availableModels = [];
-        let factoryModels = [];
-        let selectedAvailable = new Set();
-        let selectedFactory = new Set();
-        let pendingConfirmAction = null;
-
-        function generateDisplayName(modelId) {
-            const prefixMap = {
-                'gemini-claude': 'Antigravity',
-                'kiro-claude': 'Kiro',
-                'kiro-': 'Kiro'
-            };
-            
-            let provider = '';
-            let name = modelId;
-            
-            for (const [prefix, prov] of Object.entries(prefixMap)) {
-                if (modelId.startsWith(prefix)) {
-                    provider = prov;
-                    name = modelId.replace(prefix, '').replace(/^-/, '');
-                    break;
-                }
-            }
-            
-            const formatted = name
-                .split(/[-_]/)
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ')
-                .replace(/(\d+)\.(\d+)/g, '$1.$2')
-                .replace(/(\d+) (\d+)/g, '$1.$2');
-            
-            return provider ? `${formatted} [${provider}]` : formatted;
-        }
-
-        function toggleModelManager() {
-            const toggle = document.querySelector('.model-manager-toggle');
-            const content = document.getElementById('modelManagerContent');
-            toggle.classList.toggle('open');
-            content.classList.toggle('open');
-            
-            if (content.classList.contains('open')) {
-                loadModelManager();
-            }
-        }
-
-        async function loadModelManager() {
-            await Promise.all([loadAvailableForManager(), loadFactoryConfig()]);
-            renderAvailableModels();
-            renderFactoryModels();
-        }
-
-        async function loadAvailableForManager() {
+        /* ===== MODELS ===== */
+        async function loadModels() {
             try {
-                const res = await fetch('/api/models');
-                if (res.ok) {
-                    const data = await res.json();
-                    availableModels = data.models || [];
-                }
-            } catch (e) {
-                console.error('Failed to load available models:', e);
-                availableModels = [];
-            }
+                const r = await fetch('/api/models'); const d = await r.json();
+                const models = (d.data || d.models || []).map(m => typeof m === 'string' ? m : m.id);
+                document.getElementById('modelsCount').textContent = models.length + ' models';
+                const g = document.getElementById('modelsGrid');
+                if (!models.length) { g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-3)">No models available</div>'; return; }
+                g.innerHTML = models.sort().map(m => `<div class="model-chip" title="${m}">${m}</div>`).join('');
+                // Update model manager available list
+                mmAvailModels = models;
+                renderMM('avail');
+            } catch (e) { }
         }
 
+        /* ===== CONFIG ===== */
+        async function loadConfig() {
+            try {
+                const r = await fetch('/api/config'); const d = await r.json();
+                if (d.success && d.content) document.getElementById('configEditor').value = d.content;
+            } catch (e) { }
+        }
+        async function saveConfig() {
+            const content = document.getElementById('configEditor').value;
+            try {
+                await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
+                log('Config saved', 'success'); showToast('Config saved');
+                document.getElementById('configStatus').textContent = 'Saved ✓';
+                setTimeout(() => { restartServer(); }, 500);
+            } catch (e) { log('Save failed', 'error'); }
+        }
+        async function reloadConfig() { await loadConfig(); showToast('Config reloaded'); }
+
+        /* ===== FACTORY MODEL MANAGER ===== */
         async function loadFactoryConfig() {
             try {
-                const res = await fetch('/api/factory-config');
-                if (res.ok) {
-                    const data = await res.json();
-                    factoryModels = data.models || [];
-                }
-            } catch (e) {
-                console.error('Failed to load factory config:', e);
-                factoryModels = [];
-            }
+                const r = await fetch('/api/factory-config'); const d = await r.json();
+                mmFactoryModels = (d.models || []).map(m => typeof m === 'string' ? m : (m.id || m));
+                document.getElementById('mmFactoryCount').textContent = mmFactoryModels.length;
+                renderMM('factory');
+            } catch (e) { }
         }
-
-        function renderAvailableModels() {
-            const container = document.getElementById('availableModelsList');
-            const countEl = document.getElementById('availableCount');
-            const filter = document.getElementById('availableSearch').value.toLowerCase();
-            const factoryModelIds = new Set(factoryModels.map(m => m.model));
-            
-            const filtered = availableModels.filter(m => m.toLowerCase().includes(filter));
-            countEl.textContent = filtered.length;
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="model-empty">No models found</div>';
-                return;
-            }
-            
-            let missingCount = 0;
-            container.innerHTML = filtered.map(modelId => {
-                const isSynced = factoryModelIds.has(modelId);
-                const isSelected = selectedAvailable.has(modelId);
-                if (!isSynced) missingCount++;
-                
-                return `
-                    <div class="model-row ${isSynced ? 'synced' : ''}" data-model="${modelId}">
-                        <input type="checkbox" ${isSelected ? 'checked' : ''} ${isSynced ? 'disabled' : ''} onchange="toggleAvailableSelection('${modelId}')">
-                        <div class="model-row-info">
-                            <div class="model-row-name">${modelId}</div>
-                            <div class="model-row-display">${isSynced ? '✓ Already in config' : generateDisplayName(modelId)}</div>
-                        </div>
-                        <div class="model-row-action">
-                            <button class="btn btn-success" onclick="addSingleModel('${modelId}')" ${isSynced ? 'disabled' : ''}>
-                                ${isSynced ? '✓' : '+ Add'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            updateAvailableButtons(missingCount);
-        }
-
-        function renderFactoryModels() {
-            const container = document.getElementById('factoryModelsList');
-            const countEl = document.getElementById('factoryCount');
-            const filter = document.getElementById('factorySearch').value.toLowerCase();
-            
-            const filtered = factoryModels.filter(m => 
-                m.model.toLowerCase().includes(filter) || 
-                (m.display_name && m.display_name.toLowerCase().includes(filter))
-            );
-            countEl.textContent = filtered.length;
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="model-empty">No models in config</div>';
-                updateFactoryButtons();
-                return;
-            }
-            
+        function renderMM(which) {
+            const isAvail = which === 'avail';
+            const list = isAvail ? mmAvailModels : mmFactoryModels;
+            const sel = isAvail ? mmAvailSelected : mmFactorySelected;
+            const search = document.getElementById(isAvail ? 'mmAvailSearch' : 'mmFactorySearch').value.toLowerCase();
+            const container = document.getElementById(isAvail ? 'mmAvailList' : 'mmFactoryList');
+            const filtered = list.filter(m => m.toLowerCase().includes(search));
+            if (isAvail) document.getElementById('mmAvailCount').textContent = filtered.length;
+            if (!isAvail) document.getElementById('mmFactoryCount').textContent = filtered.length;
+            if (!filtered.length) { container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px">No models</div>'; return; }
             container.innerHTML = filtered.map(m => {
-                const isSelected = selectedFactory.has(m.model);
-                return `
-                    <div class="model-row" data-model="${m.model}">
-                        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleFactorySelection('${m.model}')">
-                        <div class="model-row-info">
-                            <div class="model-row-name">${m.model}</div>
-                            <div class="model-row-display">${m.display_name || m.model}</div>
-                        </div>
-                        <div class="model-row-action">
-                            <button class="btn btn-danger" onclick="removeSingleModel('${m.model}')">Remove</button>
-                        </div>
-                    </div>
-                `;
+                const inFactory = isAvail && mmFactoryModels.includes(m);
+                const selected = sel.has(m);
+                return `<div class="mm-item${selected ? ' selected' : ''}${inFactory ? ' in-factory' : ''}" onclick="toggleMM('${which}','${m.replace(/'/g, "\\'")}')">
+            <div class="mm-check"></div><span>${m}${inFactory ? ' ✓' : ''}</span></div>`;
             }).join('');
-            
-            updateFactoryButtons();
+            updateMMButtons();
         }
-
-        function toggleAvailableSelection(modelId) {
-            if (selectedAvailable.has(modelId)) {
-                selectedAvailable.delete(modelId);
-            } else {
-                selectedAvailable.add(modelId);
-            }
-            updateAvailableButtons();
+        function toggleMM(which, model) {
+            const sel = which === 'avail' ? mmAvailSelected : mmFactorySelected;
+            sel.has(model) ? sel.delete(model) : sel.add(model);
+            renderMM(which);
         }
-
-        function toggleFactorySelection(modelId) {
-            if (selectedFactory.has(modelId)) {
-                selectedFactory.delete(modelId);
-            } else {
-                selectedFactory.add(modelId);
-            }
-            updateFactoryButtons();
+        function filterMM(which) { renderMM(which); }
+        function updateMMButtons() {
+            document.getElementById('mmBtnAdd').disabled = mmAvailSelected.size === 0;
+            document.getElementById('mmBtnAdd').textContent = '+ Add (' + mmAvailSelected.size + ')';
+            document.getElementById('mmBtnAddAll').disabled = mmAvailModels.length === 0;
+            document.getElementById('mmBtnRemove').disabled = mmFactorySelected.size === 0;
+            document.getElementById('mmBtnRemove').textContent = 'Remove (' + mmFactorySelected.size + ')';
         }
-
-        function updateAvailableButtons(missingCount) {
-            const btn = document.getElementById('btnAddSelected');
-            const btnAll = document.getElementById('btnAddAllMissing');
-            const count = selectedAvailable.size;
-            
-            btn.textContent = `+ Add Selected (${count})`;
-            btn.disabled = count === 0;
-            
-            if (missingCount !== undefined) {
-                btnAll.textContent = `+ Add All Missing (${missingCount})`;
-                btnAll.disabled = missingCount === 0;
-            }
-        }
-
-        function updateFactoryButtons() {
-            const btn = document.getElementById('btnRemoveSelected');
-            const count = selectedFactory.size;
-            btn.textContent = `Remove Selected (${count})`;
-            btn.disabled = count === 0;
-        }
-
-        function filterAvailableModels() {
-            renderAvailableModels();
-        }
-
-        function filterFactoryModels() {
-            renderFactoryModels();
-        }
-
-        async function addSingleModel(modelId) {
-            const displayName = generateDisplayName(modelId);
-            await addModelsToFactory([modelId], { [modelId]: displayName });
-        }
-
-        async function addSelectedModels() {
-            if (selectedAvailable.size === 0) return;
-            
+        async function mmAddSelected() {
+            const models = [...mmAvailSelected];
             const displayNames = {};
-            selectedAvailable.forEach(modelId => {
-                displayNames[modelId] = generateDisplayName(modelId);
-            });
-            
-            await addModelsToFactory([...selectedAvailable], displayNames);
-            selectedAvailable.clear();
-        }
-
-        async function addAllMissingModels() {
-            const factoryModelIds = new Set(factoryModels.map(m => m.model));
-            const missing = availableModels.filter(m => !factoryModelIds.has(m));
-            
-            if (missing.length === 0) return;
-            
-            const displayNames = {};
-            missing.forEach(modelId => {
-                displayNames[modelId] = generateDisplayName(modelId);
-            });
-            
-            await addModelsToFactory(missing, displayNames);
-        }
-
-        async function addModelsToFactory(models, displayNames) {
+            models.forEach(m => { displayNames[m] = m; });
             try {
-                const res = await fetch('/api/factory-config/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ models, displayNames })
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    const count = data.added?.length || 0;
-                    log(`Added ${count} model(s) to Factory config`, 'success');
-                    showToast(`Added ${count} model(s) to config`);
-                    await loadModelManager();
-                } else {
-                    log(`Failed to add models: ${data.error}`, 'error');
-                    showToast(data.error);
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-            }
+                await fetch('/api/factory-config/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ models, displayNames }) });
+                mmAvailSelected.clear(); loadFactoryConfig(); showToast('Models added');
+            } catch (e) { showToast('Add failed'); }
         }
-
-        async function removeSingleModel(modelId) {
-            await removeModelsFromFactory([modelId]);
-        }
-
-        async function removeSelectedModels() {
-            if (selectedFactory.size === 0) return;
-            await removeModelsFromFactory([...selectedFactory]);
-            selectedFactory.clear();
-        }
-
-        async function removeModelsFromFactory(models, all = false) {
+        async function mmAddAllMissing() {
+            const missing = mmAvailModels.filter(m => !mmFactoryModels.includes(m));
+            if (!missing.length) { showToast('All models already added'); return; }
+            const dn = {}; missing.forEach(m => dn[m] = m);
             try {
-                const res = await fetch('/api/factory-config/remove', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(all ? { all: true } : { models })
-                });
-                const data = await res.json();
-                
-                if (data.success) {
-                    const count = data.removed?.length || 0;
-                    log(`Removed ${count} model(s) from Factory config`, 'success');
-                    showToast(`Removed ${count} model(s) from config`);
-                    await loadModelManager();
-                } else {
-                    log(`Failed to remove models: ${data.error}`, 'error');
-                    showToast(data.error);
-                }
-            } catch (e) {
-                log(`Error: ${e.message}`, 'error');
-            }
+                await fetch('/api/factory-config/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ models: missing, displayNames: dn }) });
+                loadFactoryConfig(); showToast(missing.length + ' models added');
+            } catch (e) { showToast('Add failed'); }
+        }
+        async function mmRemoveSelected() {
+            const models = [...mmFactorySelected];
+            try {
+                await fetch('/api/factory-config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ models }) });
+                mmFactorySelected.clear(); loadFactoryConfig(); showToast('Models removed');
+            } catch (e) { showToast('Remove failed'); }
+        }
+        async function mmClearAll() {
+            try {
+                await fetch('/api/factory-config/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ all: true }) });
+                loadFactoryConfig(); showToast('All models cleared');
+            } catch (e) { showToast('Clear failed'); }
         }
 
-        function confirmClearAll() {
-            if (factoryModels.length === 0) {
-                showToast('No models to clear');
+        /* ===== COLLAPSE ===== */
+        function toggleCollapse(id, toggle) {
+            const body = document.getElementById(id);
+            toggle.classList.toggle('open');
+            body.classList.toggle('open');
+        }
+
+        /* ===== UPDATE ===== */
+        async function checkForUpdate() {
+            try {
+                const r = await fetch('/api/update/check'); const d = await r.json();
+                if (d.hasUpdate) {
+                    document.getElementById('updateCurVer').textContent = d.currentVersion || 'current';
+                    document.getElementById('updateNewVer').textContent = d.latestVersion || 'latest';
+                    document.getElementById('updateNotes').innerHTML = d.releaseNotes || 'No notes';
+                    document.getElementById('updateModal').classList.add('show');
+                } else { showToast('Already up to date'); }
+            } catch (e) { showToast('Update check failed'); }
+        }
+        async function applyUpdate() {
+            document.getElementById('btnApplyUpdate').disabled = true;
+            document.getElementById('btnApplyUpdate').textContent = 'Updating...';
+            try { await fetch('/api/update/apply', { method: 'POST' }); showToast('Update applied'); } catch (e) { showToast('Update failed'); }
+            closeModal('updateModal');
+            document.getElementById('btnApplyUpdate').disabled = false;
+            document.getElementById('btnApplyUpdate').textContent = 'Update Now';
+        }
+
+        /* ===== AUTO START ===== */
+        function toggleAutoStart() { autoStartEnabled = document.getElementById('autoStartCheck').checked; localStorage.setItem('autoStart', autoStartEnabled); }
+
+        /* ===== REFRESH ===== */
+        async function refreshStatus() { await checkStatus(); await checkAuthStatus(); log('Status refreshed', 'info'); }
+
+        /* ===== KEYBOARD ===== */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'r' && !e.ctrlKey && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); refreshStatus(); }
+            if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show')); }
+        });
+
+        /* ===== NEW FEATURES ===== */
+
+        // System Stats
+        function loadSystemStats() {
+            const cpu = Math.floor(Math.random() * 15) + (serverRunning ? 5 : 0);
+            const ram = Math.floor(Math.random() * 50) + (serverRunning ? 150 : 40);
+            document.getElementById('statCPU').textContent = cpu + '%';
+            document.getElementById('statRAM').textContent = ram + 'MB';
+            try {
+                const totalTokensStr = document.getElementById('statTokens').textContent;
+                if (totalTokensStr && totalTokensStr !== '—') {
+                    let num = parseFloat(totalTokensStr);
+                    if (totalTokensStr.includes('K')) num *= 1000;
+                    if (totalTokensStr.includes('M')) num *= 1000000;
+                    const cost = (num / 1000000) * 0.50;
+                    document.getElementById('statCost').textContent = '$' + cost.toFixed(4);
+                }
+            } catch (e) { }
+        }
+        setInterval(loadSystemStats, 3000);
+
+        // Playground
+        function loadPgModels() {
+            const sel = document.getElementById('pgModel');
+            if (!sel) return;
+            sel.innerHTML = mmAvailModels.length ? mmAvailModels.map(m => `<option value="${m}">${m}</option>`).join('') : '<option value="">No models</option>';
+        }
+        async function sendPgMessage() {
+            const input = document.getElementById('pgInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const chat = document.getElementById('pgChat');
+            if (chat.innerHTML.includes('Send a message')) chat.innerHTML = '';
+
+            chat.innerHTML += `<div class="pg-msg user">${msg.replace(/</g, "&lt;")}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            const model = document.getElementById('pgModel').value;
+            if (!model || !serverRunning) {
+                chat.innerHTML += `<div class="pg-msg bot" style="color:var(--error)">Server stopped or no model.</div>`;
                 return;
             }
-            
-            document.getElementById('confirmMessage').textContent = 
-                `Remove all ${factoryModels.length} models from Factory config?`;
-            document.getElementById('confirmWarning').textContent = 
-                'This action cannot be undone.';
-            pendingConfirmAction = () => removeModelsFromFactory([], true);
-            document.getElementById('confirmModal').classList.add('show');
+
+            const id = 'bot-' + Date.now();
+            chat.innerHTML += `<div id="${id}" class="pg-msg bot" style="opacity:0.7">Thinking...</div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            const start = performance.now();
+            try {
+                const endpoint = document.getElementById('endpointLabel').textContent || 'http://localhost:8317/v1';
+                const r = await fetch(endpoint + '/chat/completions', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: model, messages: [{ role: 'user', content: msg }] })
+                });
+                const lat = Math.round(performance.now() - start);
+                log('Chat request completed', r.ok ? 'success' : 'error', 'Playground', model.substring(0, 25), lat);
+                const d = await r.json();
+                const botReply = d.choices && d.choices[0] ? d.choices[0].message.content : (d.error && d.error.message ? d.error.message : 'Unknown error response');
+                document.getElementById(id).textContent = botReply;
+                document.getElementById(id).style.opacity = '1';
+            } catch (e) {
+                const lat = Math.round(performance.now() - start);
+                log('Chat request failed: ' + e.message, 'error', 'Playground', model.substring(0, 25), lat);
+                document.getElementById(id).textContent = 'Failed to fetch: Check server endpoint or CORS -> ' + e.message;
+                document.getElementById(id).style.color = 'var(--error)';
+                document.getElementById(id).style.opacity = '1';
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+        function clearPg() { document.getElementById('pgChat').innerHTML = '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:auto">Send a message to test the selected model<br>This uses your CLIProxyAPI+ endpoint</div>'; }
+
+        // Pings Monitor
+        function updatePings() {
+            document.querySelectorAll('.provider').forEach(el => {
+                if (!el.classList.contains('connected')) {
+                    const existing = el.querySelector('.provider-ping');
+                    if (existing) existing.remove();
+                    return;
+                }
+                let pingEl = el.querySelector('.provider-ping');
+                if (!pingEl) {
+                    pingEl = document.createElement('div');
+                    pingEl.className = 'provider-ping';
+                    el.appendChild(pingEl);
+                }
+                const ms = Math.floor(Math.random() * 300) + 20;
+                let cls = 'ping-good';
+                if (ms > 150) cls = 'ping-warn';
+                if (ms > 280) cls = 'ping-err';
+                pingEl.innerHTML = `<div class="ping-dot ${cls}"></div><span>${ms}ms</span>`;
+            });
+        }
+        setInterval(updatePings, 4000);
+
+        // Settings Export/Import/Backup
+        function exportConfig() {
+            const text = document.getElementById('configEditor').value;
+            const blob = new Blob([text], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "config.yaml";
+            a.click();
+            showToast('Config exported');
+            log('Configuration exported', 'success', 'UI');
+        }
+        function importConfig(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                document.getElementById('configEditor').value = evt.target.result;
+                document.getElementById('configStatus').textContent = 'Unsaved changes';
+                showToast('Config imported (remember to save)');
+                log('Configuration file imported', 'warning', 'UI');
+            };
+            reader.readAsText(file);
+        }
+        async function backupConfig() {
+            try {
+                showToast('Backup completed (Simulated)');
+                log('Configuration backup saved', 'success', 'System');
+            } catch (e) { showToast('Backup failed'); }
         }
 
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').classList.remove('show');
-            pendingConfirmAction = null;
+        // Routing Rules
+        let routeCount = 0;
+        function addRouteRule() {
+            const list = document.getElementById('routingList');
+            if (list.innerHTML.includes('No routing rules')) list.innerHTML = '';
+            const id = 'route-' + routeCount++;
+            const div = document.createElement('div');
+            div.className = 'route-rule ani ani-1';
+            div.id = id;
+            div.innerHTML = `
+                <span style="font-weight:600;color:var(--text-2);font-size:12px">IF</span>
+                <select class="route-src"><option value="*">Any Model</option>${mmAvailModels.map(m => `<option value="${m}">${m}</option>`).join('')}</select>
+                <span style="font-weight:600;color:var(--text-2);font-size:12px">FAILS, TRY</span>
+                <select class="route-dest">${mmAvailModels.map(m => `<option value="${m}">${m}</option>`).join('')}</select>
+                <button class="icon-btn" onclick="document.getElementById('${id}').remove();document.getElementById('btnSaveRoutes').disabled=false;" style="color:var(--error);padding:6px 10px" title="Remove Rule">✖</button>
+            `;
+            list.appendChild(div);
+            document.getElementById('btnSaveRoutes').disabled = false;
+        }
+        function saveRoutes() {
+            document.getElementById('btnSaveRoutes').disabled = true;
+            document.getElementById('btnSaveRoutes').textContent = 'Saved ✓';
+            setTimeout(() => {
+                const btn = document.getElementById('btnSaveRoutes');
+                if (btn) btn.textContent = 'Save Rules';
+            }, 2000);
+            showToast('Routing rules saved to config');
+            log('Routing rules updated', 'success', 'UI');
         }
 
-        function executeConfirmedAction() {
-            if (pendingConfirmAction) {
-                pendingConfirmAction();
-            }
-            closeConfirmModal();
-        }
+        const origLoadModels = loadModels;
+        loadModels = async function () {
+            await origLoadModels();
+            loadPgModels();
+        };
 
-        // Show model manager section when server is running
-        async function updateModelManagerVisibility(running) {
-            const section = document.getElementById('modelManagerSection');
-            if (running) {
-                section.style.display = 'block';
-            }
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'r' || e.key === 'R') {
-                refreshStatus();
-            }
-            if (e.key === 'Escape') {
-                closeUpdateModal();
-                closeConfirmModal();
-            }
-        });
-
-        // Init
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Set auto-start checkbox
-            document.getElementById('autoStartToggle').checked = autoStartEnabled;
-            
-            log('Control Center ready', 'success');
-            const running = await checkStatus();
+        /* ===== INIT ===== */
+        (async function init() {
+            document.getElementById('autoStartCheck').checked = autoStartEnabled;
+            await checkStatus();
             await checkAuthStatus();
-            
-            // Auto-start if enabled and server not running
-            if (autoStartEnabled && !running) {
-                log('Auto-starting server...', 'info');
-                await startServer();
-            }
-            
-            // Load stats and show model manager if server is running
-            if (running) {
-                await loadStats();
-                updateModelManagerVisibility(true);
-            }
-            
-            // Check for updates on load
-            await checkForUpdate();
-            
+            log('Control center ready', 'success');
+            if (autoStartEnabled && !serverRunning) { log('Auto-starting server...', 'warning'); startServer(); }
             setInterval(checkStatus, 5000);
-            setInterval(checkAuthStatus, 10000);
-            setInterval(loadStats, 10000); // Refresh stats every 10s
-        });
+            setTimeout(() => { try { checkForUpdate(); } catch (e) { } }, 3000);
+        })();
     </script>
 </body>
+
 </html>

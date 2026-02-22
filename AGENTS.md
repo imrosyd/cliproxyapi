@@ -1,15 +1,17 @@
-# AGENTS.md - CLIProxyAPIPlus Easy Installation
+# AGENTS.md - CLIProxyAPI Easy Installation
 
 > Guidance for AI coding agents working on this repository.
 
 ## Project Snapshot
 
-- **Type**: Utility scripts collection (PowerShell)
-- **Purpose**: One-click installation scripts for CLIProxyAPIPlus proxy server
-- **Platform**: Windows (PowerShell 5.1+)
-- **Sub-docs**: See [scripts/AGENTS.md](scripts/AGENTS.md) for script-specific patterns
+- **Type**: Utility scripts collection (PowerShell + Bash)
+- **Purpose**: One-click installation scripts for CLIProxyAPI proxy server
+- **Platform**: Windows (PowerShell 5.1+), Linux/macOS (Bash 4+)
+- **Sub-docs**: See [scripts/AGENTS.md](scripts/AGENTS.md) for PowerShell script-specific patterns
 
 ## Quick Commands
+
+### Windows (PowerShell)
 
 ```powershell
 # Test install script (dry run not available - test on VM/sandbox)
@@ -25,11 +27,29 @@
 .\scripts\uninstall-cliproxyapi.ps1 -Force
 ```
 
+### Linux / macOS (Bash)
+
+```bash
+# Test install script (dry run not available - test on VM/sandbox)
+./unix/install-cliproxyapi.sh --prebuilt
+
+# Test OAuth script (interactive)
+./unix/cliproxyapi-oauth.sh
+
+# Test update script
+./unix/update-cliproxyapi.sh --prebuilt
+
+# Test uninstall (use --force to skip confirmation)
+./unix/uninstall-cliproxyapi.sh --force
+```
+
 ## Repository Structure
 
 ```
-├── scripts/           → PowerShell scripts [see scripts/AGENTS.md]
+├── scripts/           → PowerShell scripts (Windows) [see scripts/AGENTS.md]
+├── unix/              → Bash scripts (Linux/macOS)
 ├── configs/           → Example config files (YAML, JSON)
+├── gui/               → HTML GUI for Control Center
 ├── README.md          → English docs
 ├── README_ID.md       → Indonesian docs
 └── LICENSE            → MIT
@@ -39,9 +59,10 @@
 
 ### Code Style
 - **PowerShell**: Use approved verbs (`Get-`, `Set-`, `New-`, `Remove-`)
+- **Bash**: Use snake_case for functions, lowercase for variables
 - **Indentation**: 4 spaces (no tabs)
-- **Comments**: Use `#` for inline, `<# #>` for block/help
-- **Encoding**: UTF-8 with BOM for PowerShell scripts
+- **Comments**: Use `#` for inline, `<# #>` for block/help (PowerShell)
+- **Encoding**: UTF-8 with BOM for PowerShell, UTF-8 for Bash
 
 ### Commit Format
 ```
@@ -61,18 +82,27 @@ Types: `feat`, `fix`, `docs`, `refactor`, `chore`
 
 - **NEVER** commit real API keys or OAuth tokens
 - Use `sk-dummy` as placeholder in examples
-- Config paths use `~` or `$env:USERPROFILE` (resolved at runtime)
+- Config paths use `~` or `$env:USERPROFILE` / `$HOME` (resolved at runtime)
 - No hardcoded usernames or paths
 
 ## JIT Index
 
-### Find Script Functions
+### Find Script Functions (PowerShell)
 ```powershell
 # Find all functions in scripts
 Select-String -Path "scripts\*.ps1" -Pattern "^function\s+\w+"
 
 # Find param blocks
 Select-String -Path "scripts\*.ps1" -Pattern "param\s*\("
+```
+
+### Find Script Functions (Bash)
+```bash
+# Find all functions in unix scripts
+grep -n "^function\s\|^[a-z_]*() {" unix/*.sh
+
+# Find parameter handling
+grep -n "case.*in\|for arg in" unix/*.sh
 ```
 
 ### Find Config Patterns
@@ -88,6 +118,7 @@ Select-String -Path "configs\*.yaml" -Pattern "^\w+:"
 
 Before PR:
 - [ ] Script runs without errors on clean Windows install
-- [ ] Help text updated (`Get-Help .\script.ps1`)
+- [ ] Script runs without errors on clean Linux/macOS install
+- [ ] Help text updated (`Get-Help .\script.ps1` or `./script.sh --help`)
 - [ ] README updated if new features added
 - [ ] Both English and Indonesian READMEs in sync

@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus Installation Script for Droid CLI
+    CLIProxyAPI Installation Script for Droid CLI
 .DESCRIPTION
-    Complete one-click installer that sets up CLIProxyAPI-Plus for Factory Droid.
+    Complete one-click installer that sets up CLIProxyAPI for Factory Droid.
     - Clones or downloads pre-built binary
-    - Configures ~/.cli-proxy-api/config.yaml
+    - Configures ~/.cliproxyapi/config.yaml
     - Updates ~/.factory/config.json with custom models
     - Provides OAuth login prompts
 .NOTES
     Author: Auto-generated for faiz
-    Repo: https://github.com/router-for-me/CLIProxyAPIPlus
+    Repo: https://github.com/imrosyd/cliproxyapi
 #>
 
 param(
@@ -20,13 +20,13 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$REPO_URL = "https://github.com/router-for-me/CLIProxyAPIPlus.git"
-$RELEASE_API = "https://api.github.com/repos/router-for-me/CLIProxyAPIPlus/releases/latest"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPIPlus"
+$REPO_URL = "https://github.com/imrosyd/cliproxyapi.git"
+$RELEASE_API = "https://api.github.com/repos/imrosyd/cliproxyapi/releases/latest"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
 $BIN_DIR = "$env:USERPROFILE\bin"
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
 $FACTORY_DIR = "$env:USERPROFILE\.factory"
-$BINARY_NAME = "cliproxyapi-plus.exe"
+$BINARY_NAME = "cliproxyapi.exe"
 
 function Write-Step { param($msg) Write-Host "`n[*] $msg" -ForegroundColor Cyan }
 function Write-Success { param($msg) Write-Host "[+] $msg" -ForegroundColor Green }
@@ -35,7 +35,7 @@ function Write-Error { param($msg) Write-Host "[-] $msg" -ForegroundColor Red }
 
 Write-Host @"
 ==============================================
-  CLIProxyAPI-Plus Installer for Droid CLI
+  CLIProxyAPI Installer for Droid CLI
 ==============================================
 "@ -ForegroundColor Magenta
 
@@ -78,8 +78,8 @@ if ($UsePrebuilt) {
             Write-Error "Could not find Windows binary in latest release"
             exit 1
         }
-        $zipPath = "$env:TEMP\cliproxyapi-plus.zip"
-        $extractPath = "$env:TEMP\cliproxyapi-plus-extract"
+        $zipPath = "$env:TEMP\cliproxyapi.zip"
+        $extractPath = "$env:TEMP\cliproxyapi-extract"
         
         Write-Host "    Downloading $($asset.name)..."
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
@@ -152,8 +152,8 @@ if ($UsePrebuilt -and -not (Test-Path "$BIN_DIR\$BINARY_NAME")) {
             Write-Error "Could not find Windows binary in latest release"
             exit 1
         }
-        $zipPath = "$env:TEMP\cliproxyapi-plus.zip"
-        $extractPath = "$env:TEMP\cliproxyapi-plus-extract"
+        $zipPath = "$env:TEMP\cliproxyapi.zip"
+        $extractPath = "$env:TEMP\cliproxyapi-extract"
         
         Write-Host "    Downloading $($asset.name)..."
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
@@ -179,7 +179,7 @@ if ($UsePrebuilt -and -not (Test-Path "$BIN_DIR\$BINARY_NAME")) {
 }
 
 # Create config.yaml
-Write-Step "Configuring ~/.cli-proxy-api/config.yaml..."
+Write-Step "Configuring ~/.cliproxyapi/config.yaml..."
 $configYaml = @"
 port: 8317
 auth-dir: "$($CONFIG_DIR -replace '\\', '/')"
@@ -271,28 +271,28 @@ if (-not $SkipOAuth) {
 Run these commands to login to each provider:
 
   # Gemini CLI
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --login
 
   # Antigravity
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --antigravity-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --antigravity-login
 
   # GitHub Copilot
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --github-copilot-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --github-copilot-login
 
   # Codex
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --codex-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --codex-login
 
   # Claude
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --claude-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --claude-login
 
   # Qwen
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --qwen-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --qwen-login
 
   # iFlow
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --iflow-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --iflow-login
 
   # Kiro (AWS)
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml --kiro-aws-login
+  cliproxyapi --config $CONFIG_DIR\config.yaml --kiro-aws-login
 
 ==============================================
 "@ -ForegroundColor Yellow
@@ -322,7 +322,7 @@ Quick Start:
   1. Start server:    start-cliproxyapi -Background
   2. Login OAuth:     cliproxyapi-oauth -All
   3. Open GUI:        gui-cliproxyapi
-  4. Use with Droid:  droid (select cliproxyapi-plus/* model)
+  4. Use with Droid:  droid (select cliproxyapi/* model)
 "@ -ForegroundColor Cyan
 
 if ($pathAdded) {

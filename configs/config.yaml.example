@@ -1,13 +1,13 @@
 # CLIProxyAPI-Plus Configuration
-# Copy this to ~/.cli-proxy-api/config.yaml
+# Copy this to ~/.cliproxyapi/config.yaml
 
 # Server port (default: 8317)
 port: 8317
 
 # Directory to store OAuth tokens
-# Windows: C:/Users/YourName/.cli-proxy-api
-# Linux/Mac: ~/.cli-proxy-api
-auth-dir: "~/.cli-proxy-api"
+# Windows: C:/Users/YourName/.cliproxyapi
+# Linux/Mac: ~/.cliproxyapi
+auth-dir: "~/.cliproxyapi"
 
 # API keys for authentication (use any dummy key)
 api-keys:

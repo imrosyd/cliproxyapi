@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus Update Script
+    CLIProxyAPI Update Script
 .DESCRIPTION
-    Updates CLIProxyAPI-Plus to the latest version.
+    Updates CLIProxyAPI to the latest version.
     - Pulls latest from repo OR downloads latest release
     - Rebuilds binary OR extracts pre-built
     - Preserves all config and auth files
 .NOTES
     Author: Auto-generated for faiz
-    Repo: https://github.com/router-for-me/CLIProxyAPIPlus
+    Repo: https://github.com/imrosyd/cliproxyapi
 #>
 
 param(
@@ -18,12 +18,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$REPO_URL = "https://github.com/router-for-me/CLIProxyAPIPlus.git"
-$RELEASE_API = "https://api.github.com/repos/router-for-me/CLIProxyAPIPlus/releases/latest"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPIPlus"
+$REPO_URL = "https://github.com/imrosyd/cliproxyapi.git"
+$RELEASE_API = "https://api.github.com/repos/imrosyd/cliproxyapi/releases/latest"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
 $BIN_DIR = "$env:USERPROFILE\bin"
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
-$BINARY_NAME = "cliproxyapi-plus.exe"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
+$BINARY_NAME = "cliproxyapi.exe"
 
 function Write-Step { param($msg) Write-Host "`n[*] $msg" -ForegroundColor Cyan }
 function Write-Success { param($msg) Write-Host "[+] $msg" -ForegroundColor Green }
@@ -32,7 +32,7 @@ function Write-Error { param($msg) Write-Host "[-] $msg" -ForegroundColor Red }
 
 Write-Host @"
 ==============================================
-  CLIProxyAPI-Plus Updater
+  CLIProxyAPI Updater
 ==============================================
 "@ -ForegroundColor Magenta
 
@@ -107,8 +107,8 @@ if (-not $UsePrebuilt -and (Test-Path $CLONE_DIR)) {
             exit 1
         }
         
-        $zipPath = "$env:TEMP\cliproxyapi-plus-update.zip"
-        $extractPath = "$env:TEMP\cliproxyapi-plus-extract"
+        $zipPath = "$env:TEMP\cliproxyapi-update.zip"
+        $extractPath = "$env:TEMP\cliproxyapi-extract"
         
         Write-Host "    Downloading $($asset.name)..."
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
@@ -163,6 +163,6 @@ Config:  $CONFIG_DIR\config.yaml (preserved)
 Auth:    $CONFIG_DIR\*.json (preserved)
 
 To start the server:
-  cliproxyapi-plus --config $CONFIG_DIR\config.yaml
+  cliproxyapi --config $CONFIG_DIR\config.yaml
 ==============================================
 "@ -ForegroundColor Green

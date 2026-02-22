@@ -1,0 +1,17 @@
+[Unit]
+Description=CLIProxyAPI Proxy Server
+Documentation=https://github.com/imrosyd/cliproxyapi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/bin/cliproxyapi --config %h/.cliproxyapi/config.yaml
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:%h/.cliproxyapi/logs/server.log
+StandardError=append:%h/.cliproxyapi/logs/server.log
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target

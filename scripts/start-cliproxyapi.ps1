@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus Server Manager
+    CLIProxyAPI Server Manager
 .DESCRIPTION
-    Start, stop, and manage the CLIProxyAPI-Plus proxy server.
+    Start, stop, and manage the CLIProxyAPI proxy server.
 .EXAMPLE
     start-cliproxyapi.ps1              # Start in foreground
     start-cliproxyapi.ps1 -Background  # Start in background
@@ -11,7 +11,7 @@
     start-cliproxyapi.ps1 -Logs        # View logs
 .NOTES
     Author: Auto-generated
-    Repo: https://github.com/julianromli/CLIProxyAPIPlus-Easy-Installation
+    Repo: https://github.com/imrosyd/cliproxyapi
 #>
 
 param(
@@ -22,11 +22,11 @@ param(
     [switch]$Restart
 )
 
-$BINARY = "$env:USERPROFILE\bin\cliproxyapi-plus.exe"
-$CONFIG = "$env:USERPROFILE\.cli-proxy-api\config.yaml"
-$LOG_DIR = "$env:USERPROFILE\.cli-proxy-api\logs"
+$BINARY = "$env:USERPROFILE\bin\cliproxyapi.exe"
+$CONFIG = "$env:USERPROFILE\.cliproxyapi\config.yaml"
+$LOG_DIR = "$env:USERPROFILE\.cliproxyapi\logs"
 $PORT = 8317
-$PROCESS_NAMES = @("cliproxyapi-plus", "cli-proxy-api")
+$PROCESS_NAMES = @("cliproxyapi", "cli-proxy-api")
 
 function Write-Step { param($msg) Write-Host "[*] $msg" -ForegroundColor Cyan }
 function Write-Success { param($msg) Write-Host "[+] $msg" -ForegroundColor Green }
@@ -47,7 +47,7 @@ function Test-PortInUse {
 }
 
 function Show-Status {
-    Write-Host "`n=== CLIProxyAPI-Plus Status ===" -ForegroundColor Magenta
+    Write-Host "`n=== CLIProxyAPI Status ===" -ForegroundColor Magenta
     
     $process = Get-ServerProcess
     if ($process) {
@@ -105,7 +105,7 @@ function Show-Logs {
     } else {
         Write-Warning "No log files found in $LOG_DIR"
         Write-Host "Server may be running without file logging."
-        Write-Host "Start with: cliproxyapi-plus --config $CONFIG"
+        Write-Host "Start with: cliproxyapi --config $CONFIG"
     }
 }
 
@@ -148,7 +148,7 @@ function Start-Server {
             exit 1
         }
     } else {
-        Write-Host "=== CLIProxyAPI-Plus Server ===" -ForegroundColor Magenta
+        Write-Host "=== CLIProxyAPI Server ===" -ForegroundColor Magenta
         Write-Host "Config:   $CONFIG"
         Write-Host "Endpoint: http://localhost:$PORT/v1"
         Write-Host "Press Ctrl+C to stop`n" -ForegroundColor DarkGray

@@ -1,0 +1,12 @@
+[Unit]
+Description=CLIProxyAPI Auto-Update
+Documentation=https://github.com/imrosyd/cliproxyapi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/update-cliproxyapi --prebuilt --force
+StandardOutput=append:%h/.cliproxyapi/logs/update.log
+StandardError=append:%h/.cliproxyapi/logs/update.log
+Environment=HOME=%h

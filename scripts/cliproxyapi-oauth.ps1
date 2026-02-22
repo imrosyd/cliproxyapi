@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus OAuth Login Helper
+    CLIProxyAPI OAuth Login Helper
 .DESCRIPTION
     Interactive script to login to all supported OAuth providers.
     Run without parameters for interactive menu, or use flags for specific providers.
@@ -22,12 +22,12 @@ param(
     [switch]$Kiro
 )
 
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
 $CONFIG_FILE = "$CONFIG_DIR\config.yaml"
-$BINARY = "$env:USERPROFILE\bin\cliproxyapi-plus.exe"
+$BINARY = "$env:USERPROFILE\bin\cliproxyapi.exe"
 
 if (-not (Test-Path $BINARY)) {
-    Write-Host "[-] cliproxyapi-plus.exe not found. Run install-cliproxyapi.ps1 first." -ForegroundColor Red
+    Write-Host "[-] cliproxyapi.exe not found. Run install-cliproxyapi.ps1 first." -ForegroundColor Red
     exit 1
 }
 
@@ -42,14 +42,15 @@ $providers = @(
     @{ Name = "Kiro (AWS)"; Flag = "--kiro-aws-login"; Switch = "Kiro" }
 )
 
-function Run-Login {
+function Invoke-Login {
     param($provider)
     Write-Host "`n[*] Logging in to $($provider.Name)..." -ForegroundColor Cyan
-    Write-Host "    Command: cliproxyapi-plus --config $CONFIG_FILE $($provider.Flag)" -ForegroundColor DarkGray
+    Write-Host "    Command: cliproxyapi --config $CONFIG_FILE $($provider.Flag)" -ForegroundColor DarkGray
     & $BINARY --config $CONFIG_FILE $provider.Flag
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[+] $($provider.Name) login completed!" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "[!] $($provider.Name) login may have issues (exit code: $LASTEXITCODE)" -ForegroundColor Yellow
     }
 }
@@ -59,19 +60,20 @@ $anyFlagPassed = $All -or $Gemini -or $Antigravity -or $Copilot -or $Codex -or $
 
 if ($anyFlagPassed) {
     # Direct mode - run specified logins
-    Write-Host "=== CLIProxyAPI-Plus OAuth Login ===" -ForegroundColor Magenta
+    Write-Host "=== CLIProxyAPI OAuth Login ===" -ForegroundColor Magenta
     
     foreach ($p in $providers) {
         $switchVar = Get-Variable -Name $p.Switch -ValueOnly -ErrorAction SilentlyContinue
         if ($All -or $switchVar) {
-            Run-Login $p
+            Invoke-Login $p
         }
     }
-} else {
+}
+else {
     # Interactive menu mode
     Write-Host @"
 ==========================================
-  CLIProxyAPI-Plus OAuth Login Menu
+  CLIProxyAPI OAuth Login Menu
 ==========================================
 "@ -ForegroundColor Magenta
 
@@ -94,7 +96,7 @@ if ($anyFlagPassed) {
         if ($choice -eq 'A' -or $choice -eq 'a') {
             Write-Host "`nLogging in to ALL providers..." -ForegroundColor Yellow
             foreach ($p in $providers) {
-                Run-Login $p
+                Invoke-Login $p
                 Write-Host "`nPress Enter to continue to next provider..." -ForegroundColor DarkGray
                 Read-Host
             }
@@ -109,8 +111,9 @@ if ($anyFlagPassed) {
             if ($sel -match '^\d+$') {
                 $idx = [int]$sel - 1
                 if ($idx -ge 0 -and $idx -lt $providers.Count) {
-                    Run-Login $providers[$idx]
-                } else {
+                    Invoke-Login $providers[$idx]
+                }
+                else {
                     Write-Host "[!] Invalid selection: $sel" -ForegroundColor Yellow
                 }
             }

@@ -1,14 +1,14 @@
-# CLIProxyAPIPlus Easy Installation
+# CLIProxyAPI Easy Installation
 
-> One-click setup scripts for [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus) - Use multiple AI providers through a single OpenAI-compatible API.
+> One-click setup scripts for [CLIProxyAPI](https://github.com/imrosyd/cliproxyapi) - Use multiple AI providers through a single OpenAI-compatible API.
 
 [English](README.md) | [Bahasa Indonesia](README_ID.md)
 
 ---
 
-## What is CLIProxyAPIPlus?
+## What is CLIProxyAPI?
 
-**CLIProxyAPIPlus** is a local proxy server that lets you access multiple AI providers (Gemini, Claude, GPT, Qwen, etc.) through a **single OpenAI-compatible API endpoint**.
+**CLIProxyAPI** is a local proxy server that lets you access multiple AI providers (Gemini, Claude, GPT, Qwen, etc.) through a **single OpenAI-compatible API endpoint**.
 
 Think of it as a "router" for AI models - you login once to each provider via OAuth, and the proxy handles everything else. Your CLI tools (Droid, Claude Code, Cursor, etc.) just talk to `localhost:8317` like it's OpenAI.
 
@@ -40,7 +40,7 @@ Think of it as a "router" for AI models - you login once to each provider via OA
 
 ```
 ┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
-│   Your CLI      │     │   CLIProxyAPIPlus    │     │   AI Providers  │
+│   Your CLI      │     │   CLIProxyAPI    │     │   AI Providers  │
 │  (Droid, etc.)  │────▶│   localhost:8317     │────▶│  Gemini, Claude │
 │                 │     │                      │     │  GPT, Qwen, etc │
 └─────────────────┘     └──────────────────────┘     └─────────────────┘
@@ -54,42 +54,44 @@ Think of it as a "router" for AI models - you login once to each provider via OA
 ```
 
 1. **You login** to each provider once (OAuth flow opens in browser)
-2. **Tokens are stored** locally in `~/.cli-proxy-api/*.json`
+2. **Tokens are stored** locally in `~/.cliproxyapi/*.json`
 3. **Proxy server runs** on `localhost:8317`
 4. **Your CLI sends requests** to the proxy using OpenAI API format
 5. **Proxy routes** requests to the correct provider based on model name
 
 ---
 
-## Quick Start (Windows)
+## Quick Start
 
-### Prerequisites
+### Windows
+
+#### Prerequisites
 
 - **Git** - [Download](https://git-scm.com/downloads)
 - **Go 1.21+** (optional, for building from source) - [Download](https://go.dev/dl/)
 
-### Option 1: One-Line Install (Recommended)
+#### Option 1: One-Line Install (Recommended)
 
 ```powershell
 # Download and run the installer (via JSDelivr CDN - faster)
-irm https://cdn.jsdelivr.net/gh/julianromli/CLIProxyAPIPlus-Easy-Installation@main/scripts/install-cliproxyapi.ps1 | iex
+irm https://cdn.jsdelivr.net/gh/imrosyd/cliproxyapi@main/scripts/install-cliproxyapi.ps1 | iex
 
 # Alternative (via GitHub raw)
-irm https://raw.githubusercontent.com/julianromli/CLIProxyAPIPlus-Easy-Installation/main/scripts/install-cliproxyapi.ps1 | iex
+irm https://raw.githubusercontent.com/imrosyd/cliproxyapi/main/scripts/install-cliproxyapi.ps1 | iex
 ```
 
-### Option 2: Manual Install
+#### Option 2: Manual Install
 
 ```powershell
 # Clone this repo
-git clone https://github.com/julianromli/CLIProxyAPIPlus-Easy-Installation.git
-cd CLIProxyAPIPlus-Easy-Installation
+git clone https://github.com/imrosyd/cliproxyapi.git
+cd cliproxyapi
 
 # Run the installer
 .\scripts\install-cliproxyapi.ps1
 ```
 
-### After Installation
+#### After Installation
 
 Scripts are installed to `~/bin/` and added to PATH automatically.
 
@@ -107,12 +109,130 @@ cliproxyapi-oauth -All
 gui-cliproxyapi
 ```
 
+### Linux / macOS
+
+#### Prerequisites
+
+- **Git** - `sudo apt install git` (Ubuntu/Debian) or `brew install git` (macOS)
+- **Go 1.21+** (optional, for building from source) - `sudo apt install golang-go` or `brew install go`
+- **curl** - Usually pre-installed
+
+#### Option 1: One-Line Install (Recommended)
+
+```bash
+# Download and run the installer (via JSDelivr CDN - faster)
+curl -fsSL https://cdn.jsdelivr.net/gh/imrosyd/cliproxyapi@main/unix/install-cliproxyapi.sh | bash
+
+# Alternative (via GitHub raw)
+curl -fsSL https://raw.githubusercontent.com/imrosyd/cliproxyapi/main/unix/install-cliproxyapi.sh | bash
+```
+
+#### Option 2: Manual Install
+
+```bash
+# Clone this repo
+git clone https://github.com/imrosyd/cliproxyapi.git
+cd cliproxyapi
+
+# Run the installer
+./unix/install-cliproxyapi.sh
+
+# Or with pre-built binary (no Go required)
+./unix/install-cliproxyapi.sh --prebuilt
+```
+
+#### After Installation
+
+Scripts are installed to `~/bin/` and added to PATH automatically.
+
+```bash
+# Restart terminal or reload shell config
+source ~/.bashrc  # or ~/.zshrc
+
+# Start server in background
+start-cliproxyapi -b
+
+# Login to providers
+cliproxyapi-oauth --all
+
+# Open GUI Control Center (full control via browser)
+gui-cliproxyapi
+```
+
 **Available Scripts:**
-- `start-cliproxyapi` - Start/stop/restart server
+- `start-cliproxyapi` - Start/stop/restart server + systemd management
 - `cliproxyapi-oauth` - Login to OAuth providers
 - `gui-cliproxyapi` - Open GUI Control Center
 - `update-cliproxyapi` - Update to latest version
 - `uninstall-cliproxyapi` - Remove everything
+- `cliproxyapi-benchmark` - Test provider latency
+
+---
+
+## Systemd Service (Auto-Start on Boot)
+
+On Linux systems with systemd, the installer automatically sets up a user service.
+
+```bash
+# Enable auto-start on boot
+start-cliproxyapi --enable
+
+# Disable auto-start
+start-cliproxyapi --disable
+
+# Check service status
+systemctl --user status cliproxyapi
+
+# View service logs
+journalctl --user -u cliproxyapi -f
+```
+
+The service uses `loginctl enable-linger` so it starts on boot, not just on login.
+
+---
+
+## Latency Benchmark
+
+Test response latency for all available models and find the fastest provider.
+
+```bash
+# Run benchmark (server must be running)
+cliproxyapi-benchmark
+
+# Show only top 5 fastest
+cliproxyapi-benchmark --top 5
+
+# Output as JSON
+cliproxyapi-benchmark --json
+
+# Use custom port
+cliproxyapi-benchmark --port 9000
+```
+
+Results are saved to `~/.cliproxyapi/benchmark.json` for reference.
+
+---
+
+## Auto-Update
+
+The installer sets up a **weekly auto-update timer** via systemd that automatically downloads the latest CLIProxyAPI binary from GitHub. If the server is running, it will be restarted with the new binary.
+
+```bash
+# Check next scheduled update
+systemctl --user list-timers cliproxyapi-update
+
+# View update logs
+cat ~/.cliproxyapi/logs/update.log
+
+# Run update manually
+update-cliproxyapi --prebuilt
+
+# Disable auto-update
+systemctl --user disable --now cliproxyapi-update.timer
+
+# Re-enable auto-update
+systemctl --user enable --now cliproxyapi-update.timer
+```
 
 ---
 
@@ -293,6 +413,8 @@ curl http://localhost:8317/v1/chat/completions \
 
 ## Scripts Reference
 
+### Windows Scripts (`scripts/*.ps1`)
+
 ### `start-cliproxyapi.ps1`
 
 Server manager - start, stop, and monitor.
@@ -411,17 +533,155 @@ gui-cliproxyapi.ps1 -NoBrowser
 
 The GUI runs a local management server on `localhost:8318` that handles all control commands.
 
+### Linux / macOS Scripts (`unix/*.sh`)
+
+### `start-cliproxyapi.sh`
+
+Server manager - start, stop, and monitor.
+
+```bash
+# Start server (foreground)
+./start-cliproxyapi.sh
+
+# Start in background
+./start-cliproxyapi.sh -b
+
+# Check status
+./start-cliproxyapi.sh --status
+
+# Stop server
+./start-cliproxyapi.sh --stop
+
+# Restart
+./start-cliproxyapi.sh --restart
+
+# View logs
+./start-cliproxyapi.sh --logs
+
+# Enable systemd auto-start
+./start-cliproxyapi.sh --enable
+
+# Disable systemd auto-start
+./start-cliproxyapi.sh --disable
+```
+
+### `install-cliproxyapi.sh`
+
+Full installation script.
+
+```bash
+# Default: Build from source
+./install-cliproxyapi.sh
+
+# Use pre-built binary (no Go required)
+./install-cliproxyapi.sh --prebuilt
+
+# Force reinstall (overwrites existing)
+./install-cliproxyapi.sh --force
+
+# Skip OAuth instructions
+./install-cliproxyapi.sh --skip-oauth
+```
+
+### `update-cliproxyapi.sh`
+
+Update to latest version.
+
+```bash
+# Update from source (if cloned)
+./update-cliproxyapi.sh
+
+# Update using pre-built binary
+./update-cliproxyapi.sh --prebuilt
+
+# Force update even if up-to-date
+./update-cliproxyapi.sh --force
+```
+
+### `cliproxyapi-oauth.sh`
+
+Interactive OAuth login helper.
+
+```bash
+# Interactive menu
+./cliproxyapi-oauth.sh
+
+# Login to all providers
+./cliproxyapi-oauth.sh --all
+
+# Login to specific providers
+./cliproxyapi-oauth.sh --gemini --copilot --kiro
+```
+
+### `uninstall-cliproxyapi.sh`
+
+Clean uninstallation.
+
+```bash
+# Uninstall (keeps auth files)
+./uninstall-cliproxyapi.sh
+
+# Remove everything including auth
+./uninstall-cliproxyapi.sh --all
+
+# Force without confirmation
+./uninstall-cliproxyapi.sh --all --force
+```
+
+### `gui-cliproxyapi.sh`
+
+GUI Control Center with full server management.
+
+```bash
+# Open GUI (starts management server on port 8318)
+./gui-cliproxyapi.sh
+
+# Use custom port
+./gui-cliproxyapi.sh --port 9000
+
+# Don't auto-open browser
+./gui-cliproxyapi.sh --no-browser
+```
+
+### `cliproxyapi-benchmark.sh`
+
+Latency benchmark for all available models.
+
+```bash
+# Benchmark all models
+./cliproxyapi-benchmark.sh
+
+# Show top 5 fastest
+./cliproxyapi-benchmark.sh --top 5
+
+# JSON output
+./cliproxyapi-benchmark.sh --json
+```
+
 ---
 
 ## File Locations
 
+### Windows
+
 | File | Location | Description |
 |------|----------|-------------|
-| Binary | `~/bin/cliproxyapi-plus.exe` | The proxy server executable |
-| Config | `~/.cli-proxy-api/config.yaml` | Proxy configuration |
-| Auth tokens | `~/.cli-proxy-api/*.json` | OAuth tokens for each provider |
+| Binary | `~/bin/cliproxyapi.exe` | The proxy server executable |
+| Config | `~/.cliproxyapi/config.yaml` | Proxy configuration |
+| Auth tokens | `~/.cliproxyapi/*.json` | OAuth tokens for each provider |
 | Droid config | `~/.factory/config.json` | Custom models for Factory Droid |
-| Source | `~/CLIProxyAPIPlus/` | Cloned source (if built from source) |
+| Source | `~/CLIProxyAPI/` | Cloned source (if built from source) |
+
+### Linux / macOS
+
+| File | Location | Description |
+|------|----------|-------------|
+| Binary | `~/bin/cliproxyapi` | The proxy server executable |
+| Config | `~/.cliproxyapi/config.yaml` | Proxy configuration |
+| Auth tokens | `~/.cliproxyapi/*.json` | OAuth tokens for each provider |
+| Systemd | `~/.config/systemd/user/cliproxyapi.service` | Auto-start service |
+| Benchmark | `~/.cliproxyapi/benchmark.json` | Latest benchmark results |
+| Source | `~/cliproxyapi/` | Cloned source (if built from source) |
 
 ---
 
@@ -432,7 +692,13 @@ The GUI runs a local management server on `localhost:8318` that handles all cont
 Make sure the proxy server is running:
 
 ```powershell
-cliproxyapi-plus --config ~/.cli-proxy-api/config.yaml
+# Windows
+cliproxyapi --config ~/.cliproxyapi/config.yaml
+```
+
+```bash
+# Linux/macOS
+cliproxyapi --config ~/.cliproxyapi/config.yaml
 ```
 
 ### "Unauthorized" or "Invalid API key"
@@ -460,7 +726,7 @@ The proxy auto-switches to another provider/model when quota is hit. If all prov
 ## Credits
 
 - [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus) - The original proxy server
-- [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) - The mainline project
+- [CLIProxyAPIPlus-Easy-Installation](https://github.com/julianromli/CLIProxyAPIPlus-Easy-Installation) - Original easy installation scripts
 - Community contributors for GitHub Copilot and Kiro OAuth implementations
 
 ---

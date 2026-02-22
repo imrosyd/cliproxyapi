@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    CLIProxyAPI-Plus Uninstaller
+    CLIProxyAPI Uninstaller
 .DESCRIPTION
-    Completely removes CLIProxyAPI-Plus and all related files.
+    Completely removes CLIProxyAPI and all related files.
     By default, preserves auth files and .factory/config.json.
 .EXAMPLE
     uninstall-cliproxyapi.ps1              # Interactive, keeps auth
@@ -21,13 +21,13 @@ param(
 $ErrorActionPreference = "SilentlyContinue"
 
 $BIN_DIR = "$env:USERPROFILE\bin"
-$CONFIG_DIR = "$env:USERPROFILE\.cli-proxy-api"
-$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPIPlus"
+$CONFIG_DIR = "$env:USERPROFILE\.cliproxyapi"
+$CLONE_DIR = "$env:USERPROFILE\CLIProxyAPI"
 $FACTORY_CONFIG = "$env:USERPROFILE\.factory\config.json"
 
 $items = @(
-    @{ Name = "Binary"; Path = "$BIN_DIR\cliproxyapi-plus.exe"; Type = "File"; Always = $true }
-    @{ Name = "Binary backup"; Path = "$BIN_DIR\cliproxyapi-plus.exe.old"; Type = "File"; Always = $true }
+    @{ Name = "Binary"; Path = "$BIN_DIR\cliproxyapi.exe"; Type = "File"; Always = $true }
+    @{ Name = "Binary backup"; Path = "$BIN_DIR\cliproxyapi.exe.old"; Type = "File"; Always = $true }
     @{ Name = "Install script"; Path = "$BIN_DIR\install-cliproxyapi.ps1"; Type = "File"; Always = $true }
     @{ Name = "Update script"; Path = "$BIN_DIR\update-cliproxyapi.ps1"; Type = "File"; Always = $true }
     @{ Name = "OAuth script"; Path = "$BIN_DIR\cliproxyapi-oauth.ps1"; Type = "File"; Always = $true }
@@ -59,7 +59,7 @@ function Get-Size {
 
 Write-Host @"
 ==========================================
-  CLIProxyAPI-Plus Uninstaller
+  CLIProxyAPI Uninstaller
 ==========================================
 "@ -ForegroundColor Red
 
@@ -100,7 +100,7 @@ foreach ($item in $items) {
 
 # Display what will be removed
 if ($toRemove.Count -eq 0) {
-    Write-Host "`n[!] Nothing to remove. CLIProxyAPI-Plus is not installed." -ForegroundColor Yellow
+    Write-Host "`n[!] Nothing to remove. CLIProxyAPI is not installed." -ForegroundColor Yellow
     exit 0
 }
 
@@ -130,7 +130,7 @@ if (-not $Force) {
 }
 
 # Remove items
-Write-Host "`n[*] Removing CLIProxyAPI-Plus..." -ForegroundColor Cyan
+Write-Host "`n[*] Removing CLIProxyAPI..." -ForegroundColor Cyan
 $removed = @()
 $failed = @()
 

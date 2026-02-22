@@ -1,0 +1,11 @@
+[Unit]
+Description=CLIProxyAPI Weekly Auto-Update
+Documentation=https://github.com/imrosyd/cliproxyapi
+
+[Timer]
+OnCalendar=weekly
+RandomizedDelaySec=3600
+Persistent=true
+
+[Install]
+WantedBy=timers.target

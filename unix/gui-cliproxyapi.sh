@@ -556,7 +556,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             payload = data.get('body', {})
             model = payload.get('model', '') if isinstance(payload, dict) else ''
             
-            url = 'http://localhost:8317' + target_path
+            url = 'http://localhost:' + str(API_PORT) + target_path
             self.log('Proxy request: ' + method + ' ' + url + ' (model: ' + model + ')')
             start_time = time.time()
             
@@ -688,10 +688,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
     
     def api_status(self):
         pid = self.get_pid()
+        endpoint = 'http://localhost:' + str(API_PORT) + '/v1'
         if pid:
-            self.send_json({'running': True, 'pid': pid, 'port': 8317, 'endpoint': 'http://localhost:8317/v1'})
+            self.send_json({'running': True, 'pid': pid, 'port': API_PORT, 'endpoint': endpoint})
         else:
-            self.send_json({'running': False, 'pid': None, 'port': 8317, 'endpoint': 'http://localhost:8317/v1'})
+            self.send_json({'running': False, 'pid': None, 'port': API_PORT, 'endpoint': endpoint})
     
     def api_auth_status(self):
         providers = {
@@ -713,7 +714,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def api_models(self):
         try:
             import urllib.request
-            req = urllib.request.Request('http://localhost:8317/v1/models')
+            req = urllib.request.Request('http://localhost:' + str(API_PORT) + '/v1/models')
             req.add_header('Authorization', 'Bearer sk-dummy')
             with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read().decode())
@@ -725,7 +726,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         '''Proxy to the upstream Management API for usage statistics'''
         try:
             import urllib.request
-            req = urllib.request.Request('http://localhost:8317/v0/management/usage')
+            req = urllib.request.Request('http://localhost:' + str(API_PORT) + '/v0/management/usage')
             # Try without auth first (localhost bypass may work)
             try:
                 with urllib.request.urlopen(req, timeout=5) as resp:
@@ -735,7 +736,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             except:
                 pass
             # If that fails, try with dummy key
-            req = urllib.request.Request('http://localhost:8317/v0/management/usage')
+            req = urllib.request.Request('http://localhost:' + str(API_PORT) + '/v0/management/usage')
             req.add_header('Authorization', 'Bearer sk-dummy')
             try:
                 with urllib.request.urlopen(req, timeout=5) as resp:
@@ -805,7 +806,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             data = json.loads(body)
             models_to_add = data.get('models', [])
             display_names = data.get('displayNames', {})
-            base_url = data.get('baseUrl', 'http://localhost:8317/v1')
+            base_url = data.get('baseUrl', 'http://localhost:' + str(API_PORT) + '/v1')
             api_key = data.get('apiKey', 'sk-dummy')
             provider = data.get('provider', 'openai')
             

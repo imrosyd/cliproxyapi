@@ -5,9 +5,9 @@
     Interactive script to login to all supported OAuth providers.
     Run without parameters for interactive menu, or use flags for specific providers.
 .EXAMPLE
-    cliproxyapi-oauth.ps1              # Interactive menu
-    cliproxyapi-oauth.ps1 -All         # Login to all providers
-    cliproxyapi-oauth.ps1 -Gemini      # Login to Gemini only
+    cpa-oauth              # Interactive menu
+    cpa-oauth -All         # Login to all providers
+    cpa-oauth -Gemini      # Login to Gemini only
 #>
 
 param(

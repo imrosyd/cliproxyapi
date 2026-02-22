@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cliproxyapi.dev/schema/providers.json",
+  "title": "CLIProxyAPI Providers Configuration",
+  "description": "Schema for custom AI providers configuration compatible with AI SDK",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "providers": {
+      "type": "object",
+      "description": "Map of provider configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/provider"
+      }
+    }
+  },
+  "required": ["providers"],
+  "definitions": {
+    "provider": {
+      "type": "object",
+      "description": "Provider configuration",
+      "properties": {
+        "npm": {
+          "type": "string",
+          "description": "NPM package name for the SDK (e.g., @ai-sdk/anthropic, groq-sdk)",
+          "examples": ["@ai-sdk/anthropic", "@ai-sdk/openai", "groq-sdk", "@together-ai/sdk"]
+        },
+        "options": {
+          "$ref": "#/definitions/providerOptions"
+        },
+        "models": {
+          "type": "object",
+          "description": "Map of model configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/model"
+          }
+        }
+      },
+      "required": ["options"]
+    },
+    "providerOptions": {
+      "type": "object",
+      "description": "Provider connection options",
+      "properties": {
+        "baseURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for the API endpoint",
+          "examples": [
+            "https://api.openai.com/v1",
+            "https://openrouter.ai/api/v1",
+            "http://localhost:11434/v1"
+          ]
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "API key for authentication (use placeholder like 'sk-xxx' in examples)"
+        },
+        "headers": {
+          "type": "object",
+          "description": "Additional headers to send with requests",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "proxy": {
+          "type": "string",
+          "description": "Proxy URL for requests",
+          "examples": ["socks5://localhost:1080", "http://proxy.example.com:8080"]
+        }
+      },
+      "required": ["baseURL"]
+    },
+    "model": {
+      "type": "object",
+      "description": "Model configuration",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the model",
+          "examples": ["GPT 5.3 Codex", "Claude 3.5 Sonnet", "Llama 3.2"]
+        },
+        "reasoning": {
+          "type": "boolean",
+          "description": "Whether the model supports reasoning/thinking",
+          "default": false
+        },
+        "limit": {
+          "$ref": "#/definitions/modelLimits"
+        },
+        "modalities": {
+          "$ref": "#/definitions/modalities"
+        },
+        "variants": {
+          "type": "object",
+          "description": "Model variants with different settings",
+          "additionalProperties": {
+            "$ref": "#/definitions/variant"
+          }
+        }
+      }
+    },
+    "modelLimits": {
+      "type": "object",
+      "description": "Token limits for the model",
+      "properties": {
+        "context": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000,
+          "description": "Maximum context window size in tokens",
+          "examples": [400000, 128000, 8192]
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "description": "Maximum output tokens",
+          "examples": [128000, 4096, 2048]
+        }
+      }
+    },
+    "modalities": {
+      "type": "object",
+      "description": "Input and output modalities supported by the model",
+      "properties": {
+        "input": {
+          "type": "array",
+          "description": "Supported input types",
+          "items": {
+            "type": "string",
+            "enum": ["text", "image", "pdf", "audio", "video", "file"]
+          },
+          "examples": [["text", "image", "pdf"], ["text"]]
+        },
+        "output": {
+          "type": "array",
+          "description": "Supported output types",
+          "items": {
+            "type": "string",
+            "enum": ["text", "image", "audio"]
+          },
+          "examples": [["text"], ["text", "image"]]
+        }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "description": "Model variant configuration",
+      "properties": {
+        "reasoningEffort": {
+          "type": "string",
+          "description": "Reasoning effort level",
+          "enum": ["none", "low", "medium", "high", "xhigh"],
+          "default": "medium"
+        },
+        "textVerbosity": {
+          "type": "string",
+          "description": "Text verbosity level",
+          "enum": ["none", "low", "medium", "high", "xhigh"],
+          "default": "medium"
+        }
+      }
+    }
+  }
+}

@@ -156,11 +156,24 @@ get_auth_status() {
     local first=true
     
     for provider in gemini copilot antigravity codex claude qwen iflow kiro; do
-        if ls "$CONFIG_DIR/${provider}"*.json 2>/dev/null | head -1 > /dev/null; then
-            [ "$first" = false ] && status+=","
+        found=false
+        case "$provider" in
+            copilot)
+                if ls "$CONFIG_DIR/github-copilot"*.json 2>/dev/null | head -1 > /dev/null; then
+                    found=true
+                fi
+                ;;
+            *)
+                if ls "$CONFIG_DIR/${provider}"*.json 2>/dev/null | head -1 > /dev/null; then
+                    found=true
+                fi
+                ;;
+        esac
+        
+        [ "$first" = false ] && status+=","
+        if [ "$found" = true ]; then
             status+="\"$provider\":true"
         else
-            [ "$first" = false ] && status+=","
             status+="\"$provider\":false"
         fi
         first=false
@@ -326,6 +339,14 @@ echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
 echo ""
 
+# Clean up any stale process on the GUI port
+pids=$(lsof -ti ":$PORT" 2>/dev/null || true)
+if [ -n "$pids" ]; then
+    write_log "Cleaning up stale process on port $PORT..."
+    echo "$pids" | xargs kill -9 2>/dev/null || true
+    sleep 1
+fi
+
 if [ "$NO_BROWSER" = false ]; then
     if command -v xdg-open &> /dev/null; then
         xdg-open "http://localhost:$PORT" &
@@ -342,7 +363,13 @@ cleanup() {
 }
 trap cleanup SIGINT SIGTERM
 
-$PYTHON_CMD -c "
+export PORT
+export CONFIG_DIR="$CONFIG_DIR"
+export BINARY="$BINARY"
+export CONFIG="$CONFIG"
+export GUI_PATH="$GUI_PATH"
+export SCRIPT_VERSION="$SCRIPT_VERSION"
+$PYTHON_CMD << 'PYTHON_SCRIPT'
 import http.server
 import socketserver
 import json
@@ -353,11 +380,12 @@ import time
 import threading
 import datetime
 
-PORT = $PORT
-CONFIG_DIR = '$CONFIG_DIR'
-BINARY = '$BINARY'
-CONFIG = '$CONFIG'
-GUI_PATH = '$GUI_PATH'
+PORT = int(os.environ.get('PORT', 8318))
+CONFIG_DIR = os.environ.get('CONFIG_DIR', os.path.expanduser('~/.cliproxyapi'))
+SCRIPT_VERSION = os.environ.get('SCRIPT_VERSION', '1.0.0')
+BINARY = os.environ.get('BINARY', os.path.expanduser('~/bin/cliproxyapi'))
+CONFIG = os.environ.get('CONFIG', os.path.join(CONFIG_DIR, 'config.yaml'))
+GUI_PATH = os.environ.get('GUI_PATH', '')
 PID_FILE = os.path.join(CONFIG_DIR, 'cliproxyapi.pid')
 STATS_FILE = os.path.join(CONFIG_DIR, 'stats.json')
 LOG_FILE = os.path.join(CONFIG_DIR, 'logs', 'server.log')
@@ -428,6 +456,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
     
+    def log(self, msg):
+        ts = datetime.datetime.now().strftime('%H:%M:%S')
+        print("[" + ts + "] " + msg)
+    
     def send_json(self, data, status=200):
         self.send_response(status)
         self.send_header('Content-Type', 'application/json')
@@ -463,11 +495,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif parsed_path == '/api/logs':
             self.api_logs()
         elif parsed_path == '/api/version':
-            self.send_json({'scripts': '$SCRIPT_VERSION'})
+            self.send_json({'scripts': SCRIPT_VERSION})
+        elif parsed_path == '/api/update/check':
+            self.api_update_check()
         elif parsed_path == '/api/management/usage':
             self.api_management_usage()
         elif parsed_path == '/api/factory-config':
             self.api_get_factory_config()
+        elif parsed_path == '/api/providers':
+            self.api_get_providers()
+        elif parsed_path.startswith('/api/providers/'):
+            name = parsed_path.split('/')[-1]
+            self.api_get_provider(name)
         else:
             self.send_json({'error': 'Not found'}, 404)
     
@@ -498,6 +537,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.api_factory_config_add(body)
         elif self.path == '/api/factory-config/remove':
             self.api_factory_config_remove(body)
+        elif self.path == '/api/providers':
+            self.api_save_providers(body)
+        elif self.path == '/api/providers/test':
+            self.api_test_provider(body)
         else:
             self.send_json({'error': 'Not found'}, 404)
     
@@ -507,14 +550,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         import urllib.error
         
         try:
-            data = json.loads(body)
+            data = json.loads(body) if body else {}
             target_path = data.get('path', '/v1/chat/completions')
             method = data.get('method', 'POST')
             payload = data.get('body', {})
             model = payload.get('model', '') if isinstance(payload, dict) else ''
             
-            url = f'http://localhost:8317{target_path}'
-            
+            url = 'http://localhost:8317' + target_path
+            self.log('Proxy request: ' + method + ' ' + url + ' (model: ' + model + ')')
             start_time = time.time()
             
             req = urllib.request.Request(url, method=method)
@@ -523,6 +566,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             
             if method in ['POST', 'PUT', 'PATCH']:
                 req_data = json.dumps(payload).encode()
+                self.log('Request body length: ' + str(len(req_data)))
             else:
                 req_data = None
             
@@ -530,21 +574,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 with urllib.request.urlopen(req, req_data, timeout=120) as resp:
                     response_data = resp.read().decode()
                     latency_ms = (time.time() - start_time) * 1000
+                    self.log('Response status: ' + str(resp.status) + ', latency: ' + str(int(latency_ms)) + 'ms')
                     
-                    # Detect provider from model name
                     provider = None
                     if model:
-                        if 'gemini' in model.lower():
+                        model_lower = model.lower()
+                        if 'gemini' in model_lower:
                             provider = 'gemini'
-                        elif 'claude' in model.lower() and 'kiro' in model.lower():
+                        elif 'claude' in model_lower and 'kiro' in model_lower:
                             provider = 'kiro'
-                        elif 'claude' in model.lower():
+                        elif 'claude' in model_lower:
                             provider = 'claude'
-                        elif 'gpt' in model.lower() or 'codex' in model.lower():
+                        elif 'gpt' in model_lower or 'codex' in model_lower:
                             provider = 'openai'
-                        elif 'qwen' in model.lower():
+                        elif 'qwen' in model_lower:
                             provider = 'qwen'
-                        elif 'grok' in model.lower():
+                        elif 'grok' in model_lower:
                             provider = 'grok'
                     
                     increment_stats(success=True, provider=provider, model=model, latency_ms=latency_ms)
@@ -559,14 +604,27 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 latency_ms = (time.time() - start_time) * 1000
                 increment_stats(success=False, provider=None, model=model, latency_ms=latency_ms)
                 
+                error_body = e.read().decode() if e.fp else str(e)
+                self.log('Proxy HTTP error: ' + str(e.code) + ' - ' + error_body[:200])
+                
                 self.send_response(e.code)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                self.wfile.write(e.read())
+                self.wfile.write(error_body.encode())
                 
+            except urllib.error.URLError as e:
+                latency_ms = (time.time() - start_time) * 1000
+                increment_stats(success=False, provider=None, model=model, latency_ms=latency_ms)
+                self.log('Proxy URL error: ' + str(e.reason))
+                self.send_json({'error': 'Connection failed: ' + str(e.reason) + '. Is the API server running on port 8317?'}, 503)
+                
+        except json.JSONDecodeError as e:
+            self.log('Proxy JSON parse error: ' + str(e))
+            self.send_json({'error': 'Invalid JSON: ' + str(e)}, 400)
         except Exception as e:
-            self.send_json({'success': False, 'error': str(e)}, 500)
+            self.log('Proxy error: ' + str(e))
+            self.send_json({'error': str(e)}, 500)
     
     def serve_gui(self):
         if os.path.exists(GUI_PATH):
@@ -574,6 +632,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 content = f.read()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
             self.end_headers()
             self.wfile.write(content.encode())
         else:
@@ -633,10 +694,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({'running': False, 'pid': None, 'port': 8317, 'endpoint': 'http://localhost:8317/v1'})
     
     def api_auth_status(self):
-        providers = ['gemini', 'copilot', 'antigravity', 'codex', 'claude', 'qwen', 'iflow', 'kiro']
+        providers = {
+            'gemini': 'gemini',
+            'copilot': 'github-copilot',
+            'antigravity': 'antigravity',
+            'codex': 'codex',
+            'claude': 'claude',
+            'qwen': 'qwen',
+            'iflow': 'iflow',
+            'kiro': 'kiro'
+        }
         status = {}
-        for p in providers:
-            files = [f for f in os.listdir(CONFIG_DIR) if f.startswith(p) and f.endswith('.json')]
+        for p, prefix in providers.items():
+            files = [f for f in os.listdir(CONFIG_DIR) if f.startswith(prefix) and f.endswith('.json')]
             status[p] = len(files) > 0
         self.send_json(status)
     
@@ -692,6 +762,42 @@ class Handler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             self.send_json({'success': False, 'error': str(e), 'models': [], 'count': 0})
     
+    def api_update_check(self):
+        '''Check for updates from GitHub'''
+        import urllib.request
+        try:
+            req = urllib.request.Request('https://api.github.com/repos/imrosyd/cliproxyapi/commits/main')
+            req.add_header('User-Agent', 'CLIProxyAPI-GUI')
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode())
+                latest_commit = data.get('sha', '')[:7] if data.get('sha') else ''
+                latest_date = data.get('commit', {}).get('author', {}).get('date', '')
+                message = data.get('commit', {}).get('message', '').split('\\n')[0] if data.get('commit', {}).get('message') else ''
+                
+                version_file = os.path.join(CONFIG_DIR, 'version.json')
+                local_commit = 'unknown'
+                if os.path.exists(version_file):
+                    try:
+                        with open(version_file, 'r') as f:
+                            vdata = json.load(f)
+                            local_commit = vdata.get('commitSha', 'unknown')
+                    except:
+                        pass
+                
+                has_update = (local_commit == 'unknown') or (local_commit != latest_commit)
+                
+                self.send_json({
+                    'hasUpdate': has_update,
+                    'currentVersion': SCRIPT_VERSION,
+                    'currentCommit': local_commit,
+                    'latestCommit': latest_commit,
+                    'latestCommitDate': latest_date,
+                    'releaseNotes': message,
+                    'downloadUrl': 'https://github.com/imrosyd/cliproxyapi/archive/refs/heads/main.zip'
+                })
+        except Exception as e:
+            self.send_json({'hasUpdate': False, 'error': str(e)})
+    
     def api_factory_config_add(self, body):
         '''Add models to Factory config'''
         factory_path = os.path.expanduser('~/.factory/config.json')
@@ -699,8 +805,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             data = json.loads(body)
             models_to_add = data.get('models', [])
             display_names = data.get('displayNames', {})
+            base_url = data.get('baseUrl', 'http://localhost:8317/v1')
+            api_key = data.get('apiKey', 'sk-dummy')
+            provider = data.get('provider', 'openai')
             
-            # Load existing
             existing = {'models': []}
             if os.path.exists(factory_path):
                 with open(factory_path, 'r') as f:
@@ -710,9 +818,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             added = 0
             for model in models_to_add:
                 if model not in current_models:
-                    entry = {'id': model}
-                    if model in display_names:
-                        entry['displayName'] = display_names[model]
+                    entry = {
+                        'id': model,
+                        'displayName': display_names.get(model, model),
+                        'baseUrl': base_url,
+                        'apiKey': api_key,
+                        'provider': provider
+                    }
                     existing.setdefault('models', []).append(entry)
                     added += 1
             
@@ -938,13 +1050,182 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not flag:
             self.send_json({'success': False, 'error': 'Unknown provider'})
             return
-        subprocess.Popen([BINARY, '--config', CONFIG, flag])
-        self.send_json({'success': True, 'message': f'OAuth started for {provider}'})
+        
+        import re
+        
+        try:
+            proc = subprocess.Popen(
+                [BINARY, '--config', CONFIG, flag],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            
+            output_lines = []
+            login_url = None
+            device_code = None
+            
+            # Read output for up to 15 seconds to capture login URL
+            import select
+            url_pattern = re.compile(r'https?://[^\s<>]+')
+            code_pattern = re.compile(r'code[:\s]+([A-Z0-9]{4,}[-\s]?[A-Z0-9]{4,})', re.IGNORECASE)
+            deadline = time.time() + 15
+            while time.time() < deadline:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    break
+                ready, _, _ = select.select([proc.stdout], [], [], min(remaining, 0.5))
+                if ready:
+                    line = proc.stdout.readline()
+                    if not line:
+                        break
+                    output_lines.append(line.strip())
+                    
+                    # Look for URLs
+                    urls = url_pattern.findall(line)
+                    for u in urls:
+                        login_url = u
+                    
+                    # Look for device/user codes
+                    code_match = code_pattern.search(line)
+                    if code_match:
+                        device_code = code_match.group(1)
+                    
+                    # If we found a URL, we can stop waiting
+                    if login_url:
+                        break
+                        
+                # Check if process ended
+                if proc.poll() is not None:
+                    # Read remaining output
+                    remaining_out = proc.stdout.read()
+                    if remaining_out:
+                        for rline in remaining_out.strip().splitlines():
+                            output_lines.append(rline)
+                            urls = url_pattern.findall(rline)
+                            for u in urls:
+                                login_url = u
+                    break
+            
+            result = {
+                'success': True,
+                'message': f'OAuth started for {provider}',
+                'output': '\n'.join(output_lines[-10:]),
+            }
+            if login_url:
+                result['url'] = login_url
+            if device_code:
+                result['code'] = device_code
+            
+            self.send_json(result)
+            
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_get_providers(self):
+        '''Get all custom providers from providers.json'''
+        providers_path = os.path.join(CONFIG_DIR, 'providers.json')
+        try:
+            if os.path.exists(providers_path):
+                with open(providers_path, 'r') as f:
+                    data = json.load(f)
+                self.send_json(data)
+            else:
+                self.send_json({'$schema': 'https://cliproxyapi.dev/schema/providers.json', 'providers': {}})
+        except Exception as e:
+            self.send_json({'$schema': 'https://cliproxyapi.dev/schema/providers.json', 'providers': {}, 'error': str(e)})
+    
+    def api_get_provider(self, name):
+        '''Get a specific provider'''
+        providers_path = os.path.join(CONFIG_DIR, 'providers.json')
+        try:
+            if os.path.exists(providers_path):
+                with open(providers_path, 'r') as f:
+                    data = json.load(f)
+                provider = data.get('providers', {}).get(name)
+                if provider:
+                    self.send_json({'success': True, 'name': name, 'provider': provider})
+                else:
+                    self.send_json({'success': False, 'error': 'Provider not found'}, 404)
+            else:
+                self.send_json({'success': False, 'error': 'Provider not found'}, 404)
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_save_providers(self, body):
+        '''Save providers to providers.json'''
+        providers_path = os.path.join(CONFIG_DIR, 'providers.json')
+        try:
+            data = json.loads(body)
+            providers = data.get('providers', {})
+            
+            # Load existing and merge
+            existing = {'$schema': 'https://cliproxyapi.dev/schema/providers.json', 'providers': {}}
+            if os.path.exists(providers_path):
+                with open(providers_path, 'r') as f:
+                    existing = json.load(f)
+            
+            # Merge providers
+            existing['providers'].update(providers)
+            
+            os.makedirs(CONFIG_DIR, exist_ok=True)
+            with open(providers_path, 'w') as f:
+                json.dump(existing, f, indent=2)
+            
+            self.send_json({'success': True, 'count': len(existing['providers'])})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
+    
+    def api_test_provider(self, body):
+        '''Test connection to a provider'''
+        import urllib.request
+        import urllib.error
+        
+        try:
+            data = json.loads(body)
+            base_url = data.get('baseURL', '')
+            api_key = data.get('apiKey', '')
+            name = data.get('name', '')
+            
+            if not base_url:
+                self.send_json({'success': False, 'error': 'baseURL required'})
+                return
+            
+            test_url = base_url.rstrip('/') + '/models'
+            self.log('Testing provider: ' + name + ' -> ' + test_url)
+            
+            req = urllib.request.Request(test_url)
+            if api_key:
+                req.add_header('Authorization', 'Bearer ' + api_key)
+            
+            start_time = time.time()
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                latency = int((time.time() - start_time) * 1000)
+                response_data = json.loads(resp.read().decode())
+                model_count = len(response_data.get('data', []))
+                
+                self.send_json({
+                    'success': True,
+                    'latency_ms': latency,
+                    'model_count': model_count,
+                    'status': resp.status
+                })
+        except urllib.error.HTTPError as e:
+            self.send_json({'success': False, 'error': f'HTTP {e.code}: {e.reason}'})
+        except urllib.error.URLError as e:
+            self.send_json({'success': False, 'error': f'Connection failed: {e.reason}'})
+        except Exception as e:
+            self.send_json({'success': False, 'error': str(e)})
 
-with socketserver.TCPServer(('', PORT), Handler) as httpd:
-    print(f'Server running on port {PORT}')
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+with ThreadingHTTPServer(('', PORT), Handler) as httpd:
+    print('Server running on port ' + str(PORT))
     httpd.serve_forever()
-" &
+PYTHON_SCRIPT
+) &
 SERVER_PID=$!
 
 wait $SERVER_PID

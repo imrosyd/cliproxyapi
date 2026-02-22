@@ -21,23 +21,22 @@ BIN_DIR="$HOME/bin"
 CONFIG_DIR="$HOME/.cliproxyapi"
 CLONE_DIR="$HOME/CLIProxyAPI-source"
 BINARY_NAME="cliproxyapi"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 USE_PREBUILT=false
 FORCE=false
-SKIP_OAUTH=false
 
 for arg in "$@"; do
     case $arg in
         --prebuilt) USE_PREBUILT=true ;;
         --force) FORCE=true ;;
-        --skip-oauth) SKIP_OAUTH=true ;;
         --help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
             echo "  --prebuilt     Use pre-built binary (no Go required)"
             echo "  --force        Force reinstall"
-            echo "  --skip-oauth   Skip OAuth instructions"
+
             echo "  --help         Show this help"
             exit 0
             ;;
@@ -49,6 +48,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
 
 write_step() { echo -e "\n${CYAN}[*] $1${NC}"; }
@@ -230,13 +231,24 @@ else
 fi
 
 write_step "Installing helper scripts..."
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-for script in start-cliproxyapi cliproxyapi-oauth update-cliproxyapi uninstall-cliproxyapi gui-cliproxyapi cliproxyapi-benchmark; do
-    if [ -f "$SCRIPT_DIR/${script}.sh" ]; then
-        cp "$SCRIPT_DIR/${script}.sh" "$BIN_DIR/$script"
-        chmod +x "$BIN_DIR/$script"
-        write_success "Installed: $script"
+# Map source files to installed names (cpa- prefix)
+declare -A SCRIPT_MAP=(
+    ["start-cliproxyapi.sh"]="cpa-start"
+    ["cliproxyapi-oauth.sh"]="cpa-oauth"
+    ["update-cliproxyapi.sh"]="cpa-update"
+    ["uninstall-cliproxyapi.sh"]="cpa-uninstall"
+    ["gui-cliproxyapi.sh"]="cpa-gui"
+    ["cliproxyapi-benchmark.sh"]="cpa-benchmark"
+    ["install-cliproxyapi.sh"]="cpa-install"
+)
+
+for src in "${!SCRIPT_MAP[@]}"; do
+    target="${SCRIPT_MAP[$src]}"
+    if [ -f "$SCRIPT_DIR/$src" ]; then
+        cp "$SCRIPT_DIR/$src" "$BIN_DIR/$target"
+        chmod +x "$BIN_DIR/$target"
+        write_success "Installed: $target"
     fi
 done
 
@@ -254,7 +266,7 @@ if command -v systemctl &> /dev/null; then
     if [ -f "$SCRIPT_DIR/cliproxyapi.service" ]; then
         cp "$SCRIPT_DIR/cliproxyapi.service" "$SYSTEMD_DIR/cliproxyapi.service"
         write_success "Systemd service installed"
-        echo "    Enable auto-start: start-cliproxyapi --enable"
+        echo "    Enable auto-start: cpa-start --enable"
         echo "    Or manually:       systemctl --user enable --now cliproxyapi"
     else
         write_warning "Service file not found, skipping"
@@ -300,63 +312,41 @@ else
     PATH_ADDED=false
 fi
 
-if [ "$SKIP_OAUTH" = false ]; then
-    echo ""
-    echo -e "${YELLOW}=============================================="
-    echo "  OAuth Login Setup (Optional)"
-    echo "=============================================="
-    echo "Run these commands to login to each provider:"
-    echo ""
-    echo "  # Gemini CLI"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --login"
-    echo ""
-    echo "  # Antigravity"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --antigravity-login"
-    echo ""
-    echo "  # GitHub Copilot"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --github-copilot-login"
-    echo ""
-    echo "  # Codex"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --codex-login"
-    echo ""
-    echo "  # Claude"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --claude-login"
-    echo ""
-    echo "  # Qwen"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --qwen-login"
-    echo ""
-    echo "  # iFlow"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --iflow-login"
-    echo ""
-    echo "  # Kiro (AWS)"
-    echo "  $BINARY_NAME --config $CONFIG_DIR/config.yaml --kiro-aws-login"
-    echo -e "==============================================${NC}"
-fi
-
 echo ""
-echo -e "${GREEN}=============================================="
-echo -e "  Installation Complete!"
-echo -e "==============================================${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════"
+echo -e "  ✓ Installation Complete!"
+echo -e "══════════════════════════════════════════════${NC}"
 echo ""
-echo "Installed Files:"
-echo "  Binary:   $BIN_DIR/$BINARY_NAME"
-echo "  Config:   $CONFIG_DIR/config.yaml"
+echo -e "  ${BOLD}Server Control (cpa-start)${NC}"
+echo "    cpa-start -b         Start in background"
+echo "    cpa-start --stop     Stop server"
+echo "    cpa-start --status   Check status"
+echo "    cpa-start --logs     View server logs"
+echo "    cpa-start --enable   Enable auto-start on boot"
 echo ""
-echo "Available Scripts (in $BIN_DIR):"
-echo "  start-cliproxyapi     Start/stop/restart server"
-echo "  cliproxyapi-oauth     Login to OAuth providers"
-echo "  update-cliproxyapi    Update to latest version"
-echo "  uninstall-cliproxyapi Remove everything"
+echo -e "  ${BOLD}OAuth Login (cpa-oauth)${NC}"
+echo "    cpa-oauth            Interactive menu"
+echo "    cpa-oauth --all      Login to ALL providers"
+echo "    cpa-oauth --gemini   Login to Gemini CLI"
+echo "    cpa-oauth --github   Login to GitHub Copilot"
+echo "    cpa-oauth --kiro     Login to Kiro (AWS)"
+echo "    (Also: --codex, --claude, --qwen, --iflow, --antigravity)"
 echo ""
-echo "Quick Start:"
-echo "  1. Start server:    start-cliproxyapi -b"
-echo "  2. Login OAuth:     cliproxyapi-oauth --all"
-echo "  3. Test endpoint:   curl http://localhost:8317/v1/models"
+echo -e "  ${BOLD}Other Tools${NC}"
+echo "    cpa-gui              Open Control Center GUI"
+echo "    cpa-update           Update to latest version"
+echo "    cpa-benchmark        Test latency & speed"
+echo "    cpa-uninstall        Remove everything"
+echo ""
+echo -e "  ${BOLD}Quick Start:${NC}"
+echo "    1. cpa-start -b"
+echo "    2. cpa-oauth --all"
+echo "    3. curl http://localhost:8317/v1/models"
 
 if [ "$PATH_ADDED" = true ]; then
     echo ""
-    echo -e "${YELLOW}NOTE: Restart your terminal or run: source ~/.bashrc (or ~/.zshrc)${NC}"
+    echo -e "  ${YELLOW}⚠ Restart terminal or run: source ~/.bashrc${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}==============================================${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════${NC}"

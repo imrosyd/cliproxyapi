@@ -316,16 +316,16 @@ Installed Files:
   Droid:    $FACTORY_DIR\config.json
 
 Available Scripts (in $BIN_DIR):
-  start-cliproxyapi     Start/stop/restart server
-  cliproxyapi-oauth     Login to OAuth providers
-  gui-cliproxyapi       Open Control Center GUI
-  update-cliproxyapi    Update to latest version
-  uninstall-cliproxyapi Remove everything
+  cpa-start            Start/stop/restart server
+  cpa-oauth            Login to OAuth providers
+  cpa-gui              Open Control Center GUI
+  cpa-update           Update to latest version
+  cpa-uninstall        Remove everything
 
 Quick Start:
-  1. Start server:    start-cliproxyapi -Background
-  2. Login OAuth:     cliproxyapi-oauth -All
-  3. Open GUI:        gui-cliproxyapi
+  1. Start server:    cpa-start -Background
+  2. Login OAuth:     cpa-oauth -All
+  3. Open GUI:        cpa-gui
   4. Use with Droid:  droid (select cliproxyapi/* model)
 "@ -ForegroundColor Cyan
 

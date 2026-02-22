@@ -75,7 +75,7 @@ check_server() {
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/v1/models" --connect-timeout 3 2>/dev/null || echo "000")
     if [ "$RESPONSE" != "200" ]; then
         write_error "Server not responding at $BASE_URL"
-        echo "  Make sure CLIProxyAPI is running: start-cliproxyapi -b"
+        echo "  Make sure CLIProxyAPI is running: cpa-start -b"
         exit 1
     fi
 }

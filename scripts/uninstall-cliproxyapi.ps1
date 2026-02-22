@@ -5,10 +5,10 @@
     Completely removes CLIProxyAPI and all related files.
     By default, preserves auth files and .factory/config.json.
 .EXAMPLE
-    uninstall-cliproxyapi.ps1              # Interactive, keeps auth
-    uninstall-cliproxyapi.ps1 -All         # Remove everything
-    uninstall-cliproxyapi.ps1 -KeepAuth    # Keep OAuth tokens
-    uninstall-cliproxyapi.ps1 -Force       # No confirmation
+    cpa-uninstall              # Interactive, keeps auth
+    cpa-uninstall -All         # Remove everything
+    cpa-uninstall -KeepAuth    # Keep OAuth tokens
+    cpa-uninstall -Force       # No confirmation
 #>
 
 param(
@@ -28,10 +28,12 @@ $FACTORY_CONFIG = "$env:USERPROFILE\.factory\config.json"
 $items = @(
     @{ Name = "Binary"; Path = "$BIN_DIR\cliproxyapi.exe"; Type = "File"; Always = $true }
     @{ Name = "Binary backup"; Path = "$BIN_DIR\cliproxyapi.exe.old"; Type = "File"; Always = $true }
-    @{ Name = "Install script"; Path = "$BIN_DIR\install-cliproxyapi.ps1"; Type = "File"; Always = $true }
-    @{ Name = "Update script"; Path = "$BIN_DIR\update-cliproxyapi.ps1"; Type = "File"; Always = $true }
-    @{ Name = "OAuth script"; Path = "$BIN_DIR\cliproxyapi-oauth.ps1"; Type = "File"; Always = $true }
-    @{ Name = "Uninstall script"; Path = "$BIN_DIR\uninstall-cliproxyapi.ps1"; Type = "File"; Always = $true }
+    @{ Name = "Start script"; Path = "$BIN_DIR\cpa-start.ps1"; Type = "File"; Always = $true }
+    @{ Name = "Update script"; Path = "$BIN_DIR\cpa-update.ps1"; Type = "File"; Always = $true }
+    @{ Name = "OAuth script"; Path = "$BIN_DIR\cpa-oauth.ps1"; Type = "File"; Always = $true }
+    @{ Name = "Uninstall script"; Path = "$BIN_DIR\cpa-uninstall.ps1"; Type = "File"; Always = $true }
+    @{ Name = "GUI script"; Path = "$BIN_DIR\cpa-gui.ps1"; Type = "File"; Always = $true }
+    @{ Name = "Install script"; Path = "$BIN_DIR\cpa-install.ps1"; Type = "File"; Always = $true }
     @{ Name = "Clone directory"; Path = $CLONE_DIR; Type = "Directory"; Always = $true }
     @{ Name = "Config (config.yaml)"; Path = "$CONFIG_DIR\config.yaml"; Type = "File"; Always = $true }
     @{ Name = "Logs directory"; Path = "$CONFIG_DIR\logs"; Type = "Directory"; Always = $true }
@@ -188,7 +190,7 @@ if ($toKeep.Count -gt 0) {
 
 if ($toKeep.Count -gt 0 -and -not $All) {
     Write-Host "`nTo remove everything including auth files:" -ForegroundColor DarkGray
-    Write-Host "  uninstall-cliproxyapi.ps1 -All -Force" -ForegroundColor DarkGray
+    Write-Host "  cpa-uninstall.ps1 -All -Force" -ForegroundColor DarkGray
 }
 
 Write-Host ""

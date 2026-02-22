@@ -4,11 +4,11 @@
 .DESCRIPTION
     Start, stop, and manage the CLIProxyAPI proxy server.
 .EXAMPLE
-    start-cliproxyapi.ps1              # Start in foreground
-    start-cliproxyapi.ps1 -Background  # Start in background
-    start-cliproxyapi.ps1 -Status      # Check if running
-    start-cliproxyapi.ps1 -Stop        # Stop server
-    start-cliproxyapi.ps1 -Logs        # View logs
+    cpa-start              # Start in foreground
+    cpa-start -Background  # Start in background
+    cpa-start -Status      # Check if running
+    cpa-start -Stop        # Stop server
+    cpa-start -Logs        # View logs
 .NOTES
     Author: Auto-generated
     Repo: https://github.com/imrosyd/cliproxyapi
@@ -141,8 +141,8 @@ function Start-Server {
         if (Get-ServerProcess) {
             Write-Success "Server started in background (PID: $($process.Id))"
             Write-Host "`nEndpoint: http://localhost:$PORT/v1"
-            Write-Host "To stop:   start-cliproxyapi.ps1 -Stop"
-            Write-Host "To status: start-cliproxyapi.ps1 -Status"
+            Write-Host "To stop:   cpa-start -Stop"
+            Write-Host "To status: cpa-start -Status"
         } else {
             Write-Error "Server failed to start"
             exit 1

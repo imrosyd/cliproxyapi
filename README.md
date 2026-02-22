@@ -100,13 +100,13 @@ Scripts are installed to `~/bin/` and added to PATH automatically.
 $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User')
 
 # Start server in background
-start-cliproxyapi -Background
+cpa-start -Background
 
 # Login to providers
-cliproxyapi-oauth -All
+cpa-oauth -All
 
 # Open GUI Control Center (full control via browser)
-gui-cliproxyapi
+cpa-gui
 ```
 
 ### Linux / macOS
@@ -150,22 +150,22 @@ Scripts are installed to `~/bin/` and added to PATH automatically.
 source ~/.bashrc  # or ~/.zshrc
 
 # Start server in background
-start-cliproxyapi -b
+cpa-start -b
 
 # Login to providers
-cliproxyapi-oauth --all
+cpa-oauth --all
 
 # Open GUI Control Center (full control via browser)
-gui-cliproxyapi
+cpa-gui
 ```
 
 **Available Scripts:**
-- `start-cliproxyapi` - Start/stop/restart server + systemd management
-- `cliproxyapi-oauth` - Login to OAuth providers
-- `gui-cliproxyapi` - Open GUI Control Center
-- `update-cliproxyapi` - Update to latest version
-- `uninstall-cliproxyapi` - Remove everything
-- `cliproxyapi-benchmark` - Test provider latency
+- `cpa-start` - Start/stop/restart server + systemd management
+- `cpa-oauth` - Login to OAuth providers
+- `cpa-gui` - Open GUI Control Center
+- `cpa-update` - Update to latest version
+- `cpa-uninstall` - Remove everything
+- `cpa-benchmark` - Test provider latency
 
 ---
 
@@ -175,10 +175,10 @@ On Linux systems with systemd, the installer automatically sets up a user servic
 
 ```bash
 # Enable auto-start on boot
-start-cliproxyapi --enable
+cpa-start --enable
 
 # Disable auto-start
-start-cliproxyapi --disable
+cpa-start --disable
 
 # Check service status
 systemctl --user status cliproxyapi
@@ -197,16 +197,16 @@ Test response latency for all available models and find the fastest provider.
 
 ```bash
 # Run benchmark (server must be running)
-cliproxyapi-benchmark
+cpa-benchmark
 
 # Show only top 5 fastest
-cliproxyapi-benchmark --top 5
+cpa-benchmark --top 5
 
 # Output as JSON
-cliproxyapi-benchmark --json
+cpa-benchmark --json
 
 # Use custom port
-cliproxyapi-benchmark --port 9000
+cpa-benchmark --port 9000
 ```
 
 Results are saved to `~/.cliproxyapi/benchmark.json` for reference.
@@ -225,7 +225,7 @@ systemctl --user list-timers cliproxyapi-update
 cat ~/.cliproxyapi/logs/update.log
 
 # Run update manually
-update-cliproxyapi --prebuilt
+cpa-update --prebuilt
 
 # Disable auto-update
 systemctl --user disable --now cliproxyapi-update.timer
@@ -246,7 +246,7 @@ Just start the proxy and select a model in Droid:
 
 ```powershell
 # Start proxy in background
-start-cliproxyapi -Background
+cpa-start -Background
 
 # Use Droid normally - custom models will appear in model selector
 droid
@@ -256,7 +256,7 @@ Or use the GUI:
 
 ```powershell
 # Open Control Center, click "Start", then use Droid
-gui-cliproxyapi
+cpa-gui
 ```
 
 ### Claude Code
@@ -415,28 +415,28 @@ curl http://localhost:8317/v1/chat/completions \
 
 ### Windows Scripts (`scripts/*.ps1`)
 
-### `start-cliproxyapi.ps1`
+### `cpa-start` (Windows)
 
 Server manager - start, stop, and monitor.
 
 ```powershell
 # Start server (foreground)
-.\start-cliproxyapi.ps1
+cpa-start
 
 # Start in background
-.\start-cliproxyapi.ps1 -Background
+cpa-start -Background
 
 # Check status
-.\start-cliproxyapi.ps1 -Status
+cpa-start -Status
 
 # Stop server
-.\start-cliproxyapi.ps1 -Stop
+cpa-start -Stop
 
 # Restart
-.\start-cliproxyapi.ps1 -Restart
+cpa-start -Restart
 
 # View logs
-.\start-cliproxyapi.ps1 -Logs
+cpa-start -Logs
 ```
 
 ### `install-cliproxyapi.ps1`
@@ -457,64 +457,64 @@ Full installation script.
 .\install-cliproxyapi.ps1 -SkipOAuth
 ```
 
-### `update-cliproxyapi.ps1`
+### `cpa-update` (Windows)
 
 Update to latest version.
 
 ```powershell
 # Update from source (if cloned)
-.\update-cliproxyapi.ps1
+cpa-update
 
 # Update using pre-built binary
-.\update-cliproxyapi.ps1 -UsePrebuilt
+cpa-update -UsePrebuilt
 
 # Force update even if up-to-date
-.\update-cliproxyapi.ps1 -Force
+cpa-update -Force
 ```
 
-### `cliproxyapi-oauth.ps1`
+### `cpa-oauth` (Windows)
 
 Interactive OAuth login helper.
 
 ```powershell
 # Interactive menu
-.\cliproxyapi-oauth.ps1
+cpa-oauth
 
 # Login to all providers
-.\cliproxyapi-oauth.ps1 -All
+cpa-oauth -All
 
 # Login to specific providers
-.\cliproxyapi-oauth.ps1 -Gemini -Copilot -Kiro
+cpa-oauth -Gemini -Copilot -Kiro
 ```
 
-### `uninstall-cliproxyapi.ps1`
+### `cpa-uninstall` (Windows)
 
 Clean uninstallation.
 
 ```powershell
 # Uninstall (keeps auth files)
-.\uninstall-cliproxyapi.ps1
+cpa-uninstall
 
 # Remove everything including auth
-.\uninstall-cliproxyapi.ps1 -All
+cpa-uninstall -All
 
 # Force without confirmation
-.\uninstall-cliproxyapi.ps1 -All -Force
+cpa-uninstall -All -Force
 ```
 
-### `gui-cliproxyapi.ps1`
+### `cpa-gui` (Windows)
 
 GUI Control Center with full server management.
 
 ```powershell
 # Open GUI (starts management server on port 8318)
-gui-cliproxyapi.ps1
+cpa-gui
 
 # Use custom port
-gui-cliproxyapi.ps1 -Port 9000
+cpa-gui -Port 9000
 
 # Don't auto-open browser
-gui-cliproxyapi.ps1 -NoBrowser
+cpa-gui -NoBrowser
 ```
 
 **Features:**
@@ -535,34 +535,34 @@ The GUI runs a local management server on `localhost:8318` that handles all cont
 
 ### Linux / macOS Scripts (`unix/*.sh`)
 
-### `start-cliproxyapi.sh`
+### `cpa-start`
 
 Server manager - start, stop, and monitor.
 
 ```bash
 # Start server (foreground)
-./start-cliproxyapi.sh
+cpa-start
 
 # Start in background
-./start-cliproxyapi.sh -b
+cpa-start -b
 
 # Check status
-./start-cliproxyapi.sh --status
+cpa-start --status
 
 # Stop server
-./start-cliproxyapi.sh --stop
+cpa-start --stop
 
 # Restart
-./start-cliproxyapi.sh --restart
+cpa-start --restart
 
 # View logs
-./start-cliproxyapi.sh --logs
+cpa-start --logs
 
 # Enable systemd auto-start
-./start-cliproxyapi.sh --enable
+cpa-start --enable
 
 # Disable systemd auto-start
-./start-cliproxyapi.sh --disable
+cpa-start --disable
 ```
 
 ### `install-cliproxyapi.sh`
@@ -583,79 +583,79 @@ Full installation script.
 ./install-cliproxyapi.sh --skip-oauth
 ```
 
-### `update-cliproxyapi.sh`
+### `cpa-update`
 
 Update to latest version.
 
 ```bash
 # Update from source (if cloned)
-./update-cliproxyapi.sh
+cpa-update
 
 # Update using pre-built binary
-./update-cliproxyapi.sh --prebuilt
+cpa-update --prebuilt
 
 # Force update even if up-to-date
-./update-cliproxyapi.sh --force
+cpa-update --force
 ```
 
-### `cliproxyapi-oauth.sh`
+### `cpa-oauth`
 
 Interactive OAuth login helper.
 
 ```bash
 # Interactive menu
-./cliproxyapi-oauth.sh
+cpa-oauth
 
 # Login to all providers
-./cliproxyapi-oauth.sh --all
+cpa-oauth --all
 
 # Login to specific providers
-./cliproxyapi-oauth.sh --gemini --copilot --kiro
+cpa-oauth --gemini --copilot --kiro
 ```
 
-### `uninstall-cliproxyapi.sh`
+### `cpa-uninstall`
 
 Clean uninstallation.
 
 ```bash
 # Uninstall (keeps auth files)
-./uninstall-cliproxyapi.sh
+cpa-uninstall
 
 # Remove everything including auth
-./uninstall-cliproxyapi.sh --all
+cpa-uninstall --all
 
 # Force without confirmation
-./uninstall-cliproxyapi.sh --all --force
+cpa-uninstall --all --force
 ```
 
-### `gui-cliproxyapi.sh`
+### `cpa-gui`
 
 GUI Control Center with full server management.
 
 ```bash
 # Open GUI (starts management server on port 8318)
-./gui-cliproxyapi.sh
+cpa-gui
 
 # Use custom port
-./gui-cliproxyapi.sh --port 9000
+cpa-gui --port 9000
 
 # Don't auto-open browser
-./gui-cliproxyapi.sh --no-browser
+cpa-gui --no-browser
 ```
 
-### `cliproxyapi-benchmark.sh`
+### `cpa-benchmark`
 
 Latency benchmark for all available models.
 
 ```bash
 # Benchmark all models
-./cliproxyapi-benchmark.sh
+cpa-benchmark
 
 # Show top 5 fastest
-./cliproxyapi-benchmark.sh --top 5
+cpa-benchmark --top 5
 
 # JSON output
-./cliproxyapi-benchmark.sh --json
+cpa-benchmark --json
 ```
 
 ---
@@ -682,6 +682,157 @@ Latency benchmark for all available models.
 | Systemd | `~/.config/systemd/user/cliproxyapi.service` | Auto-start service |
 | Benchmark | `~/.cliproxyapi/benchmark.json` | Latest benchmark results |
 | Source | `~/CLIProxyAPI-source/` | Cloned source (if built from source) |
+
+---
+
+## Custom AI Providers (AI SDK)
+
+CLIProxyAPI supports custom AI providers compatible with **Vercel AI SDK** format. Add your own providers like OpenRouter, Ollama, LMStudio, Together AI, Groq, or any OpenAI-compatible API.
+
+### Quick Start
+
+#### Windows (PowerShell)
+
+```powershell
+# Interactive mode
+add-provider.ps1
+
+# Use template
+add-provider.ps1 -Template openrouter -ApiKey "sk-or-xxx"
+
+# List providers
+list-providers.ps1
+
+# Test connection
+test-provider.ps1 openrouter
+```
+
+#### Linux / macOS (Bash)
+
+```bash
+# Interactive mode
+./unix/add-provider.sh -i
+
+# Use template
+./unix/add-provider.sh --template openrouter --api-key "sk-or-xxx"
+
+# List providers
+./unix/list-providers.sh
+
+# Test connection
+./unix/test-provider.sh openrouter
+```
+
+### Provider Configuration File
+
+Providers are stored in `~/.cliproxyapi/providers.json`:
+
+```json
+{
+  "$schema": "https://cliproxyapi.dev/schema/providers.json",
+  "providers": {
+    "deepseek": {
+      "npm": null,
+      "options": {
+        "baseURL": "https://api.deepseek.com/v1",
+        "apiKey": "sk-xxx"
+      },
+      "models": {
+        "deepseek-chat": {
+          "name": "DeepSeek Chat",
+          "reasoning": false,
+          "limit": {
+            "context": 64000,
+            "output": 4096
+          },
+          "modalities": {
+            "input": ["text"],
+            "output": ["text"]
+          }
+        },
+        "deepseek-reasoner": {
+          "name": "DeepSeek Reasoner",
+          "reasoning": true,
+          "limit": {
+            "context": 64000,
+            "output": 8192
+          },
+          "modalities": {
+            "input": ["text"],
+            "output": ["text"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Pre-defined Templates
+
+| Template | Base URL | Description |
+|----------|----------|-------------|
+| `openrouter` | `https://openrouter.ai/api/v1` | 100+ models from various providers |
+| `ollama` | `http://localhost:11434/v1` | Local LLM (no API key needed) |
+| `lmstudio` | `http://localhost:1234/v1` | Local LLM (no API key needed) |
+| `together` | `https://api.together.xyz/v1` | Together AI cloud API |
+| `groq` | `https://api.groq.com/openai/v1` | Groq fast inference |
+| `deepseek` | `https://api.deepseek.com/v1` | DeepSeek API |
+
+### Model Configuration Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Display name for the model |
+| `reasoning` | boolean | Whether model supports thinking/reasoning |
+| `limit.context` | number | Context window size in tokens |
+| `limit.output` | number | Maximum output tokens |
+| `modalities.input` | array | Input types: `text`, `image`, `pdf`, `audio`, `video` |
+| `modalities.output` | array | Output types: `text`, `image`, `audio` |
+| `variants` | object | Model variants with reasoning/verbosity settings |
+
+### Using with CLIProxyAPI
+
+After adding custom providers, they work automatically with CLIProxyAPI:
+
+```bash
+# Start the server
+cpa-start -b
+
+# Use custom model
+curl http://localhost:8317/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-dummy" \
+  -d '{"model": "deepseek-chat", "messages": [{"role": "user", "content": "Hello!"}]}'
+```
+
+### GUI Management
+
+Open the Control Center to manage providers visually:
+
+```bash
+cpa-gui
+```
+
+Navigate to the **Custom** tab to:
+- Add/edit/delete providers
+- Test connections
+- Import/export configurations
+- Use pre-defined templates
+
+### Export / Import
+
+```powershell
+# Windows
+export-providers.ps1 -o providers.json
+export-providers.ps1 --format yaml -o providers.yaml
+```
+
+```bash
+# Linux/macOS
+./unix/export-providers.sh -o providers.json
+./unix/export-providers.sh --format yaml -o providers.yaml
+```
 
 ---
 
@@ -715,7 +866,7 @@ The proxy accepts any API key. Make sure you're using `sk-dummy` or any non-empt
 
 1. Make sure you've logged into the provider that offers that model
 2. Check the model name spelling (case-sensitive)
-3. Run `cliproxyapi-oauth.ps1` to see which providers you're logged into
+3. Run `cpa-oauth` to see which providers you're logged into
 
 ### Quota exceeded
 

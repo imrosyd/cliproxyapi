@@ -9,9 +9,9 @@
 .PARAMETER NoBrowser
     Don't automatically open browser
 .EXAMPLE
-    gui-cliproxyapi.ps1
-    gui-cliproxyapi.ps1 -Port 9000
-    gui-cliproxyapi.ps1 -NoBrowser
+    cpa-gui
+    cpa-gui -Port 9000
+    cpa-gui -NoBrowser
 #>
 
 param(
@@ -545,22 +545,37 @@ $FACTORY_CONFIG_PATH = "$env:USERPROFILE\.factory\config.json"
 
 function Get-FactoryConfig {
     if (-not (Test-Path $FACTORY_CONFIG_PATH)) {
-        return @{ success = $true; config = @{ custom_models = @() }; models = @() }
+        return @{ success = $true; config = @{ models = @() }; models = @() }
     }
     
     try {
         $content = Get-Content $FACTORY_CONFIG_PATH -Raw -Encoding UTF8
         $config = $content | ConvertFrom-Json
         $models = @()
-        if ($config.custom_models) {
-            $models = $config.custom_models | ForEach-Object {
+        
+        if ($config.models) {
+            $models = $config.models | ForEach-Object {
                 @{
-                    model        = $_.model
-                    display_name = $_.model_display_name
-                    base_url     = $_.base_url
+                    id           = if ($_.id) { $_.id } elseif ($_.model) { $_.model } else { "unknown" }
+                    displayName = if ($_.displayName) { $_.displayName } elseif ($_.model_display_name) { $_.model_display_name } else { $_.id }
+                    baseUrl     = if ($_.baseUrl) { $_.baseUrl } elseif ($_.base_url) { $_.base_url } else { "" }
+                    apiKey      = if ($_.apiKey) { $_.apiKey } elseif ($_.api_key) { $_.api_key } else { "" }
+                    provider    = if ($_.provider) { $_.provider } else { "openai" }
                 }
             }
         }
+        elseif ($config.custom_models) {
+            $models = $config.custom_models | ForEach-Object {
+                @{
+                    id           = $_.model
+                    displayName  = $_.model_display_name
+                    baseUrl      = $_.base_url
+                    apiKey       = $_.api_key
+                    provider     = $_.provider
+                }
+            }
+        }
+        
         return @{ success = $true; config = $config; models = $models }
     }
     catch {
@@ -569,34 +584,30 @@ function Get-FactoryConfig {
 }
 
 function Add-FactoryModels {
-    param([array]$Models, [hashtable]$DisplayNames)
+    param([array]$Models, [hashtable]$DisplayNames, [string]$BaseUrl, [string]$ApiKey, [string]$Provider)
     
     try {
-        # Ensure .factory directory exists
         $factoryDir = Split-Path $FACTORY_CONFIG_PATH -Parent
         if (-not (Test-Path $factoryDir)) {
             New-Item -ItemType Directory -Path $factoryDir -Force | Out-Null
         }
         
-        # Load existing config or create new
-        $config = @{ custom_models = @() }
+        $config = @{ models = @() }
         if (Test-Path $FACTORY_CONFIG_PATH) {
             $backup = "$FACTORY_CONFIG_PATH.bak"
             Copy-Item -Path $FACTORY_CONFIG_PATH -Destination $backup -Force
             $content = Get-Content $FACTORY_CONFIG_PATH -Raw -Encoding UTF8
             $config = $content | ConvertFrom-Json
-            if (-not $config.custom_models) {
-                $config | Add-Member -NotePropertyName "custom_models" -NotePropertyValue @() -Force
+            if (-not $config.models) {
+                $config | Add-Member -NotePropertyName "models" -NotePropertyValue @() -Force
             }
         }
         
-        # Get existing model IDs
         $existingModels = @()
-        if ($config.custom_models) {
-            $existingModels = $config.custom_models | ForEach-Object { $_.model }
+        if ($config.models) {
+            $existingModels = $config.models | ForEach-Object { if ($_.id) { $_.id } elseif ($_.model) { $_.model } }
         }
         
-        # Add new models
         $added = @()
         foreach ($modelId in $Models) {
             if ($modelId -notin $existingModels) {
@@ -608,22 +619,21 @@ function Add-FactoryModels {
                 }
                 
                 $newEntry = @{
-                    api_key            = "sk-dummy"
-                    provider           = "openai"
-                    model              = $modelId
-                    base_url           = "http://localhost:8317/v1"
-                    model_display_name = $displayName
+                    id = $modelId
+                    displayName = $displayName
+                    baseUrl = if ($BaseUrl) { $BaseUrl } else { "http://localhost:8317/v1" }
+                    apiKey = if ($ApiKey) { $ApiKey } else { "sk-dummy" }
+                    provider = if ($Provider) { $Provider } else { "openai" }
                 }
                 
-                $config.custom_models += $newEntry
+                $config.models += $newEntry
                 $added += $modelId
             }
         }
         
-        # Save config
         $config | ConvertTo-Json -Depth 10 | Out-File -FilePath $FACTORY_CONFIG_PATH -Encoding UTF8 -Force
         
-        return @{ success = $true; added = $added; total = $config.custom_models.Count }
+        return @{ success = $true; added = $added; total = $config.models.Count }
     }
     catch {
         return @{ success = $false; error = $_.Exception.Message }
@@ -638,39 +648,48 @@ function Remove-FactoryModels {
     }
     
     try {
-        # Backup
         $backup = "$FACTORY_CONFIG_PATH.bak"
         Copy-Item -Path $FACTORY_CONFIG_PATH -Destination $backup -Force
         
         $content = Get-Content $FACTORY_CONFIG_PATH -Raw -Encoding UTF8
         $config = $content | ConvertFrom-Json
         
-        if (-not $config.custom_models) {
+        $modelList = @()
+        if ($config.models) {
+            $modelList = $config.models
+        }
+        elseif ($config.custom_models) {
+            $modelList = $config.custom_models
+        }
+        
+        if ($modelList.Count -eq 0) {
             return @{ success = $true; removed = @(); total = 0 }
         }
         
         $removed = @()
         if ($All) {
-            $removed = $config.custom_models | ForEach-Object { $_.model }
-            $config.custom_models = @()
+            $removed = $modelList | ForEach-Object { if ($_.id) { $_.id } elseif ($_.model) { $_.model } }
+            $config.models = @()
+            if ($config.custom_models) { $config.custom_models = @() }
         }
         else {
             $remaining = @()
-            foreach ($entry in $config.custom_models) {
-                if ($entry.model -in $Models) {
-                    $removed += $entry.model
+            foreach ($entry in $modelList) {
+                $modelId = if ($entry.id) { $entry.id } elseif ($entry.model) { $entry.model }
+                if ($modelId -in $Models) {
+                    $removed += $modelId
                 }
                 else {
                     $remaining += $entry
                 }
             }
-            $config.custom_models = $remaining
+            $config.models = $remaining
+            if ($config.custom_models) { $config.custom_models = $remaining }
         }
         
-        # Save config
         $config | ConvertTo-Json -Depth 10 | Out-File -FilePath $FACTORY_CONFIG_PATH -Encoding UTF8 -Force
         
-        return @{ success = $true; removed = $removed; total = $config.custom_models.Count }
+        return @{ success = $true; removed = $removed; total = $config.models.Count }
     }
     catch {
         return @{ success = $false; error = $_.Exception.Message }
@@ -712,6 +731,183 @@ function Send-HtmlResponse {
     $Context.Response.ContentLength64 = $buffer.Length
     $Context.Response.OutputStream.Write($buffer, 0, $buffer.Length)
     $Context.Response.OutputStream.Close()
+}
+
+function Invoke-ProxyRequest {
+    param([string]$Body)
+    
+    try {
+        $data = $Body | ConvertFrom-Json
+        $targetPath = if ($data.path) { $data.path } else { "/v1/chat/completions" }
+        $requestMethod = if ($data.method) { $data.method } else { "POST" }
+        $payload = $data.body
+        $model = ""
+        if ($payload -and $payload.model) { $model = $payload.model }
+        
+        $url = "http://localhost:$API_PORT$targetPath"
+        Write-Log "Proxy request: $requestMethod $url (model: $model)"
+        $startTime = Get-Date
+        
+        try {
+            if ($requestMethod -in @("POST", "PUT", "PATCH")) {
+                $jsonBody = $payload | ConvertTo-Json -Depth 10 -Compress
+                Write-Log "Request body length: $($jsonBody.Length)"
+                $response = Invoke-WebRequest -Uri $url -Method $requestMethod -ContentType "application/json" -Headers @{ "Authorization" = "Bearer sk-dummy" } -Body $jsonBody -TimeoutSec 120 -ErrorAction Stop -UseBasicParsing
+            }
+            else {
+                $response = Invoke-WebRequest -Uri $url -Method $requestMethod -ContentType "application/json" -Headers @{ "Authorization" = "Bearer sk-dummy" } -TimeoutSec 120 -ErrorAction Stop -UseBasicParsing
+            }
+            
+            $latencyMs = [math]::Round(((Get-Date) - $startTime).TotalMilliseconds, 0)
+            Write-Log "Response status: $($response.StatusCode), latency: ${latencyMs}ms"
+            
+            $provider = $null
+            if ($model) {
+                $modelLower = $model.ToLower()
+                if ($modelLower -match "gemini") { $provider = "gemini" }
+                elseif ($modelLower -match "claude" -and $modelLower -match "kiro") { $provider = "kiro" }
+                elseif ($modelLower -match "claude") { $provider = "claude" }
+                elseif ($modelLower -match "gpt|codex") { $provider = "openai" }
+                elseif ($modelLower -match "qwen") { $provider = "qwen" }
+                elseif ($modelLower -match "grok") { $provider = "grok" }
+            }
+            
+            Update-RequestStats -Success $true -Provider $provider -Model $model -LatencyMs $latencyMs
+            
+            return @{ success = $true; rawContent = $response.Content; statusCode = 200 }
+        }
+        catch {
+            $latencyMs = [math]::Round(((Get-Date) - $startTime).TotalMilliseconds, 0)
+            Update-RequestStats -Success $false -Provider $null -Model $model -LatencyMs $latencyMs
+            
+            Write-Log "Proxy error: $($_.Exception.Message)"
+            
+            $errorMsg = $_.Exception.Message
+            $statusCode = 500
+            $errorBody = $errorMsg
+            
+            if ($_.Exception.Response) {
+                try {
+                    $statusCode = [int]$_.Exception.Response.StatusCode
+                    $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                    $errorBody = $reader.ReadToEnd()
+                    $reader.Close()
+                    Write-Log "Error body: $errorBody"
+                }
+                catch {}
+            }
+            return @{ success = $false; error = $errorBody; statusCode = $statusCode }
+        }
+    }
+    catch {
+        Write-Log "Proxy parse error: $($_.Exception.Message)"
+        return @{ success = $false; error = "Invalid request: $($_.Exception.Message)"; statusCode = 400 }
+    }
+}
+
+function Update-RequestStats {
+    param([bool]$Success, [string]$Provider, [string]$Model, [double]$LatencyMs)
+    
+    try {
+        if (Test-Path $STATS_FILE) {
+            $stats = Get-Content $STATS_FILE -Raw | ConvertFrom-Json
+        }
+        else {
+            $stats = @{
+                total_requests = 0
+                successful     = 0
+                failed         = 0
+                by_provider    = @{}
+                by_model       = @{}
+                latencies      = @()
+                start_time     = (Get-Date).ToString("o")
+                last_request   = $null
+            }
+        }
+        
+        $stats.total_requests++
+        if ($Success) { $stats.successful++ } else { $stats.failed++ }
+        
+        if ($LatencyMs -gt 0) {
+            $stats.latencies = @($stats.latencies) + $LatencyMs
+            if ($stats.latencies.Count -gt 100) {
+                $stats.latencies = @($stats.latencies | Select-Object -Last 100)
+            }
+        }
+        
+        if ($Provider) {
+            if (-not $stats.by_provider.$Provider) {
+                $stats.by_provider | Add-Member -NotePropertyName $Provider -NotePropertyValue @{ total = 0; successful = 0; failed = 0 } -Force
+            }
+            $stats.by_provider.$Provider.total++
+            if ($Success) { $stats.by_provider.$Provider.successful++ } else { $stats.by_provider.$Provider.failed++ }
+        }
+        
+        if ($Model) {
+            $modelKey = $Model
+            if (-not $stats.by_model.$modelKey) {
+                $stats.by_model | Add-Member -NotePropertyName $modelKey -NotePropertyValue @{ total = 0; successful = 0; failed = 0 } -Force
+            }
+            $stats.by_model.$modelKey.total++
+            if ($Success) { $stats.by_model.$modelKey.successful++ } else { $stats.by_model.$modelKey.failed++ }
+        }
+        
+        $stats.last_request = (Get-Date).ToString("o")
+        $stats | ConvertTo-Json -Depth 10 | Out-File $STATS_FILE -Encoding UTF8
+    }
+    catch {}
+}
+
+function Get-Providers {
+    $providersPath = Join-Path $CONFIG_DIR "providers.json"
+    if (Test-Path $providersPath) {
+        try {
+            $data = Get-Content $providersPath -Raw | ConvertFrom-Json -Depth 10
+            return $data
+        } catch {}
+    }
+    return @{ '$schema' = "https://cliproxyapi.dev/schema/providers.json"; providers = @{} }
+}
+
+function Set-Providers {
+    param([object]$Providers)
+    $providersPath = Join-Path $CONFIG_DIR "providers.json"
+    $existing = Get-Providers
+    
+    foreach ($prop in $Providers.PSObject.Properties) {
+        $existing.providers | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
+    }
+    
+    $existing | ConvertTo-Json -Depth 10 | Out-File $providersPath -Encoding UTF8
+    return @{ success = $true; count = $existing.providers.PSObject.Properties.Count }
+}
+
+function Test-ProviderConnection {
+    param([string]$BaseURL, [string]$ApiKey, [string]$Name)
+    
+    try {
+        $testUrl = $BaseURL.TrimEnd('/') + '/models'
+        $headers = @{ "Content-Type" = "application/json" }
+        if ($ApiKey) { $headers["Authorization"] = "Bearer $ApiKey" }
+        
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        $response = Invoke-WebRequest -Uri $testUrl -Method GET -Headers $headers -TimeoutSec 15 -UseBasicParsing
+        $stopwatch.Stop()
+        
+        $latency = $stopwatch.ElapsedMilliseconds
+        $data = $response.Content | ConvertFrom-Json
+        $modelCount = ($data.data | Measure-Object).Count
+        
+        return @{
+            success = $true
+            latency_ms = $latency
+            model_count = $modelCount
+            status = $response.StatusCode
+        }
+    }
+    catch {
+        return @{ success = $false; error = $_.Exception.Message }
+    }
 }
 
 # Main
@@ -987,7 +1183,10 @@ try {
                                     $displayNames[$_.Name] = $_.Value
                                 }
                             }
-                            $result = Add-FactoryModels -Models $models -DisplayNames $displayNames
+                            $baseUrl = $data.baseUrl
+                            $apiKey = $data.apiKey
+                            $provider = $data.provider
+                            $result = Add-FactoryModels -Models $models -DisplayNames $displayNames -BaseUrl $baseUrl -ApiKey $apiKey -Provider $provider
                             Send-JsonResponse -Context $context -Data $result
                         }
                         catch {
@@ -1023,6 +1222,30 @@ try {
                         Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
                     }
                 }
+                "^/api/proxy$" {
+                    if ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        $result = Invoke-ProxyRequest -Body $body
+                        if ($result.success) {
+                            $context.Response.StatusCode = 200
+                            $context.Response.ContentType = "application/json"
+                            $context.Response.Headers.Add("Access-Control-Allow-Origin", "*")
+                            $rawBytes = [System.Text.Encoding]::UTF8.GetBytes($result.rawContent)
+                            $context.Response.ContentLength64 = $rawBytes.Length
+                            $context.Response.OutputStream.Write($rawBytes, 0, $rawBytes.Length)
+                            $context.Response.OutputStream.Close()
+                        }
+                        else {
+                            Send-JsonResponse -Context $context -Data @{ error = $result.error } -StatusCode $result.statusCode
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
                 "^/api/management/usage$" {
                     if ($method -eq "GET") {
                         try {
@@ -1038,6 +1261,48 @@ try {
                             catch {
                                 Send-JsonResponse -Context $context -Data @{ available = $false; error = "Management API not available. Enable usage-statistics-enabled in config.yaml" }
                             }
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/providers$" {
+                    if ($method -eq "GET") {
+                        $providers = Get-Providers
+                        Send-JsonResponse -Context $context -Data $providers
+                    }
+                    elseif ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json -Depth 10
+                            $result = Set-Providers -Providers $data.providers
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid JSON: $($_.Exception.Message)" } -StatusCode 400
+                        }
+                    }
+                    else {
+                        Send-JsonResponse -Context $context -Data @{ error = "Method not allowed" } -StatusCode 405
+                    }
+                }
+                "^/api/providers/test$" {
+                    if ($method -eq "POST") {
+                        $reader = New-Object System.IO.StreamReader($request.InputStream)
+                        $body = $reader.ReadToEnd()
+                        $reader.Close()
+                        
+                        try {
+                            $data = $body | ConvertFrom-Json
+                            $result = Test-ProviderConnection -BaseURL $data.baseURL -ApiKey $data.apiKey -Name $data.name
+                            Send-JsonResponse -Context $context -Data $result
+                        }
+                        catch {
+                            Send-JsonResponse -Context $context -Data @{ success = $false; error = "Invalid request: $($_.Exception.Message)" } -StatusCode 400
                         }
                     }
                     else {

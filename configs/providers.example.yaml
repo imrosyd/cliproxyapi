@@ -1,0 +1,166 @@
+# CLIProxyAPI Providers Configuration (YAML Format)
+# This is an alternative format for CLIProxyAPIPlus native configuration
+# For AI SDK compatible format, use providers.json
+
+# Provider: cliproxy (Codex via Zumy)
+openai-compatibility:
+  - name: "cliproxy"
+    npm: "@ai-sdk/anthropic"
+    base-url: "https://codex.zumy.dev/v1"
+    api-key-entries:
+      - api-key: "kodek"
+    models:
+      - name: "gpt-5.3-codex"
+        alias: "GPT 5.3 Codex"
+        reasoning: true
+        context-limit: 400000
+        output-limit: 128000
+        input-modalities:
+          - text
+          - image
+          - pdf
+        output-modalities:
+          - text
+        variants:
+          - id: "none"
+            reasoning-effort: "none"
+            text-verbosity: "none"
+          - id: "low"
+            reasoning-effort: "low"
+            text-verbosity: "low"
+          - id: "medium"
+            reasoning-effort: "medium"
+            text-verbosity: "medium"
+          - id: "high"
+            reasoning-effort: "high"
+            text-verbosity: "high"
+          - id: "max"
+            reasoning-effort: "xhigh"
+            text-verbosity: "xhigh"
+      - name: "gpt-5-codex"
+        alias: "GPT 5 Codex"
+        reasoning: false
+        context-limit: 200000
+        output-limit: 64000
+        input-modalities:
+          - text
+          - image
+        output-modalities:
+          - text
+
+  # Provider: OpenRouter
+  - name: "openrouter"
+    base-url: "https://openrouter.ai/api/v1"
+    api-key-entries:
+      - api-key: "sk-or-v1-xxx"
+    headers:
+      HTTP-Referer: "https://your-app.com"
+      X-Title: "CLIProxyAPI"
+    models:
+      - name: "anthropic/claude-3.5-sonnet"
+        alias: "Claude 3.5 Sonnet"
+        context-limit: 200000
+        output-limit: 8192
+        input-modalities:
+          - text
+          - image
+        output-modalities:
+          - text
+      - name: "openai/gpt-4o"
+        alias: "GPT-4o"
+        context-limit: 128000
+        output-limit: 4096
+        input-modalities:
+          - text
+          - image
+        output-modalities:
+          - text
+      - name: "google/gemini-2.0-flash-exp"
+        alias: "Gemini 2.0 Flash"
+        context-limit: 1000000
+        output-limit: 8192
+        input-modalities:
+          - text
+          - image
+          - audio
+          - video
+        output-modalities:
+          - text
+
+  # Provider: Ollama (Local)
+  - name: "ollama"
+    base-url: "http://localhost:11434/v1"
+    api-key-entries:
+      - api-key: "ollama"
+    models:
+      - name: "llama3.2"
+        alias: "Llama 3.2"
+        context-limit: 128000
+        output-limit: 4096
+        input-modalities:
+          - text
+          - image
+        output-modalities:
+          - text
+      - name: "qwen2.5-coder:32b"
+        alias: "Qwen 2.5 Coder 32B"
+        context-limit: 32768
+        output-limit: 4096
+        input-modalities:
+          - text
+        output-modalities:
+          - text
+
+  # Provider: LM Studio (Local)
+  - name: "lmstudio"
+    base-url: "http://localhost:1234/v1"
+    api-key-entries:
+      - api-key: "lmstudio"
+    models:
+      - name: "local-model"
+        alias: "Local Model"
+        input-modalities:
+          - text
+        output-modalities:
+          - text
+
+  # Provider: Together AI
+  - name: "together"
+    npm: "@together-ai/sdk"
+    base-url: "https://api.together.xyz/v1"
+    api-key-entries:
+      - api-key: "xxx"
+    models:
+      - name: "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+        alias: "Llama 3.3 70B Turbo"
+        context-limit: 131072
+        output-limit: 4096
+        input-modalities:
+          - text
+        output-modalities:
+          - text
+
+  # Provider: Groq
+  - name: "groq"
+    npm: "groq-sdk"
+    base-url: "https://api.groq.com/openai/v1"
+    api-key-entries:
+      - api-key: "gsk_xxx"
+    models:
+      - name: "llama-3.3-70b-versatile"
+        alias: "Llama 3.3 70B Versatile"
+        context-limit: 128000
+        output-limit: 8192
+        input-modalities:
+          - text
+        output-modalities:
+          - text
+      - name: "deepseek-r1-distill-llama-70b"
+        alias: "DeepSeek R1 Distill 70B"
+        reasoning: true
+        context-limit: 131072
+        output-limit: 8192
+        input-modalities:
+          - text
+        output-modalities:
+          - text

@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>CLIProxyAPI+ Control Center</title>
     <meta name="description" content="Professional management dashboard for CLIProxyAPI+ proxy server">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -416,7 +419,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            padding: 16px 12px;
+            padding: 16px 12px 24px 12px;
             border-radius: var(--r);
             border: 1px solid var(--border);
             background: var(--bg-2);
@@ -460,7 +463,8 @@
         .provider-name {
             font-size: 11px;
             font-weight: 500;
-            color: var(--text-2)
+            color: var(--text-2);
+            margin-bottom: 2px
         }
 
         /* Usage section */
@@ -1029,16 +1033,17 @@
         /* Provider ping */
         .provider-ping {
             position: absolute;
-            top: 8px;
-            left: 8px;
+            bottom: 6px;
+            left: 6px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            font-weight: 600;
+            gap: 3px;
+            font-size: 8px;
+            font-weight: 500;
             font-family: var(--mono);
             opacity: 0;
             transition: opacity var(--t);
+            color: var(--text-3);
         }
 
         .provider.connected .provider-ping {
@@ -1046,8 +1051,8 @@
         }
 
         .ping-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
         }
 
@@ -1109,6 +1114,240 @@
             color: var(--text-1);
             outline: none;
         }
+
+        /* Custom Providers */
+        .cp-provider-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all var(--t)
+        }
+
+        .cp-provider-card:hover {
+            border-color: var(--border-hover)
+        }
+
+        .cp-provider-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0
+        }
+
+        .cp-provider-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-h);
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0
+        }
+
+        .cp-provider-details {
+            flex: 1;
+            min-width: 0
+        }
+
+        .cp-provider-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-0);
+            margin-bottom: 2px
+        }
+
+        .cp-provider-meta {
+            font-size: 12px;
+            color: var(--text-3);
+            display: flex;
+            gap: 12px
+        }
+
+        .cp-provider-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px
+        }
+
+        .cp-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%
+        }
+
+        .cp-status-dot.connected {
+            background: var(--success)
+        }
+
+        .cp-status-dot.offline {
+            background: var(--error)
+        }
+
+        .cp-status-dot.unknown {
+            background: var(--text-3)
+        }
+
+        .cp-actions {
+            display: flex;
+            gap: 6px
+        }
+
+        .cp-form-section {
+            margin-bottom: 16px
+        }
+
+        .cp-form-label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-3);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .cp-form-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--text-1);
+            font-size: 13px;
+            outline: none;
+            transition: border-color var(--t)
+        }
+
+        .cp-form-input:focus {
+            border-color: var(--accent)
+        }
+
+        .cp-form-input::placeholder {
+            color: var(--text-3)
+        }
+
+        .cp-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .cp-form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px
+        }
+
+        .cp-model-card {
+            background: var(--bg-0);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 12px;
+            margin-bottom: 8px
+        }
+
+        .cp-model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .cp-model-id {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-1);
+            font-weight: 500
+        }
+
+        .cp-model-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            font-size: 11px
+        }
+
+        .cp-model-field label {
+            display: block;
+            color: var(--text-3);
+            margin-bottom: 2px
+        }
+
+        .cp-model-field input,
+        .cp-model-field select {
+            width: 100%;
+            padding: 4px 8px;
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-1);
+            font-size: 11px;
+            outline: none
+        }
+
+        .cp-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--bg-3);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-2);
+            margin-right: 4px;
+            margin-bottom: 4px
+        }
+
+        .cp-tag .remove {
+            cursor: pointer;
+            opacity: .6
+        }
+
+        .cp-tag .remove:hover {
+            opacity: 1
+        }
+
+        .cp-template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .cp-template-btn {
+            padding: 10px 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            text-align: center;
+            transition: all var(--t)
+        }
+
+        .cp-template-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-h)
+        }
+
+        .cp-template-btn .name {
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-1)
+        }
+
+        .cp-template-btn .desc {
+            font-size: 10px;
+            color: var(--text-3);
+            margin-top: 2px
+        }
     </style>
 </head>
 
@@ -1148,6 +1387,7 @@
         <div class="tabs ani ani-1">
             <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
             <button class="tab" onclick="switchTab('providers')">Providers</button>
+            <button class="tab" onclick="switchTab('custom')">Custom</button>
             <button class="tab" onclick="switchTab('models')">Models</button>
             <button class="tab" onclick="switchTab('routing')">Routing</button>
             <button class="tab" onclick="switchTab('playground')">Playground</button>
@@ -1326,6 +1566,58 @@
             </div>
         </div>
 
+        <!-- TAB: CUSTOM PROVIDERS -->
+        <div class="tab-content" id="tab-custom">
+            <div class="card ani">
+                <div class="card-header">
+                    <span class="card-title">Custom AI Providers</span>
+                    <span class="card-subtitle">AI SDK compatible providers</span>
+                </div>
+                <div style="margin-bottom:16px">
+                    <button class="btn btn-accent" onclick="cpShowAddModal()">+ Add Provider</button>
+                    <button class="btn" onclick="cpImportProviders()" style="margin-left:8px">Import</button>
+                    <button class="btn" onclick="cpExportProviders()" style="margin-left:4px">Export</button>
+                </div>
+                <div id="cpProvidersList">
+                    <div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">
+                        Loading providers...
+                    </div>
+                </div>
+            </div>
+
+            <div class="card ani">
+                <div class="card-header">
+                    <span class="card-title">Quick Add from Templates</span>
+                </div>
+                <div class="cp-template-grid" id="cpTemplatesGrid">
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('openrouter')">
+                        <div class="name">OpenRouter</div>
+                        <div class="desc">100+ models</div>
+                    </div>
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('ollama')">
+                        <div class="name">Ollama</div>
+                        <div class="desc">Local LLM</div>
+                    </div>
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('lmstudio')">
+                        <div class="name">LM Studio</div>
+                        <div class="desc">Local LLM</div>
+                    </div>
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('together')">
+                        <div class="name">Together AI</div>
+                        <div class="desc">Cloud API</div>
+                    </div>
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('groq')">
+                        <div class="name">Groq</div>
+                        <div class="desc">Fast inference</div>
+                    </div>
+                    <div class="cp-template-btn" onclick="cpAddFromTemplate('deepseek')">
+                        <div class="name">DeepSeek</div>
+                        <div class="desc">DeepSeek API</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB: MODELS -->
         <div class="tab-content" id="tab-models">
             <div class="card ani" id="modelsListCard">
@@ -1338,48 +1630,43 @@
                         models</div>
                 </div>
             </div>
-            <!-- Custom Model -->
-            <div class="collapse-toggle" onclick="toggleCollapse('mmBody',this)">
-                <div style="display:flex;align-items:center;gap:8px"><span>🔧</span><span
-                        style="font-weight:600;font-size:14px">Custom Model</span></div>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="collapse-body" id="mmBody">
-                <div class="mm-panels">
-                    <div class="mm-panel">
-                        <div class="mm-panel-header"><span class="mm-panel-title">Available from CLIProxyAPI</span><span
-                                class="mm-panel-count" id="mmAvailCount">0</span></div>
-                        <input class="mm-search" id="mmAvailSearch" placeholder="Filter..." oninput="filterMM('avail')">
-                        <div class="mm-list" id="mmAvailList">
-                            <div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px">Start server
-                                first</div>
-                        </div>
-                        <div class="mm-actions">
-                            <button class="btn btn-success btn-sm" onclick="mmAddSelected()" id="mmBtnAdd" disabled>+
-                                Add Selected</button>
-                            <button class="btn btn-success btn-sm" onclick="mmAddAllMissing()" id="mmBtnAddAll"
-                                disabled>+ Add All</button>
-                        </div>
+            <!-- Add Custom Model -->
+            <div class="card ani">
+                <div class="card-header">
+                    <span class="card-title">➕ Add Custom Model</span>
+                    <button class="btn btn-accent btn-sm" onclick="addCustomModel()">Add Model</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+                    <div>
+                        <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">Model ID *</label>
+                        <input type="text" id="customModelId" placeholder="e.g. gpt-5.3-codex" style="width:100%;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
                     </div>
-                    <div class="mm-panel">
-                        <div class="mm-panel-header"><span class="mm-panel-title">Custom Model Config</span><span
-                                class="mm-panel-count" id="mmFactoryCount">0</span></div>
-                        <input class="mm-search" id="mmFactorySearch" placeholder="Filter..."
-                            oninput="filterMM('factory')">
-                        <div class="mm-list" id="mmFactoryList">
-                            <div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px">No models
-                            </div>
-                        </div>
-                        <div class="mm-actions">
-                            <button class="btn btn-danger btn-sm" onclick="mmRemoveSelected()" id="mmBtnRemove"
-                                disabled>Remove Selected</button>
-                            <button class="btn btn-danger btn-sm"
-                                onclick="confirmAction('Clear all factory models?','This cannot be undone.',mmClearAll)">Clear
-                                All</button>
-                        </div>
+                    <div>
+                        <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">Display Name</label>
+                        <input type="text" id="customModelName" placeholder="e.g. CODEX 5.3" style="width:100%;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">API Key (optional)</label>
+                        <input type="text" id="customModelKey" placeholder="e.g. sk-xxx or kodek" style="width:100%;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 150px;gap:12px">
+                    <div>
+                        <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">Base URL *</label>
+                        <input type="text" id="customModelUrl" placeholder="e.g. https://codex.zumy.dev/v1" style="width:100%;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">Provider</label>
+                        <select id="customModelProvider" style="width:100%;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none">
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google</option>
+                            <option value="custom">Custom</option>
+                        </select>
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- TAB: ROUTING -->
@@ -1499,6 +1786,66 @@
     </div>
     <div class="toast" id="toast"><span id="toastMsg"></span></div>
 
+    <!-- Custom Provider Modal -->
+    <div class="modal-overlay" id="cpModal">
+        <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
+            <div class="modal-header">
+                <span class="modal-title" id="cpModalTitle">Add Custom Provider</span>
+                <button class="modal-close" onclick="closeModal('cpModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cp-form-section">
+                    <div class="cp-form-row">
+                        <div>
+                            <label class="cp-form-label">Provider Name *</label>
+                            <input type="text" class="cp-form-input" id="cpName" placeholder="e.g., openrouter">
+                        </div>
+                        <div>
+                            <label class="cp-form-label">NPM Package (optional)</label>
+                            <input type="text" class="cp-form-input" id="cpNpm" placeholder="e.g., @ai-sdk/anthropic">
+                        </div>
+                    </div>
+                </div>
+                <div class="cp-form-section">
+                    <div class="cp-form-row-3">
+                        <div style="grid-column:span 2">
+                            <label class="cp-form-label">Base URL *</label>
+                            <input type="text" class="cp-form-input" id="cpBaseUrl" placeholder="https://api.example.com/v1">
+                        </div>
+                        <div>
+                            <label class="cp-form-label">API Key</label>
+                            <div style="display:flex;gap:4px">
+                                <input type="password" class="cp-form-input" id="cpApiKey" placeholder="sk-xxx">
+                                <button class="icon-btn" onclick="cpToggleApiKey()" title="Show/Hide" style="padding:6px 10px">👁</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cp-form-section">
+                    <label class="cp-form-label">Additional Headers (JSON)</label>
+                    <input type="text" class="cp-form-input" id="cpHeaders" placeholder='{"X-Custom": "value"}'>
+                </div>
+
+                <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+
+                <div class="card-header" style="margin-bottom:12px;padding:0">
+                    <span class="card-title">Models</span>
+                    <button class="btn btn-sm" onclick="cpAddModel()">+ Add Model</button>
+                </div>
+                <div id="cpModelsContainer">
+                    <div style="text-align:center;padding:20px;color:var(--text-3);font-size:12px">
+                        No models added yet. Click "+ Add Model" to add one.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('cpModal')">Cancel</button>
+                <button class="btn" id="cpTestBtn" onclick="cpTestConnection()" style="margin-left:auto">Test</button>
+                <button class="btn btn-accent" id="cpSaveBtn" onclick="cpSaveProvider()">Save Provider</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT -->
     <script>
         /* ===== STATE ===== */
@@ -1514,6 +1861,7 @@
             if (name === 'settings') loadConfig();
             if (name === 'models') { loadModels(); loadFactoryConfig(); }
             if (name === 'providers') checkAuthStatus();
+            if (name === 'custom') cpLoadProviders();
         }
 
         /* ===== THEME ===== */
@@ -1738,19 +2086,58 @@
         }
 
         /* ===== AUTH STATUS ===== */
+        let _prevAuth = {};
         async function checkAuthStatus() {
             try {
                 const r = await fetch('/api/auth-status'); const d = await r.json();
+                let newlyConnected = false;
                 for (const [p, v] of Object.entries(d)) {
                     const el = document.getElementById('provider-' + p);
-                    if (el) el.classList.toggle('connected', v);
+                    if (el) {
+                        el.classList.toggle('connected', v);
+                        // Flash green when newly authenticated
+                        if (v && !_prevAuth[p]) {
+                            el.style.animation = 'none';
+                            el.offsetHeight; // trigger reflow
+                            el.style.animation = 'pulse 0.5s ease 3';
+                            log('✅ ' + p + ' authenticated!', 'success');
+                            newlyConnected = true;
+                        }
+                    }
+                }
+                _prevAuth = {...d};
+                // Reload models if we just connected a new provider
+                if (newlyConnected) {
+                    setTimeout(() => { if (typeof loadModels === 'function') loadModels(); }, 1500);
                 }
             } catch (e) { }
         }
+
+        const _cliFlags = {
+            gemini: '--gemini', copilot: '--github', antigravity: '--antigravity',
+            codex: '--codex', claude: '--claude', qwen: '--qwen',
+            iflow: '--iflow', kiro: '--kiro'
+        };
+
         async function loginProvider(p) {
-            log('Logging in to ' + p + '...', 'warning');
-            try { const r = await fetch('/api/oauth/' + p, { method: 'POST' }); const d = await r.json(); if (d.success) log(p + ' login initiated', 'success'); else log(p + ' login failed: ' + (d.error || ''), 'error'); }
-            catch (e) { log('Login error: ' + e.message, 'error'); }
+            const flag = _cliFlags[p] || '--' + p;
+            log('Attempting ' + p + ' login...', 'warning');
+
+            // Try GUI login first
+            try {
+                const r = await fetch('/api/oauth/' + p, { method: 'POST' });
+                const d = await r.json();
+                if (d.success && d.url) {
+                    log('🔗 ' + p + ': <a href="' + d.url + '" target="_blank" style="color:#60a5fa;text-decoration:underline">Open login page</a>', 'success');
+                    window.open(d.url, '_blank');
+                    return;
+                }
+            } catch (e) { }
+
+            // Show CLI command as fallback
+            const cmd = 'cpa-login ' + flag;
+            log('📋 Run in terminal: <code style="background:rgba(255,255,255,.1);padding:2px 8px;border-radius:4px;cursor:pointer;user-select:all">' + cmd + '</code>', 'warning');
+            showToast('Run in terminal: ' + cmd);
         }
 
         /* ===== MODELS ===== */
@@ -1900,6 +2287,379 @@
 
         /* ===== NEW FEATURES ===== */
 
+        // Custom Providers Management
+        let cpProviders = {};
+        let cpEditingProvider = null;
+        let cpModelCount = 0;
+
+        async function cpLoadProviders() {
+            try {
+                const r = await fetch('/api/providers');
+                const d = await r.json();
+                cpProviders = d.providers || {};
+                cpRenderProvidersList();
+            } catch (e) {
+                cpRenderProvidersList();
+            }
+        }
+
+        function cpRenderProvidersList() {
+            const c = document.getElementById('cpProvidersList');
+            const names = Object.keys(cpProviders);
+            if (!names.length) {
+                c.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">
+                    No custom providers configured. Click "+ Add Provider" or use a template below.
+                </div>`;
+                return;
+            }
+            c.innerHTML = names.map(name => {
+                const p = cpProviders[name];
+                const modelCount = p.models ? Object.keys(p.models).length : 0;
+                const npm = p.npm || '';
+                const status = 'unknown';
+                return `
+                    <div class="cp-provider-card">
+                        <div class="cp-provider-info">
+                            <div class="cp-provider-icon">${name.charAt(0).toUpperCase()}</div>
+                            <div class="cp-provider-details">
+                                <div class="cp-provider-name">${name}</div>
+                                <div class="cp-provider-meta">
+                                    <span>${modelCount} model${modelCount !== 1 ? 's' : ''}</span>
+                                    ${npm ? `<span>NPM: ${npm}</span>` : ''}
+                                    <span style="font-family:var(--mono);font-size:11px;opacity:.7">${(p.options || {}).baseURL || '-'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cp-provider-status">
+                            <div class="cp-status-dot ${status}"></div>
+                            <span style="color:var(--text-3)">—</span>
+                        </div>
+                        <div class="cp-actions">
+                            <button class="btn btn-sm" onclick="cpEditProvider('${name}')">Edit</button>
+                            <button class="btn btn-sm" onclick="cpTestProvider('${name}')">Test</button>
+                            <button class="btn btn-sm" style="color:var(--error)" onclick="cpDeleteProvider('${name}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function cpShowAddModal() {
+            cpEditingProvider = null;
+            cpModelCount = 0;
+            document.getElementById('cpModalTitle').textContent = 'Add Custom Provider';
+            document.getElementById('cpName').value = '';
+            document.getElementById('cpName').disabled = false;
+            document.getElementById('cpNpm').value = '';
+            document.getElementById('cpBaseUrl').value = '';
+            document.getElementById('cpApiKey').value = '';
+            document.getElementById('cpHeaders').value = '';
+            document.getElementById('cpModelsContainer').innerHTML = `
+                <div style="text-align:center;padding:20px;color:var(--text-3);font-size:12px">
+                    No models added yet. Click "+ Add Model" to add one.
+                </div>
+            `;
+            document.getElementById('cpModal').classList.add('show');
+        }
+
+        function cpEditProvider(name) {
+            const p = cpProviders[name];
+            if (!p) return;
+            cpEditingProvider = name;
+            cpModelCount = 0;
+            document.getElementById('cpModalTitle').textContent = 'Edit Provider: ' + name;
+            document.getElementById('cpName').value = name;
+            document.getElementById('cpName').disabled = true;
+            document.getElementById('cpNpm').value = p.npm || '';
+            document.getElementById('cpBaseUrl').value = (p.options || {}).baseURL || '';
+            document.getElementById('cpApiKey').value = (p.options || {}).apiKey || '';
+            document.getElementById('cpHeaders').value = (p.options || {}).headers ? JSON.stringify(p.options.headers) : '';
+
+            const modelsContainer = document.getElementById('cpModelsContainer');
+            const models = p.models || {};
+            if (Object.keys(models).length === 0) {
+                modelsContainer.innerHTML = `
+                    <div style="text-align:center;padding:20px;color:var(--text-3);font-size:12px">
+                        No models added yet. Click "+ Add Model" to add one.
+                    </div>
+                `;
+            } else {
+                modelsContainer.innerHTML = '';
+                for (const [modelId, modelData] of Object.entries(models)) {
+                    cpAddModel(modelId, modelData);
+                }
+            }
+            document.getElementById('cpModal').classList.add('show');
+        }
+
+        function cpAddModel(modelId = '', modelData = {}) {
+            const c = document.getElementById('cpModelsContainer');
+            if (c.innerHTML.includes('No models added')) c.innerHTML = '';
+            const id = 'cp-model-' + cpModelCount++;
+            const div = document.createElement('div');
+            div.className = 'cp-model-card';
+            div.id = id;
+            div.innerHTML = `
+                <div class="cp-model-header">
+                    <input type="text" class="cp-model-id" placeholder="model-id" value="${modelId}" onchange="this.dataset.changed='true'" style="width:200px;background:transparent;border:none;font-family:var(--mono;font-size:12px;color:var(--text-1);font-weight:500">
+                    <button class="icon-btn" onclick="document.getElementById('${id}').remove()" style="color:var(--error);padding:4px 8px">✖</button>
+                </div>
+                <div class="cp-model-grid">
+                    <div class="cp-model-field">
+                        <label>Display Name</label>
+                        <input type="text" class="cp-m-name" value="${modelData.name || ''}" placeholder="GPT 5.3">
+                    </div>
+                    <div class="cp-model-field">
+                        <label>Context Limit</label>
+                        <input type="number" class="cp-m-context" value="${(modelData.limit || {}).context || ''}" placeholder="128000">
+                    </div>
+                    <div class="cp-model-field">
+                        <label>Output Limit</label>
+                        <input type="number" class="cp-m-output" value="${(modelData.limit || {}).output || ''}" placeholder="4096">
+                    </div>
+                    <div class="cp-model-field">
+                        <label>Reasoning</label>
+                        <select class="cp-m-reasoning">
+                            <option value="false" ${!modelData.reasoning ? 'selected' : ''}>No</option>
+                            <option value="true" ${modelData.reasoning ? 'selected' : ''}>Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:8px">
+                    <div class="cp-model-field" style="margin-bottom:6px">
+                        <label>Input Modalities</label>
+                        <input type="text" class="cp-m-input-mod" value="${((modelData.modalities || {}).input || []).join(', ')}" placeholder="text, image, pdf">
+                    </div>
+                    <div class="cp-model-field">
+                        <label>Output Modalities</label>
+                        <input type="text" class="cp-m-output-mod" value="${((modelData.modalities || {}).output || []).join(', ')}" placeholder="text">
+                    </div>
+                </div>
+            `;
+            c.appendChild(div);
+        }
+
+        function cpToggleApiKey() {
+            const input = document.getElementById('cpApiKey');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function cpTestProvider(name = null) {
+            const btn = document.getElementById('cpTestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+
+            const providerName = name || document.getElementById('cpName').value.trim();
+            const baseUrl = document.getElementById('cpBaseUrl').value.trim();
+            const apiKey = document.getElementById('cpApiKey').value.trim();
+
+            if (!providerName || !baseUrl) {
+                showToast('Provider name and base URL required');
+                btn.disabled = false;
+                btn.textContent = 'Test';
+                return;
+            }
+
+            try {
+                const r = await fetch('/api/providers/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: providerName, baseURL: baseUrl, apiKey })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showToast('Connection successful!');
+                    log('Provider test passed: ' + providerName, 'success', 'CustomProviders');
+                } else {
+                    showToast('Connection failed: ' + (d.error || 'Unknown error'));
+                    log('Provider test failed: ' + (d.error || 'Unknown'), 'error', 'CustomProviders');
+                }
+            } catch (e) {
+                showToast('Test failed: ' + e.message);
+            }
+            btn.disabled = false;
+            btn.textContent = 'Test';
+        }
+
+        function cpSaveProvider() {
+            const name = document.getElementById('cpName').value.trim();
+            const npm = document.getElementById('cpNpm').value.trim();
+            const baseURL = document.getElementById('cpBaseUrl').value.trim();
+            const apiKey = document.getElementById('cpApiKey').value.trim();
+            const headersStr = document.getElementById('cpHeaders').value.trim();
+
+            if (!name) { showToast('Provider name is required'); return; }
+            if (!baseURL) { showToast('Base URL is required'); return; }
+
+            let headers = {};
+            if (headersStr) {
+                try {
+                    headers = JSON.parse(headersStr);
+                } catch (e) {
+                    showToast('Invalid headers JSON');
+                    return;
+                }
+            }
+
+            const models = {};
+            document.querySelectorAll('.cp-model-card').forEach(card => {
+                const modelIdInput = card.querySelector('.cp-model-id');
+                const modelId = modelIdInput.value.trim();
+                if (!modelId) return;
+
+                const displayName = card.querySelector('.cp-m-name').value.trim();
+                const contextLimit = parseInt(card.querySelector('.cp-m-context').value) || null;
+                const outputLimit = parseInt(card.querySelector('.cp-m-output').value) || null;
+                const reasoning = card.querySelector('.cp-m-reasoning').value === 'true';
+                const inputMod = card.querySelector('.cp-m-input-mod').value.split(',').map(s => s.trim()).filter(s => s);
+                const outputMod = card.querySelector('.cp-m-output-mod').value.split(',').map(s => s.trim()).filter(s => s);
+
+                const modelData = {};
+                if (displayName) modelData.name = displayName;
+                if (reasoning) modelData.reasoning = true;
+                if (contextLimit || outputLimit) {
+                    modelData.limit = {};
+                    if (contextLimit) modelData.limit.context = contextLimit;
+                    if (outputLimit) modelData.limit.output = outputLimit;
+                }
+                if (inputMod.length || outputMod.length) {
+                    modelData.modalities = {};
+                    if (inputMod.length) modelData.modalities.input = inputMod;
+                    if (outputMod.length) modelData.modalities.output = outputMod;
+                }
+                models[modelId] = Object.keys(modelData).length ? modelData : { name: modelId };
+            });
+
+            const provider = {
+                options: { baseURL }
+            };
+            if (npm) provider.npm = npm;
+            if (apiKey) provider.options.apiKey = apiKey;
+            if (Object.keys(headers).length) provider.options.headers = headers;
+            if (Object.keys(models).length) provider.models = models;
+
+            cpProviders[name] = provider;
+            cpSaveToConfig();
+            closeModal('cpModal');
+            cpRenderProvidersList();
+            showToast('Provider saved: ' + name);
+            log('Custom provider saved: ' + name, 'success', 'CustomProviders');
+        }
+
+        async function cpSaveToConfig() {
+            try {
+                await fetch('/api/providers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ providers: cpProviders })
+                });
+            } catch (e) {
+                console.error('Failed to save providers:', e);
+            }
+        }
+
+        function cpDeleteProvider(name) {
+            if (!confirm('Delete provider "' + name + '"? This cannot be undone.')) return;
+            delete cpProviders[name];
+            cpSaveToConfig();
+            cpRenderProvidersList();
+            showToast('Provider deleted: ' + name);
+            log('Custom provider deleted: ' + name, 'warning', 'CustomProviders');
+        }
+
+        function cpAddFromTemplate(template) {
+            const templates = {
+                openrouter: {
+                    name: 'openrouter',
+                    npm: '',
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: '',
+                    headers: '{"HTTP-Referer": "https://your-app.com"}'
+                },
+                ollama: {
+                    name: 'ollama',
+                    npm: '',
+                    baseURL: 'http://localhost:11434/v1',
+                    apiKey: '',
+                    headers: ''
+                },
+                lmstudio: {
+                    name: 'lmstudio',
+                    npm: '',
+                    baseURL: 'http://localhost:1234/v1',
+                    apiKey: '',
+                    headers: ''
+                },
+                together: {
+                    name: 'together',
+                    npm: '@together-ai/sdk',
+                    baseURL: 'https://api.together.xyz/v1',
+                    apiKey: '',
+                    headers: ''
+                },
+                groq: {
+                    name: 'groq',
+                    npm: 'groq-sdk',
+                    baseURL: 'https://api.groq.com/openai/v1',
+                    apiKey: '',
+                    headers: ''
+                },
+                deepseek: {
+                    name: 'deepseek',
+                    npm: '',
+                    baseURL: 'https://api.deepseek.com/v1',
+                    apiKey: '',
+                    headers: ''
+                }
+            };
+            const t = templates[template];
+            if (!t) return;
+            cpShowAddModal();
+            document.getElementById('cpName').value = t.name;
+            document.getElementById('cpNpm').value = t.npm;
+            document.getElementById('cpBaseUrl').value = t.baseURL;
+            document.getElementById('cpApiKey').value = t.apiKey;
+            document.getElementById('cpHeaders').value = t.headers;
+        }
+
+        async function cpExportProviders() {
+            const data = {
+                $schema: "https://cliproxyapi.dev/schema/providers.json",
+                providers: cpProviders
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'providers.json';
+            a.click();
+            showToast('Providers exported');
+        }
+
+        function cpImportProviders() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const text = await file.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.providers) {
+                        cpProviders = { ...cpProviders, ...data.providers };
+                        cpSaveToConfig();
+                        cpRenderProvidersList();
+                        showToast('Providers imported');
+                    } else {
+                        showToast('Invalid providers file');
+                    }
+                } catch (err) {
+                    showToast('Invalid JSON file');
+                }
+            };
+            input.click();
+        }
+
         // System Stats
         function loadSystemStats() {
             const cpu = Math.floor(Math.random() * 15) + (serverRunning ? 5 : 0);
@@ -1937,8 +2697,12 @@
             chat.scrollTop = chat.scrollHeight;
 
             const model = document.getElementById('pgModel').value;
-            if (!model || !serverRunning) {
-                chat.innerHTML += `<div class="pg-msg bot" style="color:var(--error)">Server stopped or no model.</div>`;
+            if (!model) {
+                chat.innerHTML += `<div class="pg-msg bot" style="color:var(--error)">Please select a model first.</div>`;
+                return;
+            }
+            if (!serverRunning) {
+                chat.innerHTML += `<div class="pg-msg bot" style="color:var(--error)">Server is not running. Start the server first.</div>`;
                 return;
             }
 
@@ -1947,22 +2711,66 @@
             chat.scrollTop = chat.scrollHeight;
 
             const start = performance.now();
+            let botReply = '';
+            
             try {
-                const endpoint = document.getElementById('endpointLabel').textContent || 'http://localhost:8317/v1';
-                const r = await fetch(endpoint + '/chat/completions', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: model, messages: [{ role: 'user', content: msg }] })
+                const r = await fetch('/api/proxy', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        path: '/v1/chat/completions',
+                        method: 'POST',
+                        body: { model: model, messages: [{ role: 'user', content: msg }] }
+                    })
                 });
+                
                 const lat = Math.round(performance.now() - start);
-                log('Chat request completed', r.ok ? 'success' : 'error', 'Playground', model.substring(0, 25), lat);
-                const d = await r.json();
-                const botReply = d.choices && d.choices[0] ? d.choices[0].message.content : (d.error && d.error.message ? d.error.message : 'Unknown error response');
+                
+                const responseText = await r.text();
+                console.log('[Playground] Response status:', r.status, 'Body:', responseText.substring(0, 500));
+                
+                if (!r.ok) {
+                    let errorMsg = 'HTTP ' + r.status;
+                    try {
+                        const errJson = JSON.parse(responseText);
+                        if (errJson.error) {
+                            errorMsg = typeof errJson.error === 'string' ? errJson.error : JSON.stringify(errJson.error);
+                        }
+                    } catch (e) {
+                        errorMsg = responseText.substring(0, 200) || errorMsg;
+                    }
+                    botReply = 'Error: ' + errorMsg;
+                    log('Chat request failed: ' + errorMsg, 'error', 'Playground', model.substring(0, 25), lat);
+                } else {
+                    try {
+                        const d = JSON.parse(responseText);
+                        if (d.choices && d.choices.length > 0) {
+                            if (d.choices[0].message && d.choices[0].message.content) {
+                                botReply = d.choices[0].message.content;
+                            } else if (d.choices[0].text) {
+                                botReply = d.choices[0].text;
+                            } else {
+                                botReply = JSON.stringify(d.choices[0], null, 2);
+                            }
+                        } else if (d.error) {
+                            botReply = 'Error: ' + (typeof d.error === 'string' ? d.error : (d.error.message || JSON.stringify(d.error)));
+                        } else {
+                            botReply = JSON.stringify(d, null, 2);
+                        }
+                    } catch (parseErr) {
+                        botReply = responseText || 'Empty response from server';
+                    }
+                    log('Chat request completed', 'success', 'Playground', model.substring(0, 25), lat);
+                }
+                
                 document.getElementById(id).textContent = botReply;
                 document.getElementById(id).style.opacity = '1';
             } catch (e) {
                 const lat = Math.round(performance.now() - start);
+                console.error('[Playground] Fetch error:', e);
                 log('Chat request failed: ' + e.message, 'error', 'Playground', model.substring(0, 25), lat);
-                document.getElementById(id).textContent = 'Failed to fetch: Check server endpoint or CORS -> ' + e.message;
+                botReply = 'Request failed: ' + e.message + '. Check if GUI server is running.';
+                document.getElementById(id).textContent = botReply;
                 document.getElementById(id).style.color = 'var(--error)';
                 document.getElementById(id).style.opacity = '1';
             }
@@ -2023,6 +2831,53 @@
             } catch (e) { showToast('Backup failed'); }
         }
 
+        // Add Custom Model
+        async function addCustomModel() {
+            const modelId = document.getElementById('customModelId').value.trim();
+            const displayName = document.getElementById('customModelName').value.trim();
+            const apiKey = document.getElementById('customModelKey').value.trim();
+            const baseUrl = document.getElementById('customModelUrl').value.trim();
+            const provider = document.getElementById('customModelProvider').value;
+            
+            if (!modelId) {
+                showToast('Model ID is required');
+                return;
+            }
+            if (!baseUrl) {
+                showToast('Base URL is required');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/factory-config/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        models: [modelId],
+                        displayNames: { [modelId]: displayName || modelId },
+                        baseUrl: baseUrl,
+                        apiKey: apiKey || 'sk-dummy',
+                        provider: provider
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Model added: ' + modelId);
+                    log('Custom model added: ' + modelId, 'success', 'UI');
+                    document.getElementById('customModelId').value = '';
+                    document.getElementById('customModelName').value = '';
+                    document.getElementById('customModelKey').value = '';
+                    document.getElementById('customModelUrl').value = '';
+                    loadFactoryConfig();
+                } else {
+                    showToast('Failed to add model: ' + (result.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Error adding model: ' + e.message);
+            }
+        }
+
         // Routing Rules
         let routeCount = 0;
         function addRouteRule() {
@@ -2064,9 +2919,11 @@
             document.getElementById('autoStartCheck').checked = autoStartEnabled;
             await checkStatus();
             await checkAuthStatus();
+            try { loadModels(); loadFactoryConfig(); } catch (e) {}
             log('Control center ready', 'success');
             if (autoStartEnabled && !serverRunning) { log('Auto-starting server...', 'warning'); startServer(); }
             setInterval(checkStatus, 5000);
+            setInterval(checkAuthStatus, 5000);
             setTimeout(() => { try { checkForUpdate(); } catch (e) { } }, 3000);
         })();
     </script>

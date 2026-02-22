@@ -2,8 +2,6 @@
 
 > One-click setup scripts for [CLIProxyAPI](https://github.com/imrosyd/cliproxyapi) - Use multiple AI providers through a single OpenAI-compatible API.
 
-[English](README.md) | [Bahasa Indonesia](README_ID.md)
-
 ---
 
 ## What is CLIProxyAPI?

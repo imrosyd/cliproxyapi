@@ -617,7 +617,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 latency_ms = (time.time() - start_time) * 1000
                 increment_stats(success=False, provider=None, model=model, latency_ms=latency_ms)
                 self.log('Proxy URL error: ' + str(e.reason))
-                self.send_json({'error': 'Connection failed: ' + str(e.reason) + '. Is the API server running on port 8317?'}, 503)
+                self.send_json({'error': 'Connection failed: ' + str(e.reason) + '. Is the API server running on port ' + str(API_PORT) + '?'}, 503)
                 
         except json.JSONDecodeError as e:
             self.log('Proxy JSON parse error: ' + str(e))
@@ -641,11 +641,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({'error': 'GUI not found'}, 404)
     
     def get_pid(self):
-        # First, check if port 8317 is actually listening
+        # First, check if API port is actually listening
         try:
             import socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('localhost', 8317))
+            result = sock.connect_ex(('localhost', API_PORT))
             sock.close()
             if result != 0:
                 # Port not listening, clean up stale pid file
@@ -984,7 +984,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             # Also check if port is listening
             import socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('localhost', 8317))
+            result = sock.connect_ex(('localhost', API_PORT))
             sock.close()
             if result == 0:
                 self.send_json({'success': True, 'pid': proc.pid})
@@ -992,12 +992,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 # Server process exists but not listening yet, wait more
                 time.sleep(2)
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                result = sock.connect_ex(('localhost', 8317))
+                result = sock.connect_ex(('localhost', API_PORT))
                 sock.close()
                 if result == 0:
                     self.send_json({'success': True, 'pid': proc.pid})
                 else:
-                    self.send_json({'success': False, 'error': 'Server started but not responding on port 8317'})
+                    self.send_json({'success': False, 'error': 'Server started but not responding on port ' + str(API_PORT)})
         except ProcessLookupError:
             self.send_json({'success': False, 'error': 'Server process died'})
         except Exception as e:
